@@ -3,7 +3,7 @@ const phrases = [
     'Web Developer',
     'HTML/CSS Expert',
     'JavaScript Developer',
-    'NASA Space Apps Winner',
+    'NASA Space Apps Local Winner',
     'Frontend Specialist'
 ];
 
