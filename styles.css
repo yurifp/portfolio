@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+}
+
 :root {
     --bg-primary: #0a0a0a;
     --bg-secondary: #1a1a1a;
@@ -20,6 +24,7 @@ body {
     color: var(--text-primary);
     overflow-x: hidden;
     line-height: 1.6;
+    position: relative;
 }
 
 /* Smooth Scrolling */
@@ -34,31 +39,34 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    isolation: isolate;
 }
 
 /* Animated Background */
 .hero-bg {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: -1;
+    pointer-events: none;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
 .gradient-bg {
     position: absolute;
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: -25%;
     background: radial-gradient(circle at 20% 50%, var(--accent-primary) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, var(--accent-secondary) 0%, transparent 50%),
                 radial-gradient(circle at 40% 20%, #ec4899 0%, transparent 50%);
     opacity: 0.3;
     animation: gradient-shift 20s ease infinite;
     filter: blur(100px);
+    pointer-events: none;
 }
 
 @keyframes gradient-shift {
@@ -71,6 +79,7 @@ html {
     position: absolute;
     width: 100%;
     height: 100%;
+    pointer-events: none;
 }
 
 .particle {
@@ -80,6 +89,7 @@ html {
     font-size: 14px;
     opacity: 0.3;
     animation: float-up 10s linear infinite;
+    pointer-events: none;
 }
 
 @keyframes float-up {
@@ -105,6 +115,7 @@ html {
     z-index: 10;
     max-width: 1000px;
     padding: 0 20px;
+    position: relative;
 }
 
 .hero-title {
@@ -206,6 +217,7 @@ html {
     animation: fade-in 1s ease 2s both, bounce 2s ease-in-out 3s infinite;
     transition: opacity 0.5s ease;
     z-index: 100;
+    pointer-events: auto;
 }
 
 @keyframes bounce {
@@ -283,7 +295,7 @@ nav {
     padding: 20px 50px;
     background: rgba(10, 10, 10, 0.8);
     backdrop-filter: blur(10px);
-    z-index: 1000;
+    z-index: 9999;
     transition: all 0.3s ease;
 }
 
@@ -362,6 +374,12 @@ section {
     padding: 100px 20px;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+    background: var(--bg-primary);
+}
+
+section:not(.hero) {
+    z-index: 1;
 }
 
 .section-title {
@@ -1051,6 +1069,17 @@ footer {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .hero-bg {
+        position: fixed;
+    }
+    
+    .gradient-bg {
+        width: 200%;
+        height: 200%;
+        top: -50%;
+        left: -50%;
+    }
+    
     nav {
         padding: 15px 20px;
     }

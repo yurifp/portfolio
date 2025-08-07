@@ -292,13 +292,25 @@ window.addEventListener('scroll', () => {
     const scrolled = window.pageYOffset;
     const heroContent = document.querySelector('.hero-content');
     const particles = document.querySelector('.code-particles');
+    const heroBg = document.querySelector('.hero-bg');
     
-    if (heroContent) {
+    if (heroContent && scrolled < window.innerHeight) {
         heroContent.style.transform = `translateY(${scrolled * 0.5}px)`;
         heroContent.style.opacity = 1 - scrolled / 800;
     }
     
-    if (particles) {
+    if (particles && scrolled < window.innerHeight) {
         particles.style.transform = `translateY(${scrolled * 0.3}px)`;
+    }
+    
+    // Fade out background effect after scrolling past hero
+    if (heroBg) {
+        if (scrolled > window.innerHeight) {
+            heroBg.style.opacity = '0';
+            heroBg.style.visibility = 'hidden';
+        } else {
+            heroBg.style.opacity = '1';
+            heroBg.style.visibility = 'visible';
+        }
     }
 });
