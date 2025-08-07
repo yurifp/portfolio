@@ -4,7 +4,11 @@ const phrases = [
     'HTML/CSS Expert',
     'JavaScript Developer',
     'NASA Space Apps Local Winner',
-    'Frontend Specialist'
+    'Frontend Specialist',
+    'AI Enthusiast',
+    'Open Source Contributor',
+    'Blockchain Explorer',
+    
 ];
 
 let phraseIndex = 0;
