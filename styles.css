@@ -27,6 +27,19 @@ body {
     position: relative;
 }
 
+/* Subtle background gradient for smooth transitions */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: radial-gradient(ellipse at center top, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -2;
+}
+
 /* Smooth Scrolling */
 html {
     scroll-behavior: smooth;
@@ -42,16 +55,30 @@ html {
     isolation: isolate;
 }
 
+/* Bottom fade mask for smooth transition */
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(to bottom, transparent, var(--bg-primary) 90%);
+    pointer-events: none;
+    z-index: 15;
+}
+
 /* Animated Background */
 .hero-bg {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     z-index: -1;
     pointer-events: none;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity;
 }
 
 .gradient-bg {
@@ -63,9 +90,9 @@ html {
     background: radial-gradient(circle at 20% 50%, var(--accent-primary) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, var(--accent-secondary) 0%, transparent 50%),
                 radial-gradient(circle at 40% 20%, #ec4899 0%, transparent 50%);
-    opacity: 0.3;
+    opacity: 0.25;
     animation: gradient-shift 20s ease infinite;
-    filter: blur(100px);
+    filter: blur(120px);
     pointer-events: none;
 }
 
@@ -80,6 +107,7 @@ html {
     width: 100%;
     height: 100%;
     pointer-events: none;
+    transition: opacity 1s ease, transform 0.3s ease;
 }
 
 .particle {
@@ -90,6 +118,7 @@ html {
     opacity: 0.3;
     animation: float-up 10s linear infinite;
     pointer-events: none;
+    will-change: transform, opacity;
 }
 
 @keyframes float-up {
@@ -97,11 +126,17 @@ html {
         transform: translateY(100vh) rotate(0deg);
         opacity: 0;
     }
+    5% {
+        opacity: 0.2;
+    }
     10% {
         opacity: 0.3;
     }
-    90% {
+    85% {
         opacity: 0.3;
+    }
+    95% {
+        opacity: 0.1;
     }
     100% {
         transform: translateY(-100vh) rotate(360deg);
@@ -380,6 +415,23 @@ section {
 
 section:not(.hero) {
     z-index: 1;
+}
+
+/* Smooth transition mask for sections after hero */
+section#projects {
+    position: relative;
+}
+
+section#projects::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, var(--bg-primary));
+    pointer-events: none;
+    z-index: 2;
 }
 
 .section-title {
