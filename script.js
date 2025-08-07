@@ -47,28 +47,11 @@ type();
 const codeSnippets = [
     '<div>',
     '</div>',
-    'const',
-    'function',
     '{ }',
     '[ ]',
     '=>',
-    'class',
     '#id',
-    '.class',
-    'async',
-    'await',
-    'HTML',
-    'CSS',
-    'JS',
-    'React',
-    'Vue',
-    'Angular',
-    'Node.js',
-    'Python',
-    'Java',
-    'C++',
-    'PHP',
-    
+
 ];
 
 function createParticle() {
