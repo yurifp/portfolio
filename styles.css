@@ -51,7 +51,7 @@ html {
     height: 100%;
     z-index: -1;
     pointer-events: none;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    transition: opacity 3s ease, visibility 3s ease;
 }
 
 .gradient-bg {
@@ -88,7 +88,7 @@ html {
     font-family: 'Courier New', monospace;
     font-size: 14px;
     opacity: 0.3;
-    animation: float-up 10s linear infinite;
+    animation: float-up 12s linear infinite;
     pointer-events: none;
 }
 
@@ -375,7 +375,7 @@ section {
     max-width: 1200px;
     margin: 0 auto;
     position: relative;
-    background: var(--bg-primary);
+    
 }
 
 section:not(.hero) {
