@@ -72,20 +72,13 @@ const codeSnippets = [
 ];
 
 function createParticle() {
-    const particlesContainer = document.getElementById('particles');
-    
-    // Don't create particles if container is hidden or page is scrolled
-    if (!particlesContainer || particlesContainer.style.display === 'none' || window.pageYOffset > window.innerHeight * 0.8) {
-        return;
-    }
-    
     const particle = document.createElement('div');
     particle.className = 'particle';
     particle.textContent = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
     particle.style.left = Math.random() * 100 + '%';
     particle.style.animationDelay = Math.random() * 10 + 's';
     particle.style.fontSize = Math.random() * 10 + 14 + 'px';
-    particlesContainer.appendChild(particle);
+    document.getElementById('particles').appendChild(particle);
     
     setTimeout(() => particle.remove(), 10000);
 }
@@ -95,14 +88,8 @@ for (let i = 0; i < 20; i++) {
     setTimeout(() => createParticle(), i * 500);
 }
 
-// Continue creating particles with conditional check
-const particleInterval = setInterval(() => {
-    // Stop creating particles if scrolled too far
-    if (window.pageYOffset > window.innerHeight * 0.8) {
-        return;
-    }
-    createParticle();
-}, 1000);
+// Continue creating particles
+setInterval(createParticle, 1000);
 
 // Navbar Scroll Effect and Scroll Indicator
 window.addEventListener('scroll', () => {
@@ -126,16 +113,6 @@ window.addEventListener('scroll', () => {
             scrollIndicator.style.opacity = '';
             scrollIndicator.style.pointerEvents = '';
         }
-    }
-    
-    // Clean up particles when scrolled far enough
-    if (scrollPosition > window.innerHeight * 1.2) {
-        const particles = document.querySelectorAll('.particle');
-        particles.forEach(particle => {
-            particle.style.transition = 'opacity 0.5s ease';
-            particle.style.opacity = '0';
-            setTimeout(() => particle.remove(), 500);
-        });
     }
 });
 
@@ -310,61 +287,30 @@ menuToggle.addEventListener('click', () => {
     menuToggle.classList.toggle('active');
 });
 
-// Parallax Effect for Hero with Smooth Transition
-let ticking = false;
-function updateParallax() {
+// Parallax Effect for Hero
+window.addEventListener('scroll', () => {
     const scrolled = window.pageYOffset;
     const heroContent = document.querySelector('.hero-content');
     const particles = document.querySelector('.code-particles');
     const heroBg = document.querySelector('.hero-bg');
-    const windowHeight = window.innerHeight;
     
-    // Smooth parallax for hero content
-    if (heroContent && scrolled < windowHeight) {
+    if (heroContent && scrolled < window.innerHeight) {
         heroContent.style.transform = `translateY(${scrolled * 0.5}px)`;
-        heroContent.style.opacity = Math.max(0, 1 - scrolled / 800);
+        heroContent.style.opacity = 1 - scrolled / 800;
     }
     
-    // Smooth parallax for particles
-    if (particles && scrolled < windowHeight) {
+    if (particles && scrolled < window.innerHeight) {
         particles.style.transform = `translateY(${scrolled * 0.3}px)`;
     }
     
-    // Gradual fade out background effect with smooth transition
+    // Fade out background effect after scrolling past hero
     if (heroBg) {
-        // Calculate opacity based on scroll position
-        const fadeStart = windowHeight * 0.5; // Start fading at 50% of viewport height
-        const fadeEnd = windowHeight * 1.2; // Complete fade at 120% of viewport height
-        
-        if (scrolled <= fadeStart) {
-            heroBg.style.opacity = '1';
-        } else if (scrolled >= fadeEnd) {
+        if (scrolled > window.innerHeight) {
             heroBg.style.opacity = '0';
+            heroBg.style.visibility = 'hidden';
         } else {
-            // Calculate smooth fade between fadeStart and fadeEnd
-            const fadeProgress = (scrolled - fadeStart) / (fadeEnd - fadeStart);
-            const opacity = Math.max(0, Math.min(1, 1 - fadeProgress));
-            heroBg.style.opacity = opacity.toString();
-        }
-        
-        // Hide particles completely after fade to prevent glitches
-        if (particles) {
-            if (scrolled >= fadeEnd) {
-                particles.style.display = 'none';
-            } else {
-                particles.style.display = 'block';
-            }
+            heroBg.style.opacity = '1';
+            heroBg.style.visibility = 'visible';
         }
     }
-    
-    ticking = false;
-}
-
-function requestTick() {
-    if (!ticking) {
-        window.requestAnimationFrame(updateParallax);
-        ticking = true;
-    }
-}
-
-window.addEventListener('scroll', requestTick);
+});
