@@ -59,7 +59,16 @@ const codeSnippets = [
     'await',
     'HTML',
     'CSS',
-    'JS'
+    'JS',
+    'React',
+    'Vue',
+    'Angular',
+    'Node.js',
+    'Python',
+    'Java',
+    'C++',
+    'PHP',
+    
 ];
 
 function createParticle() {
