@@ -8,7 +8,7 @@ const phrases = [
     'AI Enthusiast',
     'Open Source Contributor',
     'Blockchain Explorer',
-    
+
 ];
 
 let phraseIndex = 0;
