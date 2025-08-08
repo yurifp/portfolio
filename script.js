@@ -4,7 +4,7 @@ const phrases = [
     'HTML/CSS Expert',
     'JavaScript Developer',
     'NASA Space Apps Local Winner',
-    'Frontend Specialist',
+    'Front-end Specialist',
     'AI Enthusiast',
     'Open Source Contributor',
     'Blockchain Explorer',
