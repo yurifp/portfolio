@@ -2,7 +2,7 @@
 const phrases = [
     'Web Developer',
     'HTML/CSS Expert',
-    'JavaScript Developer',
+    'JavaScript Programmer',
     'NASA Space Apps Local Winner',
     'Front-end Specialist',
     'AI Enthusiast',
