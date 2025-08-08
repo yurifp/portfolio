@@ -438,10 +438,11 @@ section:not(.hero) {
 }
 
 .project-image img {
-    position: absolute;
-    width: 100%;
-    top: 51px;
-    height: 140px;
+position: absolute;
+    width: 400px;
+    top: -1px;
+    left: -24px;
+    height: 251px;
     object-fit: cover;
     transition: transform 0.3s ease;
 }
