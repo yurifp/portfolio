@@ -630,7 +630,7 @@ position: absolute;
 
 .glide__arrow:hover {
     background: var(--accent-secondary);
-    transform: scale(1.1);
+ 
     box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
 }
 
