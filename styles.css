@@ -423,7 +423,8 @@ section:not(.hero) {
     position: relative;
 }
 
-.project-card:hover {
+/* Hover APENAS para cards do grid principal (não do carrossel) */
+.projects-grid .project-card:hover {
     transform: translateY(-10px);
     border-color: var(--accent-primary);
     box-shadow: 0 35px 70px rgba(99, 102, 241, 0.3);
@@ -439,9 +440,9 @@ section:not(.hero) {
 
 .project-image img {
 position: absolute;
-    width: 400px;
-    top: -1px;
-    left: -24px;
+    width: 479px;
+    top: -3px;
+    left: -5px;
     height: 251px;
     object-fit: cover;
     transition: transform 0.3s ease;
@@ -524,6 +525,155 @@ position: absolute;
     border-radius: 20px;
     font-size: 0.85rem;
     color: var(--accent-primary);
+}
+
+/* NOVOS ESTILOS PARA O CARROSSEL */
+.more-projects-section {
+    margin-top: 100px;
+    position: relative;
+}
+
+.carousel-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--text-primary);
+}
+
+/* Wrapper para adicionar padding extra ao carrossel */
+.carousel-wrapper {
+    padding: 20px 0;
+    overflow: visible;
+}
+
+/* Customização do Glide */
+.glide {
+    position: relative;
+    max-width: 1200px;
+    height: 700px;
+    margin: 0 auto;
+}
+
+.glide__track {
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.glide__slides {
+    display: flex;
+    height: 620px;
+    align-items: stretch;
+}
+
+.glide__slide {
+    display: flex;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+/* Override do hover APENAS para cards dentro do carrossel */
+.glide__slide .project-card {
+    transition: all 0.3s ease;
+}
+
+.glide__slide .project-card:hover {
+    /* Remove translateY, usa apenas borda e shadow aprimorados */
+    transform: none !important;
+    border-color: var(--accent-primary);
+    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+    border-width: 2px;
+}
+
+/* Garante que os cards no carrossel tenham a mesma altura */
+.glide__slide .project-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.glide__slide .project-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.glide__slide .project-description {
+    flex-grow: 1;
+}
+
+/* Botões de navegação customizados */
+.glide__arrows {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    pointer-events: none;
+}
+
+.glide__arrow {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: var(--accent-primary);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: all;
+    z-index: 2;
+}
+
+.glide__arrow:hover {
+    background: var(--accent-secondary);
+    transform: scale(1.1);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+}
+
+.glide__arrow--left {
+    left: -25px;
+}
+
+.glide__arrow--right {
+    right: -25px;
+}
+
+.glide__arrow svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Bullets customizados */
+.glide__bullets {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.glide__bullet {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.glide__bullet:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.2);
+}
+
+.glide__bullet--active {
+    background: var(--accent-primary);
+    width: 30px;
+    border-radius: 5px;
 }
 
 /* Skills Section - New Design */
@@ -1111,6 +1261,20 @@ footer {
     .projects-grid {
         grid-template-columns: 1fr;
         gap: 30px;
+    }
+    
+    /* Responsividade do carrossel */
+    .glide__arrow {
+        width: 40px;
+        height: 40px;
+    }
+
+    .glide__arrow--left {
+        left: 10px;
+    }
+
+    .glide__arrow--right {
+        right: 10px;
     }
     
     .skills-wrapper {

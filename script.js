@@ -8,7 +8,6 @@ const phrases = [
     'AI Enthusiast',
     'Open Source Contributor',
     'Blockchain Explorer',
-
 ];
 
 let phraseIndex = 0;
@@ -51,7 +50,6 @@ const codeSnippets = [
     '[ ]',
     '=>',
     '#id',
-
 ];
 
 function createParticle() {
@@ -106,6 +104,38 @@ document.addEventListener('mousemove', (e) => {
     const y = e.clientY / window.innerHeight;
     
     gradient.style.transform = `translate(${x * 20 - 10}px, ${y * 20 - 10}px)`;
+});
+
+// INICIALIZAÇÃO DO GLIDE CAROUSEL
+document.addEventListener('DOMContentLoaded', function() {
+    // Verifica se o elemento Glide existe
+    const glideElement = document.querySelector('.glide');
+    
+    if (glideElement) {
+        new Glide('.glide', {
+            type: 'carousel',
+            startAt: 0,
+            perView: 3,
+            gap: 30,
+            focusAt: 'center',
+            autoplay: 4000,
+            hoverpause: true,
+            animationDuration: 800,
+            animationTimingFunc: 'cubic-bezier(0.165, 0.840, 0.440, 1.000)',
+            keyboard: true,
+            swipeThreshold: 80,
+            dragThreshold: 120,
+            breakpoints: {
+                1200: {
+                    perView: 2
+                },
+                768: {
+                    perView: 1,
+                    gap: 20
+                }
+            }
+        }).mount();
+    }
 });
 
 // Skill Tabs Filter
@@ -203,6 +233,35 @@ function animateTimeline() {
 
 animateTimeline();
 
+// Animate Project Cards (incluindo os do carrossel)
+function animateProjectCards() {
+    const projectCards = document.querySelectorAll('.project-card');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, index * 100);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.2 });
+    
+    projectCards.forEach(card => {
+        // Inicializa com opacidade 0 e transform para animação
+        if (!card.closest('.glide__slide')) { // Não aplica aos cards do carrossel
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.5s ease';
+            observer.observe(card);
+        }
+    });
+}
+
+animateProjectCards();
+
 // Contact Form Handler
 document.getElementById('contactForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -297,3 +356,58 @@ window.addEventListener('scroll', () => {
         }
     }
 });
+
+// Preload images for better performance
+function preloadImages() {
+    const imageUrls = [
+        'img/projects/globe.png',
+        'img/projects/website.png',
+        'img/projects/agent.png',
+        'img/projects/project4.png',
+        'img/projects/project5.png',
+        'img/projects/project6.png'
+    ];
+    
+    imageUrls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+    });
+}
+
+// Call preload when page loads
+window.addEventListener('load', preloadImages);
+
+// Add keyboard navigation for carousel
+document.addEventListener('keydown', (e) => {
+    const glideElement = document.querySelector('.glide');
+    if (glideElement && glideElement.offsetParent !== null) { // Check if carousel is visible
+        if (e.key === 'ArrowLeft') {
+            const prevButton = document.querySelector('.glide__arrow--left');
+            if (prevButton) prevButton.click();
+        } else if (e.key === 'ArrowRight') {
+            const nextButton = document.querySelector('.glide__arrow--right');
+            if (nextButton) nextButton.click();
+        }
+    }
+});
+
+// Performance optimization: Lazy load images in carousel
+const lazyLoadImages = () => {
+    const images = document.querySelectorAll('.glide__slide img[data-src]');
+    
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+                observer.unobserve(img);
+            }
+        });
+    });
+    
+    images.forEach(img => imageObserver.observe(img));
+};
+
+// Call lazy load after DOM is ready
+document.addEventListener('DOMContentLoaded', lazyLoadImages);
