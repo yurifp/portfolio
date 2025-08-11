@@ -296,6 +296,7 @@ nav {
     background: rgba(10, 10, 10, 0.8);
     backdrop-filter: blur(10px);
     z-index: 9999;
+    opacity: 0.95;
     transition: all 0.3s ease;
 }
 
