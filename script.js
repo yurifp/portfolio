@@ -411,3 +411,56 @@ const lazyLoadImages = () => {
 
 // Call lazy load after DOM is ready
 document.addEventListener('DOMContentLoaded', lazyLoadImages);
+
+
+// Controlar velocidade dos vídeos
+document.addEventListener('DOMContentLoaded', function() {
+    // Opção 1: Controlar TODOS os vídeos na página
+    const allVideos = document.querySelectorAll('video');
+    allVideos.forEach(video => {
+        video.playbackRate = 0.5; // Ajuste este valor (0.5 = 50% velocidade, 1 = normal, 2 = dobro)
+    });
+    
+    // Opção 2: Controlar apenas o vídeo do Block-Office especificamente
+    // (descomente se quiser velocidade diferente para este vídeo)
+    /*
+    const blockOfficeVideo = document.getElementById('block-office-video');
+    if (blockOfficeVideo) {
+        blockOfficeVideo.playbackRate = 0.6; // Velocidade específica para este vídeo
+    }
+        
+    // Opção 3: Pausar vídeo no hover (descomente se quiser este efeito)
+    
+    const projectCards = document.querySelectorAll('.project-card');
+    projectCards.forEach(card => {
+        const video = card.querySelector('video');
+        if (video) {
+            card.addEventListener('mouseenter', () => {
+                video.pause();
+            });
+            card.addEventListener('mouseleave', () => {
+                video.play();
+            });
+        }
+    });
+    
+    
+    // Opção 4: Acelerar/desacelerar no hover (descomente se quiser este efeito)
+    /*
+    const projectCards = document.querySelectorAll('.project-card');
+    projectCards.forEach(card => {
+        const video = card.querySelector('video');
+        if (video) {
+            const normalSpeed = 0.7;
+            const hoverSpeed = 0.3; // Mais lento no hover
+            
+            card.addEventListener('mouseenter', () => {
+                video.playbackRate = hoverSpeed;
+            });
+            card.addEventListener('mouseleave', () => {
+                video.playbackRate = normalSpeed;
+            });
+        }
+    });
+    */
+});
