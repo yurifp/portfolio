@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Opção 2: Controlar apenas o vídeo do Block-Office especificamente
     // (descomente se quiser velocidade diferente para este vídeo)
-    
+    /*
     const blockOfficeVideo = document.getElementById('block-office-video');
     if (blockOfficeVideo) {
         blockOfficeVideo.playbackRate = 0.6; // Velocidade específica para este vídeo

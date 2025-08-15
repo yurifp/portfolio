@@ -449,12 +449,6 @@ position: absolute;
     transition: transform 0.3s ease;
 }
 
-.project-image video {
-    object-fit: cover;
-    transition: transform 0.3s ease;
-    position: relative;
-    z-index: 1;
-}
 
 .project-card:hover .project-image img {
     transform: scale(1.1);
