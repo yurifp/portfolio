@@ -418,12 +418,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Opção 1: Controlar TODOS os vídeos na página
     const allVideos = document.querySelectorAll('video');
     allVideos.forEach(video => {
-        video.playbackRate = 0.5; // Ajuste este valor (0.5 = 50% velocidade, 1 = normal, 2 = dobro)
+        video.playbackRate = 0.8; // Ajuste este valor (0.5 = 50% velocidade, 1 = normal, 2 = dobro)
     });
     
     // Opção 2: Controlar apenas o vídeo do Block-Office especificamente
     // (descomente se quiser velocidade diferente para este vídeo)
-    /*
+    
     const blockOfficeVideo = document.getElementById('block-office-video');
     if (blockOfficeVideo) {
         blockOfficeVideo.playbackRate = 0.6; // Velocidade específica para este vídeo
