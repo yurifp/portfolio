@@ -1,11 +1,12 @@
 // Typewriter Effect
 const phrases = [
-    'Web Developer',
-    'HTML/CSS Expert',
-    'JavaScript Programmer',
-    'NASA Space Apps Local Winner',
+    'Front-End Developer',
+    'Vanilla JavaScript Programmer',
+    'Angular and Vue Enthusiast',
+    'NASA Space Apps Local Winner 🏆',
     'Front-end Specialist',
-    'AI Enthusiast',
+    'Html and CSS Writer',
+    'AI Agency Owner',
     'Open Source Contributor',
     'Blockchain Explorer',
 ];
