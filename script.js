@@ -359,7 +359,7 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Preload images for better performance
+
 function preloadImages() {
     const imageUrls = [
         'img/projects/globe.png',
@@ -376,10 +376,10 @@ function preloadImages() {
     });
 }
 
-// Call preload when page loads
+
 window.addEventListener('load', preloadImages);
 
-// Add keyboard navigation for carousel
+
 document.addEventListener('keydown', (e) => {
     const glideElement = document.querySelector('.glide');
     if (glideElement && glideElement.offsetParent !== null) { // Check if carousel is visible
