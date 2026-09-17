@@ -1,0 +1,92 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Motion from '../components/Motion.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Yuri Ferreira Paulo',
+  jobTitle: 'Front-end Engineer',
+  description:
+    'Front-end engineer going full-stack. 6 years of production React at SENAI CIMATEC, twice Global Nominee at NASA Space Apps Challenge.',
+  email: 'mailto:dev.yurifpaulo@gmail.com',
+  url: Astro.site?.toString(),
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Salvador',
+    addressRegion: 'Bahia',
+    addressCountry: 'BR',
+  },
+  sameAs: [
+    'https://github.com/yurifp',
+    'https://www.linkedin.com/in/yuri-ferreira-paulo-86877a183',
+  ],
+  knowsAbout: [
+    'React',
+    'Next.js',
+    'TypeScript',
+    'Astro',
+    'Node.js',
+    'Three.js',
+    'Web performance',
+    'WCAG 2.1 accessibility',
+  ],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Progressive-enhancement gate: elements GSAP reveals start hidden only
+      // when JS is running (see the matching rule in global.css)
+      document.documentElement.classList.add('js');
+    </script>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/og.png', Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL('/og.png', Astro.site)} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <ClientRouter />
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="fixed left-4 top-4 z-50 -translate-y-24 rounded-sm bg-signal px-3 py-2 text-sm font-medium text-deep transition-transform focus:translate-y-0"
+    >
+      Skip to content
+    </a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <Motion />
+  </body>
+</html>

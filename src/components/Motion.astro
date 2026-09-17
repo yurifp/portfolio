@@ -1,0 +1,73 @@
+---
+// Motion budget: one orchestrated moment (the hero power-on), one quiet batched
+// reveal (project panels). Everything else moves in answer to user actions —
+// expansion, filtering, data arriving. prefers-reduced-motion skips it all.
+---
+
+<script>
+  import Lenis from 'lenis';
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Lenis drives ScrollTrigger, never the reverse. One instance for the whole
+  // session — it survives ClientRouter swaps, so it is created exactly once.
+  if (!reduceMotion) {
+    const lenis = new Lenis({ anchors: true });
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    // Lenis's RAF runs inside GSAP's ticker — single source of frame truth
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  function initPage() {
+    if (reduceMotion) return; // static page, instant states, no smooth scroll
+
+    // The orchestrated moment: headline rises, then the three readouts settle
+    // in sequence — real numbers taking their posts on the instrument panel.
+    const headline = document.querySelector('[data-hero-head]');
+    const readouts = gsap.utils.toArray<HTMLElement>('[data-readout]');
+
+    if (headline) {
+      gsap.from(headline, { autoAlpha: 0, y: 24, duration: 0.9, ease: 'power3.out' });
+    }
+
+    if (readouts.length) {
+      gsap.set(readouts, { y: 14 });
+      ScrollTrigger.batch(readouts, {
+        start: 'top 95%',
+        once: true,
+        onEnter: (batch) =>
+          gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.12 }),
+      });
+    }
+
+    // Quiet batched reveal for the project panels — nothing else gets one
+    const reveals = gsap.utils.toArray<HTMLElement>('[data-reveal]');
+    if (reveals.length) {
+      gsap.set(reveals, { y: 18 });
+      ScrollTrigger.batch(reveals, {
+        start: 'top 92%',
+        once: true,
+        onEnter: (batch) =>
+          gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.08 }),
+      });
+    }
+
+    ScrollTrigger.refresh();
+  }
+
+  // astro:page-load fires on first load and after every ClientRouter navigation
+  document.addEventListener('astro:page-load', initPage);
+
+  document.addEventListener('astro:before-swap', () => {
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  });
+</script>

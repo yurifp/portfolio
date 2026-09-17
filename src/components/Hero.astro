@@ -1,0 +1,102 @@
+---
+import ViewCounter from '../islands/ViewCounter';
+import TelemetryMesh from '../islands/TelemetryMesh';
+---
+
+<section id="top" class="relative overflow-hidden border-b border-line" aria-label="Introduction">
+  <!-- Decorative background layer: hydrates on idle, never touches layout -->
+  <TelemetryMesh client:idle className="-z-10" />
+  <div class="mx-auto max-w-6xl px-5 pb-14 pt-20 sm:px-8 sm:pt-28">
+    <p class="mb-6 text-sm text-dim">
+      Front-end engineer, Salvador Brazil, 6 years in production
+    </p>
+
+    <h1 data-hero-head class="max-w-4xl text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+      Front-end engineer,
+      <br />
+      going full-stack.
+      <span class="mt-5 block max-w-2xl text-lg font-normal leading-snug tracking-normal text-dim sm:text-xl">
+        The proof runs on this page — every number below is a real measurement,
+        not a mockup.
+      </span>
+    </h1>
+
+    <!--
+      The orchestrated moment: three live readouts.
+      views  → Redis, via the ViewCounter island (serverless API)
+      load   → this device's actual load time, measured by the Performance API
+      built  → when this HTML was generated, and by which pipeline
+    -->
+    <div
+      data-hero-readouts
+      class="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4"
+    >
+      <div
+        class="panel-grid rounded-panel border border-line bg-raised/60 px-5 py-4"
+        data-readout
+      >
+        <p class="text-sm text-dim">views of this page</p>
+        <p class="mt-2 text-3xl text-signal">
+          <ViewCounter client:idle slug="home" variant="large" />
+        </p>
+        <p class="mt-1 text-xs text-dim">persisted in Redis, served serverless</p>
+      </div>
+
+      <div
+        class="panel-grid rounded-panel border border-line bg-raised/60 px-5 py-4"
+        data-readout
+      >
+        <p class="text-sm text-dim">your load time</p>
+        <p class="t-value mt-2 text-3xl text-signal" data-loadms>— ms</p>
+        <p class="mt-1 text-xs text-dim">measured on this device, now</p>
+      </div>
+
+      <div
+        class="panel-grid rounded-panel border border-line bg-raised/60 px-5 py-4"
+        data-readout
+      >
+        <p class="text-sm text-dim">page generated</p>
+        <p class="t-value mt-2 text-2xl text-ink" data-generated>
+          {
+            new Date().toLocaleString('en-GB', {
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: 'UTC',
+            }) + ' UTC'
+          }
+        </p>
+        <p class="mt-1 text-xs text-dim">
+          {process.env.DEPLOY_TARGET === 'github' ? 'static build, GitHub Pages' : 'server-rendered, Vercel'}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Readout 2: the only honest way to show a load time — measure it on the device
+  function measureLoad() {
+    const el = document.querySelector<HTMLElement>('[data-loadms]');
+    if (!el || el.dataset.done) return;
+
+    const write = (ms: number) => {
+      el.dataset.done = '1';
+      el.textContent = `${Math.round(ms)} ms`;
+    };
+
+    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (nav && nav.loadEventEnd > 0) {
+      write(nav.loadEventEnd);
+    } else if (nav && nav.domContentLoadedEventEnd > 0) {
+      write(nav.domContentLoadedEventEnd);
+    } else {
+      // Fallback for bfcache/ClientRouter navigations
+      requestAnimationFrame(() => write(performance.now()));
+    }
+  }
+  measureLoad();
+  document.addEventListener('astro:page-load', measureLoad);
+</script>

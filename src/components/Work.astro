@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+import ProjectFilter from '../islands/ProjectFilter';
+import type { ProjectData } from '../islands/ProjectFilter';
+
+const entries = await getCollection('projects');
+
+const projects: ProjectData[] = (
+  await Promise.all(
+    entries.map(async ({ id, data }) => ({
+      slug: id,
+      title: data.title,
+      description: data.description,
+      role: data.role,
+      stack: data.stack,
+      year: data.year,
+      links: data.links,
+      featured: data.featured,
+      tags: data.tags,
+      metrics: data.metrics,
+      coverSrc: data.cover ? (await getImage(data.cover)).src : undefined,
+    })),
+  )
+).sort((a, b) => Number(b.featured) - Number(a.featured) || b.year - a.year);
+---
+
+<section id="work" aria-labelledby="work-title" class="border-b border-line">
+  <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+    <div class="mb-8 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
+      <h2 id="work-title" class="text-2xl font-semibold tracking-tight">Selected work</h2>
+      <p class="text-sm text-dim">two-time global nominee, NASA Space Apps Challenge</p>
+    </div>
+
+    <ProjectFilter client:visible projects={projects} />
+  </div>
+</section>

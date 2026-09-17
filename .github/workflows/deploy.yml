@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages
+
+# This workflow belongs in the repository that owns the Pages site
+# (yurifp/yurifp.github.io — serving the root, replacing the old site).
+# Repo → Settings → Pages → Source: "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_TARGET: github
+      # TODO(yuri): after the first Vercel deploy, replace with the real
+      # production URL so the static mirror's counters stay live.
+      PUBLIC_VIEWS_API: https://yurifp-portfolio.vercel.app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: withastro/action@v6
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

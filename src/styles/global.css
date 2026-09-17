@@ -1,0 +1,132 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/archivo';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+/*
+  Telemetry palette — derived from the content it presents:
+  the shared ground of the two NASA cases (night sky / ocean depth)
+  is a *colored* dark blue, never a neutral false-black. Amber is
+  semantic only: it marks live data and confirmed interaction.
+*/
+@theme {
+  --color-deep: #0c1420; /* base — abyssal blue-black */
+  --color-raised: #12202f; /* panels, elevated surfaces */
+  --color-ink: #e9eef4; /* primary text (≈15:1 on deep) */
+  --color-dim: #8fa3b8; /* secondary text (≈7:1 on deep) */
+  --color-signal: #f2b441; /* live data / confirmed state — never decorative */
+  --color-line: #2a4055; /* structure: borders, dividers, rules */
+
+  --font-sans: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --radius-panel: 4px;
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/*
+  RGB triplets for canvas code — the TelemetryMesh island reads these instead
+  of hardcoding hex (hex can't be interpolated into rgba() strings).
+  Keep in lockstep with the tokens above: node = ink, amber = signal.
+*/
+:root {
+  --color-node-rgb: 233, 238, 244;
+  --color-amber-rgb: 242, 180, 65;
+}
+
+html {
+  color-scheme: dark;
+  scrollbar-color: var(--color-line) var(--color-deep);
+}
+
+body {
+  background-color: var(--color-deep);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-signal);
+  color: var(--color-deep);
+}
+
+/* Focus is never removed without an equivalent replacement state */
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Data values: monospaced, tabular — readouts must not jitter */
+.t-value {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Fine structural grid used by readout panels and placeholders */
+.panel-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-line) 38%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-line) 38%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Diagonal hatch for pending-media placeholders (visually signed TODO) */
+.panel-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--color-line) 55%, transparent) 0 1px,
+    transparent 1px 10px
+  );
+}
+
+/* Honeypot field: present in the form, absent from perception */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Expandable case panels: height animates via grid-template-rows */
+.case-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--ease-out-quart);
+}
+.case-grid.case-open {
+  grid-template-rows: 1fr;
+}
+.case-grid .case-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Progressive-enhancement gate: only when JS is running AND motion is allowed
+   do the GSAP-revealed elements start hidden. No JS → fully visible page. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-readout],
+  html.js [data-reveal] {
+    opacity: 0;
+  }
+}

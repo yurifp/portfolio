@@ -1,0 +1,65 @@
+---
+const nav = [
+  { href: '#work', label: 'work' },
+  { href: '#stack', label: 'stack' },
+  { href: '#about', label: 'about' },
+  { href: '#contact', label: 'contact' },
+];
+---
+
+<header class="sticky top-0 z-40 border-b border-line bg-deep/85 backdrop-blur-sm">
+  <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
+    <a href="#top" class="font-semibold tracking-tight text-ink hover:text-signal">
+      Yuri Ferreira Paulo
+    </a>
+    <nav aria-label="Main" class="flex items-center gap-5 sm:gap-7">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class="text-dim transition-colors hover:text-ink focus-visible:text-ink"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <!-- Live telemetry in the chrome: Salvador local time, updates every second -->
+      <span
+        class="t-value hidden items-center gap-2 text-xs text-dim sm:flex"
+        aria-label="Local time in Salvador, Brazil"
+      >
+        <span class="inline-block size-1.5 rounded-full bg-signal" aria-hidden="true"></span>
+        <time id="clock" datetime="">--:--:--</time>
+        <span class="text-dim">UTC−3</span>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Salvador keeps UTC−3 year-round (no DST since 2019) — America/Bahia is exact
+  const fmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Bahia',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  function tick() {
+    const el = document.getElementById('clock');
+    if (!el) return;
+    const now = fmt.format(new Date());
+    el.textContent = now;
+    el.setAttribute('datetime', now);
+  }
+
+  let timer: number | undefined;
+  function start() {
+    if (timer) return;
+    tick();
+    timer = window.setInterval(tick, 1000);
+  }
+  start();
+  document.addEventListener('astro:page-load', start);
+</script>

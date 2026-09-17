@@ -1,0 +1,42 @@
+---
+// Grouped by the role each part plays — not a badge wall. Every group is a
+// real split in how the work happens: what renders, what serves, what ships.
+const groups = [
+  {
+    role: 'interface',
+    items: ['React', 'Next.js', 'TypeScript', 'Vue.js', 'Astro', 'Tailwind CSS', 'Three.js', 'GSAP'],
+  },
+  {
+    role: 'server',
+    items: ['Node.js', 'C# / .NET', 'Python', 'REST API design', 'Redis', 'MySQL', 'Astro Actions'],
+  },
+  {
+    role: 'operation',
+    items: ['Docker', 'Azure', 'OpenShift', 'CI/CD', 'Git', 'Jest', 'WCAG 2.1'],
+  },
+];
+---
+
+<section id="stack" aria-labelledby="stack-title" class="border-b border-line">
+  <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+    <div class="mb-8 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
+      <h2 id="stack-title" class="text-2xl font-semibold tracking-tight">Stack</h2>
+      <p class="text-sm text-dim">grouped by the role each part plays</p>
+    </div>
+
+    <dl class="divide-y divide-line">
+      {
+        groups.map((group) => (
+          <div class="grid gap-2 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
+            <dt class="text-sm text-dim">{group.role}</dt>
+            <dd class="flex flex-wrap gap-x-5 gap-y-1 text-ink">
+              {group.items.map((item) => (
+                <span class="text-sm">{item}</span>
+              ))}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>

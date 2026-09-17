@@ -1,0 +1,24 @@
+---
+// The page is pure content (islands hydrate client-side) — always static,
+// in both deploy targets. Only /api/* and /_actions/* run on-demand.
+export const prerender = true;
+
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Work from '../components/Work.astro';
+import StackLines from '../components/StackLines.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+
+const title = 'Yuri Ferreira Paulo — front-end engineer, going full-stack';
+const description =
+  'Six years of production front-end, with the backend proof running on this page: a typed Astro Action, Redis view counters, one codebase deployed twice. Two-time NASA Space Apps global nominee.';
+---
+
+<Base title={title} description={description}>
+  <Hero />
+  <Work />
+  <StackLines />
+  <About />
+  <Contact />
+</Base>

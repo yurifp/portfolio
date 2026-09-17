@@ -1,0 +1,25 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# environment
+.env
+.env.production
+.env.local
+
+# vercel
+.vercel
+
+# logs
+npm-debug.log*
+pnpm-debug.log*
+
+# os / editor
+.DS_Store
+Thumbs.db
+
+.vercel
+CV Yuri Ferreira_EN.pdf
