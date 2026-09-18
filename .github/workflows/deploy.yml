@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 # This workflow belongs in the repository that owns the Pages site
 # (yurifp/yurifp.github.io — serving the root, replacing the old site).
 # Repo → Settings → Pages → Source: "GitHub Actions".
+# Guarded below: in the SOURCE repo (yurifp/portfolio, where Vercel deploys
+# from) both jobs no-op — its Pages lives under /portfolio/, not the root.
 
 on:
   push:
@@ -20,6 +22,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'yurifp/yurifp.github.io'
     runs-on: ubuntu-latest
     env:
       DEPLOY_TARGET: github
@@ -31,6 +34,7 @@ jobs:
       - uses: withastro/action@v6
 
   deploy:
+    if: github.repository == 'yurifp/yurifp.github.io'
     needs: build
     runs-on: ubuntu-latest
     environment:
