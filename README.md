@@ -1,5 +1,9 @@
 # yurifp — portfolio
 
+This is the rebuilt portfolio (Astro 7), replacing the previous version of
+this repository. Deployed serverless on Vercel, with a static mirror pipeline
+for GitHub Pages.
+
 Portfolio of Yuri Ferreira Paulo, front-end engineer going full-stack. The
 site is designed to prove the claim instead of stating it: the contact form is
 a typed server action, the view counters persist in Redis, and one codebase
