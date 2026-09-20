@@ -1,0 +1,100 @@
+---
+import ViewCounter from '../islands/ViewCounter';
+
+// Draft narrative — assembled from Yuri's own CV/site facts, awaiting his
+// revision (TODO(yuri-review) on the wording of beats 2 and 4).
+const beats = [
+  {
+    label: 'Yuri Ferreira Paulo — Salvador, Brazil',
+    title: 'Front-end engineer, going <i>full-stack</i>.',
+    text: 'The proof runs on this page.',
+  },
+  {
+    label: 'Live telemetry',
+    title: 'Every number here is <i>real</i>.',
+    text: 'Counters persist in Redis. This page measures itself as you read it.',
+  },
+  {
+    label: 'Recognition',
+    title: 'Two-time global nominee, <i>NASA Space Apps</i>.',
+    text: 'Impacts — 3D asteroid impact simulation. GlobeExplorers — AI-powered environmental game.',
+  },
+  {
+    label: 'Scale',
+    title: '170+ sites kept fast, <i>accessible</i>, alive.',
+    text: 'Component libraries across modern and legacy stacks at SENAI CIMATEC — tenfold engineering productivity by our own measurement.',
+  },
+  {
+    label: 'Full-stack, for real',
+    title: 'The backend runs <i>right here</i>.',
+    text: 'Typed server actions. Redis counters. One codebase, two deploy targets. Keep scrolling — it only gets more concrete.',
+  },
+];
+---
+
+<div class="story" data-story>
+  <div class="story-stage">
+    <div class="story-bg" data-story-bg aria-hidden="true"></div>
+    {
+      beats.map((beat, i) => (
+        <section class:list={['story-beat', { 'is-first': i === 0 }]} data-beat={i} aria-label={beat.label}>
+          <p class="story-label">{beat.label}</p>
+          <h2 class="story-title display" data-story-title set:html={beat.title} />
+          {i === 1 ? (
+            <div class="story-readouts" data-readout>
+              <div class="story-readout">
+                <span class="k">views of this page</span>
+                <span class="v"><ViewCounter client:idle slug="home" variant="large" /></span>
+              </div>
+              <div class="story-readout">
+                <span class="k">your load time</span>
+                <span class="v t-value" data-loadms>— ms</span>
+              </div>
+              <div class="story-readout">
+                <span class="k">page generated</span>
+                <span class="v t-value" data-generated>—</span>
+              </div>
+            </div>
+          ) : (
+            <p class="story-text">{beat.text}</p>
+          )}
+        </section>
+      ))
+    }
+    <p class="story-count t-value" aria-hidden="true"><span data-story-count>01</span> / 05</p>
+  </div>
+</div>
+
+<script>
+  // Load-time readouts (beat 2): measured on this device — keep in sync with
+  // the values the old hero showed.
+  function measureLoad() {
+    const el = document.querySelector<HTMLElement>('[data-loadms]');
+    if (!el || el.dataset.done) return;
+    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    const ms = nav && nav.loadEventEnd > 0 ? nav.loadEventEnd : nav ? nav.domContentLoadedEventEnd : 0;
+    if (ms > 0) {
+      el.dataset.done = '1';
+      el.textContent = `${Math.round(ms)} ms`;
+    }
+  }
+  measureLoad();
+  document.addEventListener('astro:page-load', measureLoad);
+
+  function stampGenerated() {
+    const el = document.querySelector<HTMLElement>('[data-generated]');
+    if (!el || el.dataset.done) return;
+    el.dataset.done = '1';
+    el.textContent =
+      new Date().toLocaleString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC',
+      }) + ' UTC';
+  }
+  stampGenerated();
+  document.addEventListener('astro:page-load', stampGenerated);
+</script>
