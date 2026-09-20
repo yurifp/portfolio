@@ -82,11 +82,24 @@ const jsonLd = {
     >
       Skip to content
     </a>
+    <!-- Persistent WebGL host — OUTSIDE the ClientRouter-swapped <main>, so the
+         canvas node survives route changes (same trick the reference uses) -->
+    <div id="gl-host" class="pointer-events-none fixed inset-0 -z-10" aria-hidden="true"></div>
     <Header />
     <main id="main">
       <slot />
     </main>
     <Footer />
+    <div class="x-rail" aria-hidden="true"><div id="scroll-rail-fill" class="x-rail-fill"></div></div>
+    <button id="settings-btn" class="x-settings" aria-expanded="false" aria-controls="settings-panel">
+      settings
+    </button>
+    <div id="settings-panel" class="x-panel" data-open="false" role="group" aria-label="Experience settings">
+      <h2>Quality</h2>
+      <button class="opt" data-quality="high" aria-pressed="false">high <span>full field + dpr 2</span></button>
+      <button class="opt" data-quality="medium" aria-pressed="false">medium <span>half field + dpr 1.5</span></button>
+      <button class="opt" data-quality="low" aria-pressed="false">low <span>static frame</span></button>
+    </div>
     <Motion />
   </body>
 </html>
