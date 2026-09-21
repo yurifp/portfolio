@@ -9,54 +9,17 @@
   import gsap from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { experience } from '../experience/core';
+  import { initStory } from '../experience/story';
   import { getQuality, setQuality, type Quality } from '../experience/settings';
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // One shared ease vocabulary — mirrored from the CSS tokens in global.css
-  const EASE = {
-    settle: 'cubic-bezier(0.16, 1, 0.3, 1)',
-    snap: 'cubic-bezier(0.83, 0, 0.17, 1)',
-    glide: 'cubic-bezier(0.37, 0, 0.63, 1)',
-  };
-
   experience.init();
 
   function initPage() {
-    if (experience.reducedMotion) return; // static page, instant states
-
-    const headline = document.querySelector('[data-hero-head]');
-    const readouts = gsap.utils.toArray<HTMLElement>('[data-readout]');
-
-    if (headline) {
-      gsap.from(headline, { autoAlpha: 0, y: 24, duration: 0.9, ease: EASE.settle });
-    }
-
-    if (readouts.length) {
-      gsap.set(readouts, { y: 14 });
-      ScrollTrigger.batch(readouts, {
-        start: 'top 95%',
-        once: true,
-        onEnter: (batch) =>
-          gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.7, ease: EASE.settle, stagger: 0.12 }),
-      });
-    }
-
-    // Elements inside astro-islands are animated by the island itself after
-    // hydration — touching them here would corrupt React's hydration diff
-    const reveals = gsap.utils
-      .toArray<HTMLElement>('[data-reveal]')
-      .filter((el) => !el.closest('astro-island'));
-    if (reveals.length) {
-      gsap.set(reveals, { y: 18 });
-      ScrollTrigger.batch(reveals, {
-        start: 'top 92%',
-        once: true,
-        onEnter: (batch) =>
-          gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.6, ease: EASE.settle, stagger: 0.08 }),
-      });
-    }
-
+    // Storytelling (one progress → text, bg, counter) — no-ops under
+    // reduced-motion, where CSS renders the beats stacked and static
+    initStory();
     ScrollTrigger.refresh();
   }
 

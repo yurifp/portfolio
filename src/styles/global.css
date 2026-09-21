@@ -256,3 +256,128 @@ body {
     opacity: 0;
   }
 }
+
+/*
+  Storytelling — N×100dvh of scroll driving one sticky stage. Without JS or
+  with reduced-motion the beats degrade to a plain stacked flow (real content,
+  no pinning) — the same progressive gate used by the reveal system.
+*/
+.story {
+  position: relative;
+}
+.story-stage {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+.story-bg {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-deep);
+}
+.story-beat {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 max(24px, calc((100vw - 72rem) / 2));
+  max-width: 100%;
+}
+.story-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+  margin: 0 0 18px;
+}
+.story-title {
+  font-family: var(--font-display);
+  font-weight: 355;
+  font-optical-sizing: auto;
+  font-size: clamp(2.6rem, 6.4vw, 5.4rem);
+  line-height: 1.03;
+  letter-spacing: -0.012em;
+  color: var(--color-ink);
+  max-width: 20ch;
+  margin: 0 0 20px;
+}
+.story-title i,
+.story-title em {
+  color: var(--color-signal);
+  font-style: italic;
+}
+.story-text {
+  max-width: 44ch;
+  color: var(--color-ink);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+.story-count {
+  position: absolute;
+  right: max(24px, calc((100vw - 72rem) / 2));
+  bottom: 28px;
+  font-size: 11px;
+  color: var(--color-dim);
+  z-index: 1;
+}
+
+/* Live readouts (beat 2) */
+.story-readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+}
+.story-readout {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--color-raised) 60%, transparent);
+  padding: 14px 18px;
+  min-width: 180px;
+}
+.story-readout .k {
+  display: block;
+  font-size: 12px;
+  color: var(--color-dim);
+}
+.story-readout .v {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.7rem;
+  color: var(--color-signal);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* JS present: beats become absolute layers of one sticky stage */
+  html.js .story {
+    height: calc(var(--story-length, 5) * 110dvh);
+  }
+  html.js .story-stage {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+  }
+  html.js .story-beat {
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+    will-change: opacity, transform;
+  }
+  html.js .story-beat:not(.is-first) {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-beat {
+    min-height: auto;
+    padding-block: 88px;
+  }
+}

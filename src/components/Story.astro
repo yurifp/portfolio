@@ -32,7 +32,7 @@ const beats = [
 ];
 ---
 
-<div class="story" data-story>
+<div class="story" data-story style="--story-length: 5">
   <div class="story-stage">
     <div class="story-bg" data-story-bg aria-hidden="true"></div>
     {
@@ -41,7 +41,7 @@ const beats = [
           <p class="story-label">{beat.label}</p>
           <h2 class="story-title display" data-story-title set:html={beat.title} />
           {i === 1 ? (
-            <div class="story-readouts" data-readout>
+            <div class="story-readouts">
               <div class="story-readout">
                 <span class="k">views of this page</span>
                 <span class="v"><ViewCounter client:idle slug="home" variant="large" /></span>

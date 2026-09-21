@@ -53,7 +53,10 @@ export function initStory() {
     if (title) maskLines(title, { delay: 0.05 });
   }
 
-  progressScrub(story, (p) => {
+  progressScrub(story, apply);
+  apply(0); // initial frame: the scrub callback only fires on scroll
+
+  function apply(p: number) {
     const scaled = p * (BEATS - 1); // 0..4 in beat units
     beats.forEach((beat, i) => {
       const d = scaled - i;
@@ -72,12 +75,11 @@ export function initStory() {
     if (counter) counter.textContent = String(activeIndex + 1).padStart(2, '0');
 
     if (bg) {
-      const t = p;
-      bg.style.backgroundColor = mixRgb(BG_FROM, BG_TO, t);
+      bg.style.backgroundColor = mixRgb(BG_FROM, BG_TO, p);
       // signal glow drifts with progress — the CSS stand-in for the camera
-      bg.style.backgroundImage = `radial-gradient(60% 55% at ${25 + t * 50}% ${70 - t * 45}%, rgba(242,180,65,${(0.05 + t * 0.05).toFixed(3)}) 0%, transparent 70%)`;
+      bg.style.backgroundImage = `radial-gradient(60% 55% at ${25 + p * 50}% ${70 - p * 45}%, rgba(242,180,65,${(0.05 + p * 0.05).toFixed(3)}) 0%, transparent 70%)`;
     }
-  });
+  }
 
   // First beat is revealed on arrival (after fonts settle)
   const ready = () => activate(0);
