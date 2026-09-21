@@ -57,6 +57,7 @@ export function initStory() {
   apply(0); // initial frame: the scrub callback only fires on scroll
 
   function apply(p: number) {
+    experience.state.progress = p; // shared: the WebGL stage reads this every frame
     const scaled = p * (BEATS - 1); // 0..4 in beat units
     beats.forEach((beat, i) => {
       const d = scaled - i;

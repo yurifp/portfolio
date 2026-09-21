@@ -20,10 +20,23 @@ class ExperienceManager {
   private started = false;
   private lenis: Lenis | null = null;
   private rawVelocity = 0;
+  private frameCbs = new Set<(dt: number, t: number) => void>();
+  private lastT = 0;
 
   /** eased |velocity| in px/frame-ish units — read by shaders as uVelocity */
   velocity = 0;
+  /** shared state — the "one value" of one-value-many-destinations */
+  state = { progress: 0 };
   reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /**
+   * Register a per-frame callback (dt seconds, t seconds). The WebGL stage
+   * renders through this — the whole site shares gsap.ticker as its only RAF.
+   */
+  onFrame(cb: (dt: number, t: number) => void) {
+    this.frameCbs.add(cb);
+    return () => this.frameCbs.delete(cb);
+  }
 
   private raf = (time: number) => {
     if (!this.lenis) return;
@@ -31,6 +44,11 @@ class ExperienceManager {
     // Smooth the velocity so shaders glide instead of stuttering
     this.velocity += (this.rawVelocity - this.velocity) * 0.08;
     this.updateRail();
+
+    const t = time;
+    const dt = this.lastT ? Math.min(t - this.lastT, 0.05) : 0.016;
+    this.lastT = t;
+    for (const cb of this.frameCbs) cb(dt, t);
   };
 
   private onScroll = (e: { velocity: number }) => {

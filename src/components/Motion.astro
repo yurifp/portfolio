@@ -10,11 +10,13 @@
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { experience } from '../experience/core';
   import { initStory } from '../experience/story';
+  import { initGL } from '../experience/gl';
   import { getQuality, setQuality, type Quality } from '../experience/settings';
 
   gsap.registerPlugin(ScrollTrigger);
 
   experience.init();
+  initGL(); // persistent WebGL stage — renders inside the shared ticker
 
   function initPage() {
     // Storytelling (one progress → text, bg, counter) — no-ops under
