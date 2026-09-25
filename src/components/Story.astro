@@ -6,8 +6,6 @@ const nasa = [
     name: 'Impacts',
     sub: 'NASA Space Apps 2025 · global nominee',
     stack: 'JavaScript · Three.js · REST',
-    // TODO(yuri): project page + repo links for Impacts are not public yet —
-    // buttons render as signed TODOs until the real URLs land here.
     projectUrl: '',
     repoUrl: '',
     video: '',
@@ -44,12 +42,12 @@ const nasa = [
         {
           nasa.map((p) => (
             <article class="nasa-box" data-nasa-box>
-              <div class="nasa-video panel-hatch" aria-label={`${p.name} video: pending`}>
+              <div class="nasa-video panel-hatch" aria-label={`${p.name} preview`}>
                 {p.video ? (
                   <video src={p.video} muted loop playsinline preload="none" controls={false} />
                 ) : (
                   <span class="t-value" style="position:absolute; left:12px; bottom:10px; font-size:10px; color: var(--color-dim);">
-                    {p.name.toUpperCase()} VIDEO PENDING
+                    {p.name.toUpperCase()}
                   </span>
                 )}
               </div>
@@ -58,19 +56,15 @@ const nasa = [
                 <p class="sub">{p.sub}</p>
                 <p class="sub" style="text-transform: none; letter-spacing: 0.02em;">{p.stack}</p>
                 <div class="nasa-actions">
-                  {p.projectUrl ? (
+                  {p.projectUrl && (
                     <a class="x-btn" href={p.projectUrl} target="_blank" rel="noopener">
                       open project
                     </a>
-                  ) : (
-                    <span class="x-btn is-todo" title="TODO(yuri): send the project URL">project · todo</span>
                   )}
-                  {p.repoUrl ? (
+                  {p.repoUrl && (
                     <a class="x-btn" href={p.repoUrl} target="_blank" rel="noopener">
                       repository
                     </a>
-                  ) : (
-                    <span class="x-btn is-todo" title="TODO(yuri): send the repo URL">repo · todo</span>
                   )}
                 </div>
               </div>

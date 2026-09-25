@@ -466,11 +466,6 @@ body {
   border-color: var(--color-signal);
   color: var(--color-signal);
 }
-.x-btn.is-todo {
-  color: var(--color-dim);
-  border-style: dashed;
-  cursor: default;
-}
 
 /* Experience section */
 .exp-list {
