@@ -17,8 +17,14 @@ import { experience } from './core';
  */
 
 const BEATS = 3;
-/** fraction of the container scroll spent fading between adjacent beats */
-const FADE = 0.1;
+/**
+ * Transition window: fades happen ONLY in a short zone centered between two
+ * stations (F wide in beat units), so beats crossfade — the screen is never
+ * blank. Each beat holds full opacity for ~84% of its scroll span.
+ */
+const FADE = 0.16;
+/** vertical drift (px) while entering/leaving — gives the scroll direction */
+const DRIFT = 36;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
@@ -57,16 +63,21 @@ export function initStory() {
 
   function apply(p: number) {
     experience.state.progress = p; // shared: the WebGL stage reads this every frame
-    const scaled = p * (BEATS - 1); // 0..4 in beat units
+    const s = p * (BEATS - 1); // 0..2 in beat units
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
     beats.forEach((beat, i) => {
-      const d = scaled - i;
-      // each beat dwells at its station and fades out over the next FADE window
-      let o = 1 - Math.min(Math.abs(d) / FADE, 1);
-      if (i === 0 && d < 0) o = 1; // first beat starts fully visible
-      if (i === BEATS - 1 && d > 0) o = 1; // last beat holds until handoff
-      const drift = d < 0 ? d * FADE * 40 : d * 40; // parallax drift, px
+      // enter during [i-0.5-F/2, i-0.5+F/2], exit during [i+0.5-F/2, i+0.5+F/2];
+      // edge beats skip the absent side. At the midpoint of a transition both
+      // beats sit at ~0.5 — a true crossfade, content on screen the whole time.
+      let o = 1;
+      if (i > 0) o = Math.min(o, clamp01((s - (i - 0.5 - FADE / 2)) / FADE));
+      if (i < BEATS - 1) o = Math.min(o, clamp01((i + 0.5 + FADE / 2 - s) / FADE));
+      // directional drift: incoming rises from below, outgoing sinks up-screen
+      let dy = 0;
+      if (i > 0 && s < i) dy = (1 - o) * DRIFT;
+      if (i < BEATS - 1 && s > i) dy = -(1 - o) * DRIFT;
       beat.style.opacity = o.toFixed(3);
-      beat.style.transform = `translateY(${drift.toFixed(1)}px)`;
+      beat.style.transform = `translateY(${dy.toFixed(1)}px)`;
       beat.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
     });
 

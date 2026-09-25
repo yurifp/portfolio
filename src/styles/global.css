@@ -348,7 +348,7 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   /* JS present: beats become absolute layers of one sticky stage */
   html.js .story {
-    height: calc(var(--story-length, 5) * 110dvh);
+    height: calc(var(--story-length, 3) * 150dvh);
   }
   html.js .story-stage {
     position: sticky;
