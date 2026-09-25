@@ -1,18 +1,32 @@
 ---
-// Grouped by the role each part plays — not a badge wall. Every group is a
-// real split in how the work happens: what renders, what serves, what ships.
+// Groups reflect the actual split of Yuri's work, cross-checked against his
+// GitHub (github.com/yurifp): front-end sites/apps, back-end services,
+// full-stack freelance deliveries + this very site, AI/agent experiments
+// (IA-Agent, flappybird AI), blockchain TCC (block-office).
 const groups = [
   {
-    role: 'interface',
-    items: ['React', 'Next.js', 'TypeScript', 'Vue.js', 'Astro', 'Tailwind CSS', 'Three.js', 'GSAP'],
+    role: 'front-end',
+    items: ['React', 'Next.js', 'TypeScript', 'Vue.js', 'Tailwind CSS', 'Three.js', 'GSAP', 'Micro Frontends / Single-SPA'],
   },
   {
-    role: 'server',
-    items: ['Node.js', 'C# / .NET', 'Python', 'REST API design', 'Redis', 'MySQL', 'Astro Actions'],
+    role: 'back-end',
+    items: ['Node.js', 'C# / .NET', 'Java', 'Python', 'REST API design', 'Redis', 'MySQL'],
+  },
+  {
+    role: 'full-stack',
+    items: ['Astro (SSR, Actions, islands)', 'CI/CD GitHub Actions', 'Freelance apps delivered end-to-end (React + C#/Node)', 'This site — one codebase, two deploy targets'],
+  },
+  {
+    role: 'ia',
+    items: ['LLMs', 'AI agents', 'Multi-agent systems', 'RAG', 'MCP', 'YOLO computer vision (GlobeExplorers)', 'VPS inference infrastructure'],
+  },
+  {
+    role: 'blockchain',
+    items: ['Solidity', 'Ethereum', 'Solana', 'Smart-contract data systems (TCC, 10/10)'],
   },
   {
     role: 'operation',
-    items: ['Docker', 'Azure', 'OpenShift', 'CI/CD', 'Git', 'Jest', 'WCAG 2.1'],
+    items: ['Docker', 'Azure', 'OpenShift', 'Jest + React Testing Library', 'WCAG 2.1', 'Figma'],
   },
 ];
 ---
@@ -21,7 +35,7 @@ const groups = [
   <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
     <div class="mb-8 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
       <h2 id="stack-title" class="text-2xl font-semibold tracking-tight">Stack</h2>
-      <p class="text-sm text-dim">grouped by the role each part plays</p>
+      <p class="text-sm text-dim">grouped by how the work actually splits — cross-checked with github.com/yurifp</p>
     </div>
 
     <dl class="divide-y divide-line">

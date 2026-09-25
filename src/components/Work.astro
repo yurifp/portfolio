@@ -1,28 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
-import { getImage } from 'astro:assets';
-import ProjectFilter from '../islands/ProjectFilter';
-import type { ProjectData } from '../islands/ProjectFilter';
+import ViewCounter from '../islands/ViewCounter';
 
-const entries = await getCollection('projects');
-
-const projects: ProjectData[] = (
-  await Promise.all(
-    entries.map(async ({ id, data }) => ({
-      slug: id,
-      title: data.title,
-      description: data.description,
-      role: data.role,
-      stack: data.stack,
-      year: data.year,
-      links: data.links,
-      featured: data.featured,
-      tags: data.tags,
-      metrics: data.metrics,
-      coverSrc: data.cover ? (await getImage(data.cover)).src : undefined,
-    })),
-  )
-).sort((a, b) => Number(b.featured) - Number(a.featured) || b.year - a.year);
+// Fully server-rendered work list — no filter island, no reveal gates:
+// the HTML IS the content. Counters are the only islands (they degrade
+// to an em dash without JS, never hide anything).
+const entries = (await getCollection('projects')).sort(
+  (a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.year - a.data.year,
+);
 ---
 
 <section id="work" aria-labelledby="work-title" class="border-b border-line">
@@ -32,6 +17,51 @@ const projects: ProjectData[] = (
       <p class="text-sm text-dim">two-time global nominee, NASA Space Apps Challenge</p>
     </div>
 
-    <ProjectFilter client:visible projects={projects} />
+    <div class="flex flex-col gap-4">
+      {
+        entries.map(({ id, data }) => (
+          <article class:list={['rounded-panel border border-line p-5 sm:p-7', data.featured && 'bg-raised/60']}>
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h3 class="text-xl font-semibold tracking-tight sm:text-2xl">{data.title}</h3>
+              <span class="t-value text-xs text-dim">{data.year}</span>
+            </div>
+            <p class="mt-1 text-sm text-dim">{data.role}</p>
+            <p class="mt-4 max-w-2xl text-ink/90">{data.description}</p>
+
+            <div class="mt-5 grid gap-4 sm:grid-cols-3">
+              {data.metrics.map((m) => (
+                <div class="flex flex-col gap-0.5 border-l-2 border-line pl-3">
+                  <span class="text-xs text-dim">{m.label}</span>
+                  <span class="text-sm text-ink">{m.value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <span class="text-sm text-dim">{data.stack.join(', ')}</span>
+              {data.links.repo && (
+                <a
+                  class="x-btn"
+                  href={data.links.repo}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  repository
+                </a>
+              )}
+              {data.links.live && (
+                <a class="x-btn" href={data.links.live} target="_blank" rel="noopener">
+                  live
+                </a>
+              )}
+              <span class="ml-auto flex items-center gap-2 text-xs text-dim">
+                <ViewCounter client:idle slug={id} />
+                views · redis
+              </span>
+            </div>
+          </article>
+        ))
+      }
+    </div>
   </div>
 </section>

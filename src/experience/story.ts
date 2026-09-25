@@ -43,7 +43,6 @@ export function initStory() {
 
   const beats = [...story.querySelectorAll<HTMLElement>('.story-beat')];
   const bg = story.querySelector<HTMLElement>('[data-story-bg]');
-  const counter = story.querySelector<HTMLElement>('[data-story-count]');
   const revealed = new Set<number>();
 
   function activate(beatIndex: number) {
@@ -73,7 +72,6 @@ export function initStory() {
 
     const activeIndex = Math.min(BEATS - 1, Math.max(0, Math.round(scaled)));
     activate(activeIndex);
-    if (counter) counter.textContent = String(activeIndex + 1).padStart(2, '0');
 
     if (bg) {
       bg.style.backgroundColor = mixRgb(BG_FROM, BG_TO, p);

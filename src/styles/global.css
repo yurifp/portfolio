@@ -248,14 +248,6 @@ body {
   }
 }
 
-/* Progressive-enhancement gate: only when JS is running AND motion is allowed
-   do the GSAP-revealed elements start hidden. No JS → fully visible page. */
-@media (prefers-reduced-motion: no-preference) {
-  html.js [data-readout],
-  html.js [data-reveal] {
-    opacity: 0;
-  }
-}
 
 /*
   Storytelling — N×100dvh of scroll driving one sticky stage. Without JS or
