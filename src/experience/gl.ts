@@ -29,6 +29,12 @@ export function initGL() {
   if (!gl2) return; // no WebGL2 → silent exit, CSS gradient stays as backdrop
   host.appendChild(canvas);
 
+  // Context registry — browsers cap simultaneous WebGL contexts (~8-16).
+  // window.__webglContexts must stay at 1 for the whole site; the regression
+  // test toggles Quality repeatedly and asserts exactly that.
+  const W = window as typeof window & { __webglContexts?: number };
+  W.__webglContexts = (W.__webglContexts ?? 0) + 1;
+
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
   const sceneBG = new THREE.Scene();
   const camBG = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -323,8 +329,21 @@ export function initGL() {
       quadMat.dispose();
       fieldGeo.dispose();
       fieldMat.dispose();
+      // traverse visits the Scene itself (no material) — guard before .map
+      const disposeTextures = (root: THREE.Object3D) => {
+        root.traverse((obj) => {
+          const mat = (obj as THREE.Mesh).material as
+            | (THREE.Material & { map?: THREE.Texture })
+            | undefined;
+          mat?.map?.dispose();
+        });
+      };
+      disposeTextures(sceneBG);
+      disposeTextures(sceneField);
       renderer.dispose();
       canvas.remove();
+      const W = window as typeof window & { __webglContexts?: number };
+      if (W.__webglContexts) W.__webglContexts -= 1;
     },
   ];
 }
