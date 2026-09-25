@@ -70,16 +70,23 @@ export default function ConstellationGrid({
     /* reveal-by-activity: 0 = almost hidden, 1 = full constellation */
     let activity = 0;
 
+    let disposed = false;
+
     const resize = () => {
-      const host = canvas.parentElement;
-      if (!host) return;
+      if (disposed) return;
+      /* measure the canvas itself — parentElement is the astro-island
+         (display: contents) and reports 0×0 */
+      const r = canvas.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) {
+        /* styles/layout may not be applied yet — retry on next frame */
+        requestAnimationFrame(resize);
+        return;
+      }
       dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      width = host.clientWidth;
-      height = host.clientHeight;
+      width = r.width;
+      height = r.height;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       initNodes();
     };
@@ -271,6 +278,7 @@ export default function ConstellationGrid({
     }
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(raf);
       io.disconnect();
       window.removeEventListener('resize', resize);
