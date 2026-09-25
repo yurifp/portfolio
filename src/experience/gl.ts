@@ -169,13 +169,14 @@ export function initGL() {
     }
 
     void main() {
-      // 3 beats, 4 shapes: the NASA beat morphs Impacts(arc) → GlobeExplorers
-      // (ocean) mid-scroll, so stations live at t = 0,1,2,3 over the story.
+      // 3 beats, 4 shapes em t = 0..3: campo (beat 1), arco→oceano (beat NASA,
+      // o morph acontece no meio), e o GRID de chips no beat final — o look
+      // de placa de circuito mora exatamente na última estação.
       float t = uProgress * 3.0;               // 0..3 em unidades de estação
-      float wF = stationW(0.0, t) + stationW(1.0, t);
-      float wA = stationW(2.0, t);
-      float wO = stationW(3.0, t);
-      float wG = stationW(4.0, t);
+      float wF = stationW(0.0, t);
+      float wA = stationW(1.0, t);
+      float wO = stationW(2.0, t);
+      float wG = stationW(3.0, t);
 
       // Velocidade do scroll "agita" o meio: ondas mais altas quando rola
       float amp = 1.0 + uVelocity * 0.9;

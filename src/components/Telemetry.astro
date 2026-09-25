@@ -18,10 +18,6 @@ import ViewCounter from '../islands/ViewCounter';
         <span class="k">your load time</span>
         <span class="v t-value" data-loadms>— ms</span>
       </div>
-      <div class="story-readout">
-        <span class="k">page generated</span>
-        <span class="v t-value" data-generated>—</span>
-      </div>
     </div>
   </div>
 </section>
@@ -39,21 +35,4 @@ import ViewCounter from '../islands/ViewCounter';
   }
   measureLoad();
   document.addEventListener('astro:page-load', measureLoad);
-
-  function stampGenerated() {
-    const el = document.querySelector<HTMLElement>('[data-generated]');
-    if (!el || el.dataset.done) return;
-    el.dataset.done = '1';
-    el.textContent =
-      new Date().toLocaleString('en-GB', {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'UTC',
-      }) + ' UTC';
-  }
-  stampGenerated();
-  document.addEventListener('astro:page-load', stampGenerated);
 </script>
