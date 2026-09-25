@@ -5,11 +5,10 @@ import { experience } from './core';
 /**
  * Storytelling driver — "one value, many destinations" without WebGL yet.
  *
- * The .story container spans N×100dvh of scroll; a single 0→1 progress (via
+ * The .story container spans N×150dvh of scroll; a single 0→1 progress (via
  * grammar.progressScrub) simultaneously drives:
- *   - each beat's opacity/translate (crossfade with dwell windows)
+ *   - each beat's opacity/translate (crossfade between stations, never blank)
  *   - the background gradient (deep abyssal → bluer signal field)
- *   - the beat counter readout
  *   - line-mask reveals of beat titles, fired once per activation
  *
  * reduced-motion / no-JS: CSS renders beats stacked and fully visible; this
@@ -22,9 +21,9 @@ const BEATS = 3;
  * stations (F wide in beat units), so beats crossfade — the screen is never
  * blank. Each beat holds full opacity for ~84% of its scroll span.
  */
-const FADE = 0.16;
+const FADE = 0.22;
 /** vertical drift (px) while entering/leaving — gives the scroll direction */
-const DRIFT = 36;
+const DRIFT = 28;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
@@ -81,7 +80,7 @@ export function initStory() {
       beat.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
     });
 
-    const activeIndex = Math.min(BEATS - 1, Math.max(0, Math.round(scaled)));
+    const activeIndex = Math.min(BEATS - 1, Math.max(0, Math.round(s)));
     activate(activeIndex);
 
     if (bg) {

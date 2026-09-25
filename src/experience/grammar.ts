@@ -98,11 +98,13 @@ export function progressScrub(
   opts: { start?: string; end?: string } = {},
 ) {
   if (reducedMotion()) return;
+  // NO gsap 'scrub' smoothing here: Lenis already smooths the scroll itself —
+  // stacking a second smoothing layer made fast flicks feel stuck on one
+  // screen for seconds. onUpdate fires per real scroll event: 1:1 tracking.
   ScrollTrigger.create({
     trigger,
     start: opts.start ?? 'top top',
     end: opts.end ?? 'bottom top',
-    scrub: true,
     onUpdate: (self) => apply(self.progress),
   });
 }

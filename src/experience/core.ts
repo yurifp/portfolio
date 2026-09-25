@@ -68,7 +68,9 @@ class ExperienceManager {
     if (this.started || this.reducedMotion) return;
     this.started = true;
 
-    this.lenis = new Lenis({ anchors: true });
+    // lerp por frame (0..1): resposta ao wheel quase imediata, mantendo o
+    // glide — o 'duration' padrão (~1s) tornava flicks longos em 'tela presa'.
+    this.lenis = new Lenis({ anchors: true, lerp: 0.14 });
     this.lenis.on('scroll', this.onScroll as never);
 
     gsap.ticker.add(this.raf);
