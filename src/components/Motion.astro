@@ -10,6 +10,7 @@
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { experience } from '../experience/core';
   import { initStory } from '../experience/story';
+  import { initWork } from '../experience/work';
   import { initGL } from '../experience/gl';
   import { getQuality, setQuality, type Quality } from '../experience/settings';
 
@@ -22,6 +23,7 @@
     // Storytelling (one progress → text, bg, counter) — no-ops under
     // reduced-motion, where CSS renders the beats stacked and static
     initStory();
+    initWork();
     ScrollTrigger.refresh();
   }
 

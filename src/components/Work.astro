@@ -2,66 +2,89 @@
 import { getCollection } from 'astro:content';
 import ViewCounter from '../islands/ViewCounter';
 
-// Fully server-rendered work list — no filter island, no reveal gates:
-// the HTML IS the content. Counters are the only islands (they degrade
-// to an em dash without JS, never hide anything).
+// Horizontal-inside-vertical: JS (experience/work.ts) adds .is-h and pins the
+// section, translating the track sideways as you scroll. Without JS or under
+// prefers-reduced-motion the CSS keeps a plain vertical stack — same content,
+// zero motion. The amber "signal path" is one SVG polyline through the panels
+// with a live dot riding it at the current progress.
 const entries = (await getCollection('projects')).sort(
   (a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.year - a.data.year,
 );
 ---
 
-<section id="work" aria-labelledby="work-title" class="border-b border-line">
-  <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-    <div class="mb-8 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
-      <h2 id="work-title" class="text-2xl font-semibold tracking-tight">Selected work</h2>
+<section id="work" aria-labelledby="work-title" data-horizontal-section>
+  <div class="work-pin">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-baseline justify-between gap-2 px-5 pt-16 sm:px-8">
+      <h2 id="work-title" class="display section-title">Selected work</h2>
       <p class="text-sm text-dim">two-time global nominee, NASA Space Apps Challenge</p>
     </div>
 
-    <div class="flex flex-col gap-4">
-      {
-        entries.map(({ id, data }) => (
-          <article class:list={['rounded-panel border border-line p-5 sm:p-7', data.featured && 'bg-raised/60']}>
-            <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h3 class="text-xl font-semibold tracking-tight sm:text-2xl">{data.title}</h3>
-              <span class="t-value text-xs text-dim">{data.year}</span>
-            </div>
-            <p class="mt-1 text-sm text-dim">{data.role}</p>
-            <p class="mt-4 max-w-2xl text-ink/90">{data.description}</p>
-
-            <div class="mt-5 grid gap-4 sm:grid-cols-3">
-              {data.metrics.map((m) => (
-                <div class="flex flex-col gap-0.5 border-l-2 border-line pl-3">
-                  <span class="text-xs text-dim">{m.label}</span>
-                  <span class="text-sm text-ink">{m.value}</span>
+    <div class="work-track-outer">
+      <div class="work-track" data-horizontal-track>
+        {
+          entries.map(({ id, data }) => (
+            <article class="work-panel" data-panel>
+              <div class="work-media panel-hatch" aria-label={`${data.title} preview`}>
+                <span class="t-value work-media-label">{data.title.toUpperCase()}</span>
+              </div>
+              <div class="work-panel-body">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  <h3 class="display" style="font-size: 1.6rem; font-weight: 460;">{data.title}</h3>
+                  <span class="t-value text-xs text-dim">{data.year}</span>
                 </div>
-              ))}
-            </div>
+                <p class="mt-1 text-sm text-dim">{data.role}</p>
+                <p class="mt-3 text-sm leading-relaxed text-ink/90">{data.description}</p>
+                <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+                  {data.metrics.slice(0, 2).map((m) => (
+                    <li class="flex flex-col gap-0.5 border-l-2 border-line pl-3">
+                      <span class="text-xs text-dim">{m.label}</span>
+                      <span class="text-sm text-ink">{m.value}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div class="mt-5 flex flex-wrap items-center gap-4">
+                  {data.links.repo && (
+                    <a class="x-btn" href={data.links.repo} target="_blank" rel="noopener">
+                      repository
+                    </a>
+                  )}
+                  {data.links.live && (
+                    <a class="x-btn" href={data.links.live} target="_blank" rel="noopener">
+                      live
+                    </a>
+                  )}
+                  <span class="ml-auto flex items-center gap-2 text-xs text-dim">
+                    <ViewCounter client:idle slug={id} />
+                    views · redis
+                  </span>
+                </div>
+              </div>
+            </article>
+          ))
+        }
 
-            <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <span class="text-sm text-dim">{data.stack.join(', ')}</span>
-              {data.links.repo && (
-                <a
-                  class="x-btn"
-                  href={data.links.repo}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  repository
-                </a>
-              )}
-              {data.links.live && (
-                <a class="x-btn" href={data.links.live} target="_blank" rel="noopener">
-                  live
-                </a>
-              )}
-              <span class="ml-auto flex items-center gap-2 text-xs text-dim">
-                <ViewCounter client:idle slug={id} />
-                views · redis
-              </span>
-            </div>
-          </article>
-        ))
-      }
+        <article class="work-panel work-panel--end" data-panel>
+          <div class="flex h-full flex-col justify-center gap-4">
+            <h3 class="display" style="font-size: 1.6rem; font-weight: 460;">More on GitHub</h3>
+            <p class="max-w-xs text-sm text-dim">
+              Experiments, game jams and AI agents live in the repositories.
+            </p>
+            <a class="x-btn" href="https://github.com/yurifp" target="_blank" rel="noopener">
+              github.com/yurifp
+            </a>
+          </div>
+        </article>
+
+        <svg class="work-signal" data-signal-svg aria-hidden="true" viewBox="0 0 1000 40" preserveAspectRatio="none">
+          <path
+            class="work-signal-path"
+            data-signal-path
+            d="M 20 22 C 160 -6, 300 38, 460 20 S 760 4, 980 24"
+            fill="none"
+          />
+          <circle class="work-signal-dot" data-signal-dot r="4" cx="20" cy="22" />
+        </svg>
+      </div>
     </div>
   </div>
 </section>

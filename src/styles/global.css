@@ -556,3 +556,101 @@ header a {
 .exp-row:hover .exp-idx {
   color: var(--color-signal);
 }
+
+/* ─── Fase C: Work horizontal-inside-vertical ─────────────────────────────── */
+.work-track-outer {
+  position: relative;
+  margin-top: 20px;
+  overflow: hidden;
+}
+.work-track {
+  display: flex;
+  flex-direction: column; /* fallback stack (no JS / reduced motion) */
+  gap: 20px;
+  padding: 12px max(24px, calc((100vw - 72rem) / 2)) 40px;
+  position: relative;
+}
+.work-panel {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--color-raised) 55%, transparent);
+  overflow: hidden;
+}
+.work-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+.work-media-label {
+  position: absolute;
+  left: 14px;
+  bottom: 10px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--color-dim);
+}
+.work-panel-body {
+  padding: 18px 20px 22px;
+}
+.work-signal {
+  display: none;
+}
+
+/* JS + motion allowed → the pinned horizontal gallery */
+#work.is-h .work-pin {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#work.is-h .work-track-outer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+}
+#work.is-h .work-track {
+  flex-direction: row;
+  align-items: stretch;
+  gap: clamp(20px, 4vw, 64px);
+  padding: 12px max(24px, calc((100vw - 72rem) / 2)) 56px;
+  will-change: transform;
+}
+#work.is-h .work-panel {
+  width: min(66vw, 560px);
+  flex-shrink: 0;
+}
+#work.is-h .work-panel--end {
+  width: min(44vw, 380px);
+  border-style: dashed;
+  background: none;
+}
+#work.is-h .work-signal {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  width: 100%;
+  height: 40px;
+  pointer-events: none;
+}
+.work-signal-path {
+  stroke: var(--color-signal);
+  stroke-width: 1.5;
+  opacity: 0.85;
+  vector-effect: non-scaling-stroke;
+}
+.work-signal-dot {
+  fill: var(--color-signal);
+  filter: drop-shadow(0 0 6px rgba(242, 180, 65, 0.8));
+}
+@media (prefers-reduced-motion: reduce) {
+  #work.is-h .work-pin,
+  #work.is-h .work-track {
+    height: auto;
+    flex-direction: column;
+  }
+  #work.is-h .work-panel {
+    width: 100%;
+  }
+}
