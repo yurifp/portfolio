@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/archivo';
+@import '@fontsource-variable/bodoni-moda/opsz.css';
+@import '@fontsource-variable/bodoni-moda/opsz-italic.css';
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
 
@@ -18,6 +20,7 @@
   --color-line: #2a4055; /* structure: borders, dividers, rules */
 
   --font-sans: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-display: 'Bodoni Moda Variable', Georgia, serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   --radius-panel: 4px;
@@ -33,6 +36,129 @@
 :root {
   --color-node-rgb: 233, 238, 244;
   --color-amber-rgb: 242, 180, 65;
+}
+
+/*
+  Telemetry v2 — motion grammar tokens. Three named eases and three durations
+  are the whole budget; anything animated picks from these, never ad-hoc.
+*/
+:root {
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1); /* heavy arrival, long tail */
+  --ease-snap: cubic-bezier(0.83, 0, 0.17, 1); /* decisive in/out, camera cuts */
+  --ease-glide: cubic-bezier(0.37, 0, 0.63, 1); /* symmetric drift, scrubs */
+  --dur-s: 0.45s;
+  --dur-m: 0.8s;
+  --dur-l: 1.4s;
+  --stagger: 45ms;
+
+  /* Layered elevation: diffuse ellipse + hairline ring (dark = glow, not shadow) */
+  --shadow-raised:
+    0 10px 38px -10px rgba(2, 6, 17, 0.55),
+    0 0 0 1px rgba(42, 64, 85, 0.45);
+}
+
+/* Display serif — light, optical-sized; italic is an accent, never a whole heading */
+.display {
+  font-family: var(--font-display);
+  font-weight: 355;
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+}
+
+/* Thin progress rail on the right edge — scroll telemetry in chrome form */
+.x-rail {
+  position: fixed;
+  top: 50%;
+  right: 14px;
+  translate: 0 -50%;
+  width: 2px;
+  height: 38vh;
+  background: color-mix(in srgb, var(--color-line) 60%, transparent);
+  z-index: 45;
+}
+.x-rail-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-signal);
+  transform-origin: top;
+  transform: scaleY(0);
+}
+
+/* Settings control — mono interface label, reference-style */
+.x-settings {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 46;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--color-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  transition: color 0.3s var(--ease-settle);
+}
+.x-settings:hover,
+.x-settings[aria-expanded='true'] {
+  color: var(--color-signal);
+}
+.x-panel {
+  position: fixed;
+  left: 18px;
+  bottom: 52px;
+  z-index: 46;
+  width: 218px;
+  padding: 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-raised) 88%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-raised);
+}
+.x-panel h2 {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+  margin: 0 0 10px;
+}
+.x-panel .opt {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-ink);
+  background: none;
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-line) 50%, transparent);
+  padding: 8px 2px;
+  cursor: pointer;
+}
+.x-panel .opt[aria-pressed='true'] {
+  color: var(--color-signal);
+}
+.x-panel .opt span {
+  font-size: 10px;
+  color: var(--color-dim);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .x-panel {
+    transition:
+      opacity var(--dur-s) var(--ease-settle),
+      translate var(--dur-s) var(--ease-settle);
+  }
+  .x-panel[data-open='false'] {
+    opacity: 0;
+    translate: 0 8px;
+    pointer-events: none;
+  }
 }
 
 html {
@@ -128,5 +254,130 @@ body {
   html.js [data-readout],
   html.js [data-reveal] {
     opacity: 0;
+  }
+}
+
+/*
+  Storytelling — N×100dvh of scroll driving one sticky stage. Without JS or
+  with reduced-motion the beats degrade to a plain stacked flow (real content,
+  no pinning) — the same progressive gate used by the reveal system.
+*/
+.story {
+  position: relative;
+}
+.story-stage {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+.story-bg {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-deep);
+}
+.story-beat {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 max(24px, calc((100vw - 72rem) / 2));
+  max-width: 100%;
+}
+.story-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-dim);
+  margin: 0 0 18px;
+}
+.story-title {
+  font-family: var(--font-display);
+  font-weight: 355;
+  font-optical-sizing: auto;
+  font-size: clamp(2.6rem, 6.4vw, 5.4rem);
+  line-height: 1.03;
+  letter-spacing: -0.012em;
+  color: var(--color-ink);
+  max-width: 20ch;
+  margin: 0 0 20px;
+}
+.story-title i,
+.story-title em {
+  color: var(--color-signal);
+  font-style: italic;
+}
+.story-text {
+  max-width: 44ch;
+  color: var(--color-ink);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+.story-count {
+  position: absolute;
+  right: max(24px, calc((100vw - 72rem) / 2));
+  bottom: 28px;
+  font-size: 11px;
+  color: var(--color-dim);
+  z-index: 1;
+}
+
+/* Live readouts (beat 2) */
+.story-readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+}
+.story-readout {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--color-raised) 60%, transparent);
+  padding: 14px 18px;
+  min-width: 180px;
+}
+.story-readout .k {
+  display: block;
+  font-size: 12px;
+  color: var(--color-dim);
+}
+.story-readout .v {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.7rem;
+  color: var(--color-signal);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* JS present: beats become absolute layers of one sticky stage */
+  html.js .story {
+    height: calc(var(--story-length, 5) * 110dvh);
+  }
+  html.js .story-stage {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+  }
+  html.js .story-beat {
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+    will-change: opacity, transform;
+  }
+  html.js .story-beat:not(.is-first) {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-beat {
+    min-height: auto;
+    padding-block: 88px;
   }
 }

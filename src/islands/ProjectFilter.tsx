@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import gsap from 'gsap';
 import { Flip } from 'gsap/Flip';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ViewCounter from './ViewCounter';
 
-gsap.registerPlugin(Flip);
+gsap.registerPlugin(Flip, ScrollTrigger);
 
 export type ProjectData = {
   slug: string;
@@ -115,6 +116,24 @@ export default function ProjectFilter({ projects }: { projects: ProjectData[] })
     });
     flipState.current = null;
   }, [active]);
+
+  /* Island-owned reveal: runs post-hydration, so GSAP never mutates SSR HTML
+     before React sees it (that would break hydration). Same grammar as the
+     global Motion layer, scoped to these articles only. */
+  useEffect(() => {
+    if (!gridRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const els = Array.from(gridRef.current.querySelectorAll<HTMLElement>('[data-reveal]'));
+    if (!els.length) return;
+
+    gsap.set(els, { y: 18 });
+    ScrollTrigger.batch(els, {
+      start: 'top 92%',
+      once: true,
+      onEnter: (batch) =>
+        gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', stagger: 0.08 }),
+    });
+    ScrollTrigger.refresh();
+  }, []);
 
   const featured = visible.find((p) => p.featured);
   const rows = visible.filter((p) => !p.featured);
