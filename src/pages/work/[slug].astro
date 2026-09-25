@@ -3,6 +3,7 @@ export const prerender = true;
 
 import Base from '../../layouts/Base.astro';
 import Footer from '../../components/Footer.astro';
+import ConstellationGrid from '../../components/ui/constellation-grid';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -25,7 +26,9 @@ const meta = project.data;
   <article class="min-h-screen">
     <!-- case hero -->
     <header class="px-[1.6rem] pt-[8rem] pb-[3.5rem] relative">
-      <canvas data-hero-field class="absolute inset-0 w-full h-full opacity-60" aria-hidden="true"></canvas>
+      <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <ConstellationGrid client:load density={44} />
+      </div>
       <div class="relative z-10">
         <p class="mono-tiny text-lime mb-3">{meta.role}</p>
         <h1 class="display-hero" data-split="chars">{meta.title}</h1>
@@ -83,9 +86,3 @@ const meta = project.data;
   </article>
   <Footer />
 </Base>
-
-<script>
-  import { mountHeroField } from '../../scripts/hero-field';
-  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-field]');
-  if (canvas) mountHeroField(canvas);
-</script>

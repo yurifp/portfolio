@@ -22,11 +22,7 @@ import Footer from '../components/Footer.astro';
 </Base>
 
 <script>
-  import { mountHeroField } from '../scripts/hero-field';
   import { mountPortrait } from '../scripts/portrait';
-
-  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-field]');
-  if (canvas) mountHeroField(canvas);
 
   const portrait = document.querySelector<HTMLCanvasElement>('[data-portrait]');
   if (portrait) mountPortrait(portrait);

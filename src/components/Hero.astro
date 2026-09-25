@@ -1,13 +1,16 @@
 ---
 import { site, bio } from '../data/site';
+import ConstellationGrid from './ui/constellation-grid';
 
 /* contact split across the column grid, reference-style */
 const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
 const verticalLabels = ['Scroll down', 'NASA ×2 Nominee', 'Salvador — BR'];
 ---
 <section class="relative min-h-screen flex flex-col overflow-clip" id="about">
-  <!-- WebGL signal field -->
-  <canvas data-hero-field class="absolute inset-0 w-full h-full" aria-hidden="true"></canvas>
+  <!-- constellation field — reveals with pointer movement -->
+  <div class="absolute inset-0 pointer-events-none z-[1]" aria-hidden="true">
+    <ConstellationGrid client:load density={36} />
+  </div>
 
   <!-- full-height column grid -->
   <div class="absolute inset-0 pointer-events-none hidden md:grid md:grid-cols-4 z-[1]" aria-hidden="true">
