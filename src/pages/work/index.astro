@@ -1,0 +1,40 @@
+---
+export const prerender = true;
+
+import Base from '../../layouts/Base.astro';
+import Footer from '../../components/Footer.astro';
+import { workPageProjects } from '../../data/site';
+import { getCollection } from 'astro:content';
+
+const caseStudies = new Set((await getCollection('projects')).map((p) => p.id));
+const href = (slug: string) => (caseStudies.has(slug) ? `/work/${slug}` : '#');
+---
+<Base title="Work — Yuri Ferreira Paulo" description="Selected projects: case studies, web and app design.">
+  <section class="min-h-screen px-[1.6rem] pt-[7rem] pb-[4rem]">
+    <p class="mono-tiny text-dim mb-2">Index</p>
+    <h1 class="display-section mb-[3.5rem]" data-split="chars">Selected<br />Work</h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[1.6rem] gap-y-[2.6rem]">
+      {workPageProjects.map((p, i) => (
+        <article
+          class={`art-card ticks aspect-[4/3] ${i % 5 === 0 ? 'sm:aspect-[3/4]' : ''}`}
+          data-cursor="VISIT"
+        >
+          <a href={href(p.slug)} class="absolute inset-0 z-[3]" aria-label={`${p.title} — ${p.cat}`}></a>
+          <div class="art-card__img">
+            <img src={`/images/work/${p.slug}.webp`} alt={p.title} loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
+          </div>
+          <div class="art-card__cat mono-tiny px-[0.45rem] py-[0.15rem] border" style="border-color: var(--line-now); background: var(--field); color: var(--ink-now);">
+            {p.cat}
+          </div>
+          <div class="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-[0.7rem]">
+            <h2 class="font-heading font-medium text-[1.15rem]" style="color: var(--ink-now);">{p.title}</h2>
+            <span class="mono-tiny" style="color: var(--ink-now);">↗</span>
+          </div>
+          <span class="absolute -top-[5px] -left-[5px] w-[9px] h-[9px] rounded-full z-[4]" style={`background:${p.accent};`}></span>
+        </article>
+      ))}
+    </div>
+  </section>
+  <Footer />
+</Base>

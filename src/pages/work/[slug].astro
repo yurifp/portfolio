@@ -1,0 +1,75 @@
+---
+export const prerender = true;
+
+import Base from '../../layouts/Base.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const meta = project.data;
+---
+<Base title={`${meta.title} — Yuri Ferreira Paulo`} description={meta.description}>
+  <article class="min-h-screen">
+    <!-- case hero -->
+    <header class="px-[1.6rem] pt-[8rem] pb-[3.5rem] relative">
+      <canvas data-hero-field class="absolute inset-0 w-full h-full opacity-60" aria-hidden="true"></canvas>
+      <div class="relative z-10">
+        <p class="mono-tiny text-lime mb-3">{meta.role}</p>
+        <h1 class="display-hero" data-split="chars">{meta.title}</h1>
+        <div class="flex flex-wrap gap-x-[2rem] gap-y-1 mt-[1.6rem]">
+          <p class="mono-tiny text-dim">YEAR — {meta.year}</p>
+          {meta.stack && <p class="mono-tiny text-dim">STACK — {meta.stack.join(' · ')}</p>}
+        </div>
+      </div>
+    </header>
+
+    <!-- hero artboard -->
+    <div class="px-[1.6rem] mb-[4rem]">
+      <div class="ticks border" style="border-color: var(--line-now);">
+        <img
+          src={`/images/work/${project.slug}.webp`}
+          alt={meta.title}
+          class="w-full aspect-[21/9] object-cover"
+          decoding="async"
+        />
+      </div>
+    </div>
+
+    <!-- body -->
+    <div class="px-[1.6rem] pb-[5rem] cs-body">
+      <div class="grid grid-cols-1 md:grid-cols-[14rem_1fr] gap-[2rem]">
+        <aside class="md:sticky md:top-[6rem] self-start hidden md:block">
+          {meta.metrics && (
+            <div class="space-y-[1.4rem]">
+              {meta.metrics.map((m) => (
+                <div>
+                  <p class="mono-tiny text-faint mb-1">{m.label.toUpperCase()}</p>
+                  <p class="text-[0.9rem] text-dim leading-[1.5]">{m.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </aside>
+        <div class="prose-invert max-w-none space-y-[2.2rem]">
+          <Content />
+        </div>
+      </div>
+    </div>
+  </article>
+  <Footer />
+</Base>
+
+<script>
+  import { mountHeroField } from '../../scripts/hero-field';
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-field]');
+  if (canvas) mountHeroField(canvas);
+</script>

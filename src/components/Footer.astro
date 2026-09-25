@@ -1,29 +1,55 @@
 ---
+import { site, socials } from '../data/site';
+
 const year = new Date().getFullYear();
 ---
+<footer class="relative border-t" style="border-color: var(--line-now);">
+  <div class="px-[1.6rem] pt-[5rem] pb-[1.6rem]">
+    <p class="mono-tiny text-dim mb-[1.4rem]">Got an idea worth building?</p>
 
-<footer class="border-t border-line">
-  <div
-    class="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 text-sm text-dim sm:flex-row sm:items-center sm:justify-between sm:px-8"
-  >
-    <p>Salvador, Brazil (UTC−3). Open to remote and EU-Portugal.</p>
-    <nav aria-label="Contact links" class="flex gap-5">
-      <a class="transition-colors hover:text-signal" href="mailto:dev.yurifpaulo@gmail.com"
-        >e-mail</a
-      >
-      <a
-        class="transition-colors hover:text-signal"
-        href="https://github.com/yurifp"
-        rel="me noopener"
-        target="_blank">GitHub</a
-      >
-      <a
-        class="transition-colors hover:text-signal"
-        href="https://www.linkedin.com/in/yuri-ferreira-paulo-86877a183"
-        rel="me noopener"
-        target="_blank">LinkedIn</a
-      >
-    </nav>
-    <p>© {year}</p>
+    <a
+      href={`mailto:${site.email}`}
+      class="display-section hover:text-lime transition-colors block leading-[0.9]"
+      data-split="chars"
+      data-cursor="SEND"
+    >
+      Shoot a<br />message
+    </a>
+
+    <a
+      href={site.cv}
+      download
+      class="mono-tiny inline-block mt-[1.6rem] px-[0.8rem] py-[0.4rem] border nav-link"
+      style="border-color: var(--line-now);"
+      data-fade
+    >
+      ↓ Download CV
+    </a>
+
+    <div class="hairline-h my-[3.4rem]"></div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-[2.5rem] mb-[4rem]">
+      {Object.entries(socials.footer).map(([group, links]) => (
+        <div>
+          <p class="mono-tiny text-faint mb-[0.8rem]">{group}</p>
+          <ul class="space-y-[0.45rem]">
+            {links.map((l) => (
+              <li><a href={l.url} class="mono-tiny nav-link" style="color: var(--ink-now); letter-spacing: 0.32em;">{l.label.toUpperCase()}</a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      <div>
+        <p class="mono-tiny text-faint mb-[0.8rem]">Direct</p>
+        <p class="mono-tiny" style="color: var(--ink-now);">{site.email}</p>
+        <p class="mono-tiny mt-2 text-dim">{site.location.city}</p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <p class="mono-tiny text-faint">@{year} by {site.name}</p>
+      <p class="mono-tiny text-faint">BUILT WITH ASTRO · GSAP · THREE.JS</p>
+      <a href="#about" class="mono-tiny nav-link text-dim" data-scroll-top>Back to top ↑</a>
+    </div>
   </div>
 </footer>

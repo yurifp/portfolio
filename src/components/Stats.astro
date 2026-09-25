@@ -1,0 +1,40 @@
+---
+import { stats, tools } from '../data/site';
+
+const digits = (v: string) => v.split('');
+---
+<section class="relative border-t border-b" style="border-color: var(--line-now);">
+  <div class="px-[1.6rem] py-[4.5rem]">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-x-[2rem] gap-y-[3rem]">
+      {stats.map((s) => (
+        <div>
+          <div class="flex items-baseline gap-[0.15rem] font-heading font-medium text-[3.4rem] leading-none text-white" data-odo={s.value}>
+            {digits(s.value).map((d) => (
+              <span class="odo-digit" aria-hidden="true">
+                <span class="odo-digit__col">
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => <span>{n}</span>)}
+                </span>
+              </span>
+            ))}
+            {s.suffix && <span class="text-lime">{s.suffix}</span>}
+          </div>
+          <p class="mono-tiny mt-3 text-dim">{s.label}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="hairline-h my-[3.2rem]"></div>
+
+    <div class="flex flex-wrap items-center gap-[1.2rem]">
+      <p class="mono-tiny text-faint mr-2">DAILY DRIVERS</p>
+      {tools.map((t, i) => (
+        <span
+          class="mono-tiny px-[0.7rem] py-[0.3rem] border hover:border-ink transition-colors"
+          style="border-color: var(--line-now); color: var(--ink-now);"
+          data-fade
+          data-delay={i * 0.06}
+        >{t}</span>
+      ))}
+    </div>
+  </div>
+</section>

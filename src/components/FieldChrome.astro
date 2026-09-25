@@ -1,0 +1,79 @@
+---
+/*
+  FieldChrome — every fixed layer of the page in one place:
+  nav, menu overlay, cursor, preloader, progress rail, noise.
+*/
+import { site, socials } from '../data/site';
+---
+
+<!-- nav -->
+<nav class="fixed top-0 inset-x-0 z-[120] mix-blend-difference text-white">
+  <div class="flex items-start justify-between px-[1.6rem] pt-[1.2rem]">
+    <a href="/" class="flex items-center gap-3 group" aria-label="Home">
+      <span class="font-heading font-semibold text-[1.05rem] tracking-[0.02em] uppercase">{site.wordmark}</span>
+    </a>
+    <div class="flex items-center gap-[1.6rem]">
+      <button data-sound-btn aria-pressed="false" class="mono-tiny flex items-center gap-2 hover:opacity-70 transition-opacity">
+        <span class="inline-block w-[6px] h-[6px] rounded-full bg-white"></span>
+        Sound — <span>Off</span>
+      </button>
+      <div class="mono-tiny text-right leading-[1.7] hidden sm:block">
+        <div>{site.location.city} / <span data-clock>--:--</span></div>
+        <div class="opacity-60">{site.location.coords}</div>
+      </div>
+      <button data-menu-btn aria-expanded="false" class="mono-tiny flex items-center gap-2 hover:opacity-70 transition-opacity">
+        Menu
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- menu overlay -->
+<div class="menu-overlay" role="dialog" aria-label="Menu">
+  <div class="h-full flex flex-col justify-between px-[1.6rem] pt-[5.5rem] pb-[1.4rem]">
+    <nav class="flex flex-col gap-[0.4rem] overflow-hidden">
+      <a href="/" data-menu-stagger class="font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink hover:text-lime transition-colors">About</a>
+      <a href="/work" data-menu-stagger class="font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink hover:text-lime transition-colors">Work</a>
+    </nav>
+    <div class="flex items-end justify-between gap-8">
+      <div class="overflow-hidden">
+        <p class="mono-label mb-3" data-menu-stagger>Connect</p>
+        <ul class="space-y-[0.35rem]">
+          {socials.menu.map((s) => (
+            <li data-menu-stagger>
+              <a href={s.url} class="mono-tiny text-dim hover:text-ink transition-colors">
+                <span class="text-faint mr-2">{s.n}</span>{s.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p class="mono-tiny text-faint" data-menu-stagger>{site.copyright}</p>
+    </div>
+  </div>
+</div>
+
+<!-- cursor -->
+<div class="cursor-root" aria-hidden="true">
+  <div class="cursor-dot"></div>
+  <div class="cursor-label"></div>
+</div>
+
+<!-- preloader -->
+<div class="preloader" aria-hidden="true">
+  <div>
+    <p class="mono-tiny text-dim mb-2">LOADING FIELD</p>
+    <p class="mono-tiny text-faint">{site.wordmark}</p>
+  </div>
+  <p class="preloader__pct">0%</p>
+</div>
+
+<!-- progress rail -->
+<div class="progress-rail" aria-hidden="true">
+  <span class="mono-tiny" data-progress-pct>0%</span>
+  <div class="progress-rail__track"><div class="progress-rail__fill"></div></div>
+  <span class="mono-tiny rotate-180" style="writing-mode: vertical-rl;">SCROLL</span>
+</div>
+
+<!-- grain -->
+<div class="noise-layer" aria-hidden="true"></div>

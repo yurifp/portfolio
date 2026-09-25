@@ -1,0 +1,33 @@
+---
+import { workedAt } from '../data/site';
+---
+<section class="relative">
+  <div class="px-[1.6rem] py-[5rem]">
+    <p class="mono-tiny text-dim mb-2">I've been</p>
+    <h2 class="display-section mb-[3rem]" data-split="chars">Worked At</h2>
+
+    <div class="border-t" style="border-color: var(--line-now);">
+      {workedAt.map((job) => (
+        <div class="wa-item" data-open={job.n === '01' ? 'true' : 'false'}>
+          <button
+            class="wa-head w-full flex items-center gap-[1.2rem] py-[1.15rem] text-left group"
+            aria-expanded={job.n === '01' ? 'true' : 'false'}
+          >
+            <span class="mono-tiny text-faint w-[2rem] shrink-0">{job.n}</span>
+            <span class="font-heading font-medium text-[1.5rem] leading-none uppercase tracking-[0.01em] group-hover:text-lime transition-colors">{job.org}</span>
+            <span class="mono-tiny text-dim hidden sm:inline">{job.role}</span>
+            <span class="mono-tiny text-faint ml-auto hidden md:inline">{job.when}</span>
+            <span class="wa-plus font-heading text-[1.3rem] text-dim shrink-0">+</span>
+          </button>
+          <div class="wa-panel">
+            <div>
+              <p class="max-w-[42rem] pl-[3.2rem] pr-[2rem] pb-[1.3rem] text-[0.93rem] leading-[1.65] text-dim">
+                {job.desc}
+              </p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,53 @@
+---
+import { site, bio } from '../data/site';
+---
+<section class="relative min-h-screen flex flex-col" id="about">
+  <!-- WebGL signal field -->
+  <canvas data-hero-field class="absolute inset-0 w-full h-full" aria-hidden="true"></canvas>
+
+  <!-- central hairline -->
+  <div class="hairline-v absolute left-1/2 top-[14%] bottom-[12%] hidden md:block" aria-hidden="true"></div>
+
+  <!-- corner microcopy -->
+  <p class="mono-tiny absolute top-[5.2rem] left-[1.6rem] text-dim z-10">PORTFOLIO<br />©2026</p>
+  <p class="mono-tiny absolute top-[5.2rem] right-[1.6rem] text-dim text-right hidden sm:block z-10">
+    {site.born}<br />{site.role.toUpperCase()}
+  </p>
+
+  <!-- middle zone: bio left · portrait right -->
+  <div class="relative z-10 flex-1 grid md:grid-cols-[1fr_auto] items-center gap-[2.5rem] px-[1.6rem] pt-[8rem] pb-[3rem]">
+    <div class="max-w-[24rem]">
+      <p class="mono-tiny text-lime mb-3">{bio.lead}</p>
+      <div class="space-y-3 text-[0.92rem] leading-[1.55] text-dim">
+        {bio.lines.map((line) => (
+          <p data-split="words">{line.text}</p>
+        ))}
+      </div>
+      <p class="mono-tiny mt-5 text-ember">{bio.available}</p>
+    </div>
+
+    <div class="md:justify-self-end w-[180px] sm:w-[210px] ticks" data-cursor="HELLO">
+      <canvas data-portrait class="block w-full h-auto opacity-90"></canvas>
+      <p class="mono-tiny text-faint mt-2 flex justify-between"><span>PORTRAIT—DITHER</span><span>BAYER 8×8</span></p>
+    </div>
+  </div>
+
+  <!-- giant name -->
+  <div class="relative z-10 px-[1.6rem] pb-[3.4rem]">
+    <h1 class="display-hero" data-hero-name>
+      <span data-split="chars" class="block">Yuri</span>
+      <span data-split="chars" class="block ml-[12%]">Ferreira</span>
+    </h1>
+    <div class="flex flex-wrap gap-x-[1.4rem] gap-y-1 mt-[1.2rem]">
+      {bio.tags.map((t, i) => (
+        <span class="mono-tiny text-dim" data-fade data-delay={0.1 + i * 0.08}>— {t}</span>
+      ))}
+    </div>
+  </div>
+
+  <!-- scroll cue -->
+  <div class="absolute bottom-[2%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10" data-fade>
+    <span class="mono-tiny text-dim">Scroll down</span>
+    <span class="block w-px h-[2.2rem] bg-gradient-to-b from-ink/40 to-transparent"></span>
+  </div>
+</section>

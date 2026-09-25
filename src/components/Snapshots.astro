@@ -1,0 +1,68 @@
+---
+/*
+  Snap-shots — the lime field. Nine artboards scattered on a grid,
+  joined by dashed connector paths. Absolute placement mirrors the
+  reference's editorial scatter; positions come from site.ts (x/y in %).
+*/
+import { homeProjects } from '../data/site';
+
+const withHref = (p: (typeof homeProjects)[number]) =>
+  p.cat === 'Case Study' ? `/work/${p.slug}` : '/work';
+---
+<section class="relative" data-theme-section="lime">
+  <div class="px-[1.6rem] pt-[5rem]">
+    <div class="flex items-baseline justify-between mb-[3rem]">
+      <h2 class="display-section" data-split="chars">Snap-shots</h2>
+      <a href="/work" class="mono-tiny nav-link hidden sm:inline-block" style="color: var(--ink-now);">
+        View all — {homeProjects.length}+ projects
+      </a>
+    </div>
+  </div>
+
+  <div class="relative w-full" data-art-scatter style="height: 250vh;">
+    {homeProjects.map((p, i) => (
+      <article
+        class="art-card ticks absolute"
+        data-art-card
+        data-cursor="VISIT"
+        style={`left:${p.x}%; top:${p.y}%; width:${p.w}px; height:${p.h}px;`}
+      >
+        <a href={withHref(p)} class="absolute inset-0 z-[3]" aria-label={`${p.title} — ${p.cat}`}></a>
+        <div class="art-card__img">
+          <img
+            src={`/images/work/${p.slug}.webp`}
+            alt={p.title}
+            loading={i < 3 ? 'eager' : 'lazy'}
+            decoding="async"
+          />
+        </div>
+        <div class="art-card__cat mono-tiny px-[0.45rem] py-[0.15rem] border" style="border-color: var(--line-now); background: var(--field); color: var(--ink-now);">
+          {p.cat}
+        </div>
+        <div class="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-[0.7rem]">
+          <h3 class="font-heading font-medium text-[1.15rem] tracking-[0.01em]" style="color: var(--ink-now);">{p.title}</h3>
+          <span class="mono-tiny nav-link" style="color: var(--ink-now);">Visit</span>
+        </div>
+        <span class="absolute -top-[5px] -left-[5px] w-[9px] h-[9px] rounded-full z-[4]" style={`background:${p.accent};`}></span>
+      </article>
+    ))}
+
+    <!-- dashed connectors between successive cards -->
+    <svg class="connector inset-0 w-full h-full" aria-hidden="true" preserveAspectRatio="none">
+      {homeProjects.slice(0, -1).map((p, i) => {
+        const q = homeProjects[i + 1];
+        return (
+          <line
+            x1={`${p.x + 7}%`}
+            y1={`${p.y + 5}%`}
+            x2={`${q.x + 7}%`}
+            y2={`${q.y + 5}%`}
+            stroke="rgba(7,2,16,0.35)"
+            stroke-width="1"
+            stroke-dasharray="3 6"
+          />
+        );
+      })}
+    </svg>
+  </div>
+</section>

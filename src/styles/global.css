@@ -1,656 +1,427 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/archivo';
-@import '@fontsource-variable/bodoni-moda/opsz.css';
-@import '@fontsource-variable/bodoni-moda/opsz-italic.css';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource/rajdhani/400.css';
+@import '@fontsource/rajdhani/500.css';
+@import '@fontsource/rajdhani/600.css';
+@import '@fontsource/rajdhani/700.css';
+@import '@fontsource/dm-sans/400.css';
+@import '@fontsource/dm-sans/500.css';
+@import '@fontsource/dm-mono/400.css';
+@import '@fontsource/dm-mono/500.css';
 
 /*
-  Telemetry palette — derived from the content it presents:
-  the shared ground of the two NASA cases (night sky / ocean depth)
-  is a *colored* dark blue, never a neutral false-black. Amber is
-  semantic only: it marks live data and confirmed interaction.
+  Design system — "field" language.
+  Ground: #070210 (violet-black). Ink: warm off-white.
+  Accents are signal colors: lime (primary), ember, violet, cyan.
+  The Snap-shots section flips the field to saturated lime —
+  the one loud moment, everything else stays quiet.
+
+  Custom rules live in @layer components so Tailwind utilities
+  (later layer) always win on the same element.
 */
 @theme {
-  --color-deep: #0c1420; /* base — abyssal blue-black */
-  --color-raised: #12202f; /* panels, elevated surfaces */
-  --color-ink: #e9eef4; /* primary text (≈15:1 on deep) */
-  --color-dim: #8fa3b8; /* secondary text (≈7:1 on deep) */
-  --color-signal: #f2b441; /* live data / confirmed state — never decorative */
-  --color-line: #2a4055; /* structure: borders, dividers, rules */
+  --color-void: #070210;
+  --color-void-2: #0c0714;
+  --color-ink: #f5f0eb;
+  --color-dim: #b0b4c0;
+  --color-faint: #747785;
+  --color-lime: #9df133;
+  --color-limefield: #a6de38;
+  --color-limedeep: #84c72f;
+  --color-ember: #f75049;
+  --color-violet: #905cff;
+  --color-cyan: #64e8ff;
 
-  --font-sans: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
-  --font-display: 'Bodoni Moda Variable', Georgia, serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-heading: 'Rajdhani', sans-serif;
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
 
-  --radius-panel: 4px;
-
-  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/*
-  RGB triplets for canvas code — the TelemetryMesh island reads these instead
-  of hardcoding hex (hex can't be interpolated into rgba() strings).
-  Keep in lockstep with the tokens above: node = ink, amber = signal.
-*/
-:root {
-  --color-node-rgb: 233, 238, 244;
-  --color-amber-rgb: 242, 180, 65;
+  --ease-field: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-snap: cubic-bezier(0.83, 0, 0.17, 1);
 }
 
-/*
-  Telemetry v2 — motion grammar tokens. Three named eases and three durations
-  are the whole budget; anything animated picks from these, never ad-hoc.
-*/
-:root {
-  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1); /* heavy arrival, long tail */
-  --ease-snap: cubic-bezier(0.83, 0, 0.17, 1); /* decisive in/out, camera cuts */
-  --ease-glide: cubic-bezier(0.37, 0, 0.63, 1); /* symmetric drift, scrubs */
-  --dur-s: 0.45s;
-  --dur-m: 0.8s;
-  --dur-l: 1.4s;
-  --stagger: 45ms;
-
-  /* Layered elevation: diffuse ellipse + hairline ring (dark = glow, not shadow) */
-  --shadow-raised:
-    0 10px 38px -10px rgba(2, 6, 17, 0.55),
-    0 0 0 1px rgba(42, 64, 85, 0.45);
-}
-
-/* Display serif — light, optical-sized; italic is an accent, never a whole heading */
-.display {
-  font-family: var(--font-display);
-  font-weight: 355;
-  font-optical-sizing: auto;
-  letter-spacing: -0.01em;
-  line-height: 1.02;
-}
-
-/* Thin progress rail on the right edge — scroll telemetry in chrome form */
-.x-rail {
-  position: fixed;
-  top: 50%;
-  right: 14px;
-  translate: 0 -50%;
-  width: 2px;
-  height: 38vh;
-  background: color-mix(in srgb, var(--color-line) 60%, transparent);
-  z-index: 45;
-}
-.x-rail-fill {
-  position: absolute;
-  inset: 0;
-  background: var(--color-signal);
-  transform-origin: top;
-  transform: scaleY(0);
-}
-
-/* Settings control — mono interface label, reference-style */
-.x-settings {
-  position: fixed;
-  left: 18px;
-  bottom: 18px;
-  z-index: 46;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: var(--color-dim);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  transition: color 0.3s var(--ease-settle);
-}
-.x-settings:hover,
-.x-settings[aria-expanded='true'] {
-  color: var(--color-signal);
-}
-.x-panel {
-  position: fixed;
-  left: 18px;
-  bottom: 52px;
-  z-index: 46;
-  width: 218px;
-  padding: 16px;
-  border: 1px solid var(--color-line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--color-raised) 88%, transparent);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-raised);
-}
-.x-panel h2 {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-dim);
-  margin: 0 0 10px;
-}
-.x-panel .opt {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: baseline;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--color-ink);
-  background: none;
-  border: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-line) 50%, transparent);
-  padding: 8px 2px;
-  cursor: pointer;
-}
-.x-panel .opt[aria-pressed='true'] {
-  color: var(--color-signal);
-}
-.x-panel .opt span {
-  font-size: 10px;
-  color: var(--color-dim);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .x-panel {
-    transition:
-      opacity var(--dur-s) var(--ease-settle),
-      translate var(--dur-s) var(--ease-settle);
+@layer base {
+  :root {
+    /* field + ink are indirections: the lime section flips them */
+    --field: #070210;
+    --ink-now: #f5f0eb;
+    --line-now: rgba(245, 240, 235, 0.16);
   }
-  .x-panel[data-open='false'] {
-    opacity: 0;
-    translate: 0 8px;
+
+  /* fluid root — at 1600px viewport 1rem = 17.78px */
+  html {
+    font-size: clamp(9px, 1.111vw, 20px);
+    background: var(--field);
+    scrollbar-width: thin;
+    scrollbar-color: #2b2140 transparent;
+  }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2b2140; }
+
+  /* lenis */
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-stopped { overflow: hidden; }
+
+  body {
+    background: var(--field);
+    color: var(--ink-now);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+    transition: background-color 0.55s var(--ease-field), color 0.55s var(--ease-field);
+  }
+
+  /* section theme flip — driven by ScrollTrigger */
+  body[data-theme='lime'] {
+    --field: #a6de38;
+    --ink-now: #0a0f04;
+    --line-now: rgba(7, 2, 16, 0.28);
+  }
+
+  ::selection {
+    background: var(--color-lime);
+    color: #070210;
+  }
+}
+
+@layer components {
+  /* ---------- typography ---------- */
+  .display-hero {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    font-size: 6.4rem;
+    line-height: 0.8;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .display-section {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 4.6rem;
+    line-height: 0.8;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  @media (max-width: 640px) {
+    .display-hero { font-size: 4.2rem; }
+    .display-section { font-size: 3rem; }
+  }
+
+  body[data-theme='lime'] .display-section,
+  body[data-theme='lime'] .display-hero { color: #070210; }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-dim);
+  }
+
+  .mono-tiny {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- structure motifs ---------- */
+  .hairline-v { width: 1px; background: var(--line-now); }
+  .hairline-h { height: 1px; background: var(--line-now); }
+
+  /* corner registration ticks — the artboard motif */
+  .ticks { position: relative; }
+  .ticks::before,
+  .ticks::after {
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 9px;
     pointer-events: none;
+    z-index: 3;
   }
-}
-
-html {
-  color-scheme: dark;
-  scrollbar-color: var(--color-line) var(--color-deep);
-}
-
-body {
-  background-color: var(--color-deep);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-::selection {
-  background: var(--color-signal);
-  color: var(--color-deep);
-}
-
-/* Focus is never removed without an equivalent replacement state */
-:focus-visible {
-  outline: 2px solid var(--color-signal);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/* Data values: monospaced, tabular — readouts must not jitter */
-.t-value {
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-
-/* Fine structural grid used by readout panels and placeholders */
-.panel-grid {
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--color-line) 38%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-line) 38%, transparent) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-/* Diagonal hatch for pending-media placeholders (visually signed TODO) */
-.panel-hatch {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    color-mix(in srgb, var(--color-line) 55%, transparent) 0 1px,
-    transparent 1px 10px
-  );
-}
-
-/* Honeypot field: present in the form, absent from perception */
-.hp-field {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Expandable case panels: height animates via grid-template-rows */
-.case-grid {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.45s var(--ease-out-quart);
-}
-.case-grid.case-open {
-  grid-template-rows: 1fr;
-}
-.case-grid .case-inner {
-  min-height: 0;
-  overflow: hidden;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .ticks::before {
+    top: -1px; left: -1px;
+    border-top: 1px solid var(--ink-now);
+    border-left: 1px solid var(--ink-now);
   }
-}
-
-
-/*
-  Storytelling — N×100dvh of scroll driving one sticky stage. Without JS or
-  with reduced-motion the beats degrade to a plain stacked flow (real content,
-  no pinning) — the same progressive gate used by the reveal system.
-*/
-.story {
-  position: relative;
-}
-.story-stage {
-  position: relative;
-  min-height: 100dvh;
-  overflow: hidden;
-}
-.story-bg {
-  position: absolute;
-  inset: 0;
-  background-color: var(--color-deep);
-}
-.story-beat {
-  position: relative;
-  z-index: 1;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 max(24px, calc((100vw - 72rem) / 2));
-  max-width: 100%;
-}
-.story-label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-dim);
-  margin: 0 0 18px;
-}
-.story-title {
-  font-family: var(--font-display);
-  font-weight: 355;
-  font-optical-sizing: auto;
-  font-size: clamp(2.6rem, 6.4vw, 5.4rem);
-  line-height: 1.03;
-  letter-spacing: -0.012em;
-  color: var(--color-ink);
-  max-width: 20ch;
-  margin: 0 0 20px;
-}
-.story-title i,
-.story-title em {
-  color: var(--color-signal);
-  font-style: italic;
-}
-.story-text {
-  max-width: 44ch;
-  color: var(--color-ink);
-  font-size: 1.05rem;
-  line-height: 1.65;
-}
-.story-count {
-  position: absolute;
-  right: max(24px, calc((100vw - 72rem) / 2));
-  bottom: 28px;
-  font-size: 11px;
-  color: var(--color-dim);
-  z-index: 1;
-}
-
-/* Live readouts (beat 2) */
-.story-readouts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 8px;
-}
-.story-readout {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-panel);
-  background: color-mix(in srgb, var(--color-raised) 60%, transparent);
-  padding: 14px 18px;
-  min-width: 180px;
-}
-.story-readout .k {
-  display: block;
-  font-size: 12px;
-  color: var(--color-dim);
-}
-.story-readout .v {
-  display: block;
-  margin-top: 6px;
-  font-size: 1.7rem;
-  color: var(--color-signal);
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  /* JS present: beats become absolute layers of one sticky stage */
-  html.js .story {
-    height: calc(var(--story-length, 3) * 150dvh);
+  .ticks::after {
+    bottom: -1px; right: -1px;
+    border-bottom: 1px solid var(--ink-now);
+    border-right: 1px solid var(--ink-now);
   }
-  html.js .story-stage {
-    position: sticky;
-    top: 0;
-    height: 100dvh;
+
+  /* film grain over everything */
+  .noise-layer {
+    position: fixed;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    pointer-events: none;
+    z-index: 90;
+    opacity: 0.055;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain 0.9s steps(2) infinite;
   }
-  html.js .story-beat {
+  @keyframes grain {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-2%, 1%); }
+    50% { transform: translate(1%, -2%); }
+    75% { transform: translate(-1%, 2%); }
+    100% { transform: translate(2%, -1%); }
+  }
+
+  /* ---------- split text ---------- */
+  .split-line {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+  }
+  .split-line > span {
+    display: inline-block;
+    will-change: transform;
+  }
+
+  /* ---------- odometer counters ---------- */
+  .odo-digit {
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+    line-height: 1;
+    vertical-align: top;
+  }
+  .odo-digit__col {
+    display: flex;
+    flex-direction: column;
+    transition: transform 1.4s var(--ease-field);
+  }
+  .odo-digit__col span { height: 1em; line-height: 1; }
+
+  /* ---------- worked-at accordion ---------- */
+  .wa-item { border-bottom: 1px solid var(--line-now); }
+  .wa-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.65s var(--ease-field);
+  }
+  .wa-item[data-open='true'] .wa-panel { grid-template-rows: 1fr; }
+  .wa-panel > div { overflow: hidden; }
+  .wa-plus { transition: transform 0.45s var(--ease-field); }
+  .wa-item[data-open='true'] .wa-plus { transform: rotate(45deg); }
+
+  /* ---------- custom cursor ---------- */
+  .cursor-root {
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 200;
+    pointer-events: none;
+    mix-blend-mode: difference;
+  }
+  .cursor-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0;
+    white-space: nowrap;
+  }
+  @media (hover: none) { .cursor-root { display: none; } }
+
+  /* ---------- preloader ---------- */
+  .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: #070210;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 1.4rem 1.6rem;
+  }
+  .preloader__pct {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: clamp(4rem, 12vw, 11rem);
+    line-height: 0.8;
+    color: #fff;
+    letter-spacing: -0.04em;
+  }
+
+  /* ---------- progress rail ---------- */
+  .progress-rail {
+    position: fixed;
+    right: 1.1rem;
+    top: 50%;
+    translate: 0 -50%;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .progress-rail__track {
+    width: 1px;
+    height: 8rem;
+    background: var(--line-now);
+    position: relative;
+  }
+  .progress-rail__fill {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1px;
+    height: 100%;
+    background: var(--ink-now);
+    transform-origin: top;
+    transform: scaleY(0);
+  }
+
+  /* ---------- marquee ---------- */
+  .marquee { overflow: hidden; white-space: nowrap; }
+  .marquee__inner {
+    display: inline-flex;
+    gap: 3rem;
+    padding-right: 3rem;
+    animation: marquee 26s linear infinite;
+    will-change: transform;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+
+  /* ---------- project cards (artboard) ---------- */
+  .art-card {
+    position: relative;
+    border: 1px solid var(--line-now);
+    background: color-mix(in srgb, var(--field) 60%, transparent);
+    overflow: hidden;
+  }
+  .art-card__img {
     position: absolute;
     inset: 0;
-    min-height: 0;
-    will-change: opacity, transform;
+    overflow: hidden;
   }
-  html.js .story-beat:not(.is-first) {
-    opacity: 0;
+  .art-card__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.12);
+    transition: transform 1s var(--ease-field);
+  }
+  .art-card:hover .art-card__img img { transform: scale(1.02); }
+  .art-card__cat {
+    position: absolute;
+    top: 0.55rem;
+    left: 0.6rem;
+    z-index: 2;
+  }
+
+  /* dashed connector lines between scattered cards */
+  .connector {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* below 700px the scatter collapses into a stacked column */
+  @media (max-width: 700px) {
+    [data-art-scatter] { height: auto !important; display: flex; flex-direction: column; gap: 1.3rem; }
+    [data-art-scatter] .connector { display: none; }
+    [data-art-card] {
+      position: relative !important;
+      left: auto !important;
+      top: auto !important;
+      width: 100% !important;
+      height: auto !important;
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  /* nav link underline */
+  .nav-link { position: relative; }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -3px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.45s var(--ease-field);
+  }
+  .nav-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /* menu overlay */
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background: #070210;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 0.8s var(--ease-snap), visibility 0s 0.8s;
     visibility: hidden;
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .story-beat {
-    min-height: auto;
-    padding-block: 88px;
+  .menu-overlay[data-open='true'] {
+    clip-path: inset(0 0 0% 0);
+    visibility: visible;
+    transition: clip-path 0.8s var(--ease-snap);
   }
-}
 
-/* ─── v2 fixes ──────────────────────────────────────────────────────────────
-   One scroll indicator: the native scrollbar hides (wheel/keys still scroll;
-   the amber rail is the single indicator). Reduced-motion keeps the native
-   bar — the rail needs the ticker, which reduced-motion never starts. */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+  /* case study typography */
+  .cs-body p {
+    max-width: 46rem;
+    font-size: 1.06rem;
+    line-height: 1.65;
+    color: color-mix(in srgb, var(--ink-now) 86%, transparent);
   }
-  html::-webkit-scrollbar {
-    display: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .x-rail {
-    display: none;
-  }
-}
-
-/* NASA beat — the two project boxes */
-.nasa-grid {
-  display: grid;
-  gap: 16px;
-  margin-top: 26px;
-}
-@media (min-width: 640px) {
-  .nasa-grid {
-    grid-template-columns: 1fr 1fr;
-    max-width: 56rem;
-  }
-}
-.nasa-box {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-panel);
-  background: color-mix(in srgb, var(--color-raised) 60%, transparent);
-  backdrop-filter: blur(6px);
-  overflow: hidden;
-}
-.nasa-video {
-  position: relative;
-  aspect-ratio: 16 / 9;
-}
-.nasa-video video,
-.nasa-video img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.nasa-box-body {
-  padding: 14px 16px 16px;
-}
-.nasa-box h3 {
-  font-family: var(--font-display);
-  font-weight: 420;
-  font-size: 1.35rem;
-  margin: 0 0 2px;
-  color: var(--color-ink);
-}
-.nasa-box .sub {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-dim);
-  margin: 0 0 12px;
-}
-.nasa-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.x-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-ink);
-  border: 1px solid var(--color-line);
-  border-radius: 999px;
-  padding: 8px 16px;
-  text-decoration: none;
-  transition: border-color var(--dur-s) var(--ease-settle), color var(--dur-s) var(--ease-settle);
-}
-.x-btn:hover {
-  border-color: var(--color-signal);
-  color: var(--color-signal);
-}
-
-/* Experience section */
-.exp-list {
-  display: flex; 
-  flex-direction: column;
-}
-.exp-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
-  padding: 26px 0;
-  border-bottom: 1px solid var(--color-line);
-}
-@media (min-width: 720px) {
-  .exp-row {
-    grid-template-columns: 11rem 1fr 9rem;
-    gap: 24px;
-    align-items: baseline;
-  }
-}
-.exp-role {
-  font-family: var(--font-display);
-  font-weight: 460;
-  font-size: 1.25rem;
-  color: var(--color-ink);
-  margin: 0;
-}
-.exp-org {
-  color: var(--color-dim);
-  font-size: 0.95rem;
-  margin: 2px 0 8px;
-}
-.exp-row ul {
-  margin: 0;
-  padding-left: 18px;
-  color: var(--color-ink);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.exp-when {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--color-dim);
-  letter-spacing: 0.06em;
-}
-
-/* NASA beat fits small screens: top-aligned, tighter video ratio */
-@media (max-width: 640px) {
-  html.js .story-beat[data-beat="1"] {
-    justify-content: flex-start;
-    padding-top: 13vh;
-  }
-  .nasa-video {
-    aspect-ratio: 16 / 10;
-  }
-  .nasa-box h3 {
-    font-size: 1.15rem;
-  }
-}
-
-
-/* ─── Fase B: body of the site joins the hero's language ─────────────────── */
-.display.section-title {
-  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
-  font-weight: 430;
-  letter-spacing: -0.005em;
-  line-height: 1.05;
-}
-
-/* One hover timing for the whole site */
-a,
-.x-btn,
-header a {
-  transition-duration: var(--dur-s);
-  transition-timing-function: var(--ease-settle);
-}
-
-/* Experience rows gain the telemetry index (real chronological sequence) */
-.exp-row .exp-idx {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  color: var(--color-dim);
-}
-.exp-row:hover .exp-idx {
-  color: var(--color-signal);
-}
-
-/* ─── Fase C: Work horizontal-inside-vertical ─────────────────────────────── */
-.work-track-outer {
-  position: relative;
-  margin-top: 20px;
-  overflow: hidden;
-}
-.work-track {
-  display: flex;
-  flex-direction: column; /* fallback stack (no JS / reduced motion) */
-  gap: 20px;
-  padding: 12px max(24px, calc((100vw - 72rem) / 2)) 40px;
-  position: relative;
-}
-.work-panel {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-panel);
-  background: color-mix(in srgb, var(--color-raised) 55%, transparent);
-  overflow: hidden;
-}
-.work-media {
-  position: relative;
-  aspect-ratio: 16 / 9;
-}
-.work-media-label {
-  position: absolute;
-  left: 14px;
-  bottom: 10px;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: var(--color-dim);
-}
-.work-panel-body {
-  padding: 18px 20px 22px;
-}
-.work-signal {
-  display: none;
-}
-
-/* JS + motion allowed → the pinned horizontal gallery */
-#work.is-h .work-pin {
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-#work.is-h .work-track-outer {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  min-height: 0;
-}
-#work.is-h .work-track {
-  flex-direction: row;
-  align-items: stretch;
-  gap: clamp(20px, 4vw, 64px);
-  padding: 12px max(24px, calc((100vw - 72rem) / 2)) 56px;
-  will-change: transform;
-}
-#work.is-h .work-panel {
-  width: min(66vw, 560px);
-  flex-shrink: 0;
-}
-#work.is-h .work-panel--end {
-  width: min(44vw, 380px);
-  border-style: dashed;
-  background: none;
-}
-#work.is-h .work-signal {
-  display: block;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 26px;
-  width: 100%;
-  height: 40px;
-  pointer-events: none;
-}
-.work-signal-path {
-  stroke: var(--color-signal);
-  stroke-width: 1.5;
-  opacity: 0.85;
-  vector-effect: non-scaling-stroke;
-}
-.work-signal-dot {
-  fill: var(--color-signal);
-  filter: drop-shadow(0 0 6px rgba(242, 180, 65, 0.8));
-}
-@media (prefers-reduced-motion: reduce) {
-  #work.is-h .work-pin,
-  #work.is-h .work-track {
-    height: auto;
-    flex-direction: column;
-  }
-  #work.is-h .work-panel {
+  .cs-body img {
     width: 100%;
+    border: 1px solid var(--line-now);
+  }
+  .cs-body h2 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 2.6rem;
+    line-height: 0.9;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-top: 1.2rem;
+  }
+  .cs-body h3 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 1.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    color: var(--color-lime);
+  }
+  .cs-body ul { list-style: square; padding-left: 1.4rem; color: color-mix(in srgb, var(--ink-now) 80%, transparent); }
+  .cs-body ol { list-style: decimal; padding-left: 1.4rem; color: color-mix(in srgb, var(--ink-now) 80%, transparent); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__inner { animation: none; }
+    .noise-layer { animation: none; }
   }
 }
