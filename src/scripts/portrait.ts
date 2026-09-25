@@ -56,6 +56,14 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
+/* low-key ink: lime desaturated toward the void so the portrait
+   reads as a black-and-white treatment melting into #070210 */
+function lowKeyInk(): [number, number, number] {
+  const [r, g, b] = hexToRgb('#9df133');
+  const mix = (c: number) => Math.round(c * 0.55);
+  return [mix(r) + 9, mix(g) + 6, mix(b) + 14];
+}
+
 export function mountPortrait(canvas: HTMLCanvasElement, opts?: { imageUrl?: string }) {
   const ctx = canvas.getContext('2d', { alpha: false });
   if (!ctx) return;
@@ -70,7 +78,7 @@ export function mountPortrait(canvas: HTMLCanvasElement, opts?: { imageUrl?: str
     for (let x = 0; x < W; x++) terrain[y * W + x] = fbm(x / 46 + 9, y / 46 + 7);
 
   const BASE = hexToRgb('#070210');
-  let ink: [number, number, number] = [157, 241, 51]; // lime default
+  const ink: [number, number, number] = lowKeyInk();
 
   const draw = (phase: number) => {
     const [r0, g0, b0] = BASE;
@@ -93,11 +101,6 @@ export function mountPortrait(canvas: HTMLCanvasElement, opts?: { imageUrl?: str
     ctx.putImageData(img, 0, 0);
   };
 
-  const readInk = () => {
-    const v = getComputedStyle(document.documentElement).getPropertyValue('--color-lime').trim();
-    if (v.startsWith('#')) ink = hexToRgb(v);
-  };
-  readInk();
   draw(0);
 
   if (opts?.imageUrl) {

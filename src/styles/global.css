@@ -206,6 +206,8 @@
 
   /* ---------- worked-at accordion ---------- */
   .wa-item { border-bottom: 1px solid var(--line-now); }
+  .wa-head .wa-org { transition: transform 0.5s var(--ease-field), color 0.3s; }
+  .wa-head:hover .wa-org { transform: translateX(10px); }
   .wa-panel {
     display: grid;
     grid-template-rows: 0fr;

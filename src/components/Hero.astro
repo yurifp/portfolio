@@ -1,53 +1,115 @@
 ---
 import { site, bio } from '../data/site';
+
+/* contact split across the column grid, reference-style */
+const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
+const verticalLabels = ['Scroll down', 'NASA ×2 Nominee', 'Salvador — BR'];
 ---
-<section class="relative min-h-screen flex flex-col" id="about">
+<section class="relative min-h-screen flex flex-col overflow-clip" id="about">
   <!-- WebGL signal field -->
   <canvas data-hero-field class="absolute inset-0 w-full h-full" aria-hidden="true"></canvas>
 
-  <!-- central hairline -->
-  <div class="hairline-v absolute left-1/2 top-[14%] bottom-[12%] hidden md:block" aria-hidden="true"></div>
+  <!-- full-height column grid -->
+  <div class="absolute inset-0 pointer-events-none hidden md:grid md:grid-cols-4 z-[1]" aria-hidden="true">
+    <div class="hairline-v"></div>
+    <div class="hairline-v"></div>
+    <div class="hairline-v"></div>
+    <div></div>
+  </div>
+
+  <!-- giant country code bleeding off the right edge -->
+  <span
+    class="font-heading font-bold text-void absolute -right-[0.5rem] top-[16%] leading-none select-none hidden lg:block"
+    style="font-size: 21rem; letter-spacing: -0.08em; opacity: 0.55;"
+    aria-hidden="true"
+  >BR</span>
+
+  <!-- tiny red squares -->
+  <span class="absolute top-[30%] left-[1.55rem] w-[8px] h-[8px] bg-ember z-[5]" aria-hidden="true"></span>
+  <span class="absolute bottom-[24%] right-[24%] w-[8px] h-[8px] bg-ember z-[5] hidden md:block" aria-hidden="true"></span>
+  <span class="absolute top-[12%] left-[38%] w-[6px] h-[6px] bg-ember z-[5] hidden md:block" aria-hidden="true"></span>
 
   <!-- corner microcopy -->
-  <p class="mono-tiny absolute top-[5.2rem] left-[1.6rem] text-dim z-10">PORTFOLIO<br />©2026</p>
-  <p class="mono-tiny absolute top-[5.2rem] right-[1.6rem] text-dim text-right hidden sm:block z-10">
+  <p class="mono-tiny absolute top-[5.4rem] left-[1.6rem] text-dim z-10">PORTFOLIO<br />©2026</p>
+  <p class="mono-tiny absolute top-[5.4rem] right-[1.6rem] text-dim text-right hidden sm:block z-10">
     {site.born}<br />{site.role.toUpperCase()}
   </p>
 
+  <!-- vertical rotated labels, right edge -->
+  <div class="absolute right-[0.9rem] top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center gap-[3.2rem] z-10" aria-hidden="true">
+    {verticalLabels.map((l) => (
+      <span class="mono-tiny text-faint" style="writing-mode: vertical-rl; transform: rotate(180deg);">{l}</span>
+    ))}
+    <span class="block w-px h-[3.4rem] bg-gradient-to-b from-transparent to-ink/30"></span>
+  </div>
+
   <!-- middle zone: bio left · portrait right -->
   <div class="relative z-10 flex-1 grid md:grid-cols-[1fr_auto] items-center gap-[2.5rem] px-[1.6rem] pt-[8rem] pb-[3rem]">
-    <div class="max-w-[24rem]">
+    <div class="max-w-[25rem]">
       <p class="mono-tiny text-lime mb-3">{bio.lead}</p>
       <div class="space-y-3 text-[0.92rem] leading-[1.55] text-dim">
-        {bio.lines.map((line) => (
-          <p data-split="words">{line.text}</p>
-        ))}
+        <p data-split="words">
+          I'm a developer who treats <em class="not-italic font-heading text-ember">code</em> as a visual
+          <span class="text-cyan">—</span> the browser is my canvas.
+        </p>
+        <p data-split="words">
+          Nothing holds my attention like the space where
+          <span class="text-violet">engineering</span> meets
+          <em class="italic">graphic art.</em>
+        </p>
+        <p data-split="words">
+          If I ever cash out, I open a
+          <span class="text-lime">&lt;studio-lab/&gt;</span> where young builders prototype the ideas nobody will fund yet.
+        </p>
       </div>
       <p class="mono-tiny mt-5 text-ember">{bio.available}</p>
     </div>
 
     <div class="md:justify-self-end w-[180px] sm:w-[210px] ticks" data-cursor="HELLO">
-      <canvas data-portrait class="block w-full h-auto opacity-90"></canvas>
+      <canvas data-portrait class="block w-full h-auto" style="mask-image: radial-gradient(ellipse 92% 88% at 50% 45%, #000 68%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 92% 88% at 50% 45%, #000 68%, transparent 100%);"></canvas>
       <p class="mono-tiny text-faint mt-2 flex justify-between"><span>PORTRAIT—DITHER</span><span>BAYER 8×8</span></p>
     </div>
   </div>
 
-  <!-- giant name -->
-  <div class="relative z-10 px-[1.6rem] pb-[3.4rem]">
-    <h1 class="display-hero" data-hero-name>
+  <!-- giant name + badge + split contact -->
+  <div class="relative z-10 px-[1.6rem] pb-[3.2rem]">
+    <h1
+      class="font-heading uppercase"
+      style="font-weight: 300; font-size: 7.6rem; line-height: 0.82; letter-spacing: -0.055em; color: #fff;"
+      data-hero-name
+    >
       <span data-split="chars" class="block">Yuri</span>
-      <span data-split="chars" class="block ml-[12%]">Ferreira</span>
+      <span data-split="chars" class="block ml-[14%]">Ferreira</span>
     </h1>
-    <div class="flex flex-wrap gap-x-[1.4rem] gap-y-1 mt-[1.2rem]">
-      {bio.tags.map((t, i) => (
-        <span class="mono-tiny text-dim" data-fade data-delay={0.1 + i * 0.08}>— {t}</span>
-      ))}
+
+    <div class="flex flex-wrap items-end justify-between gap-[1.4rem] mt-[1.3rem]">
+      <div class="flex flex-wrap gap-x-[1.4rem] gap-y-1">
+        {bio.tags.map((t, i) => (
+          <span class="mono-tiny text-dim" data-fade data-delay={0.1 + i * 0.08}>— {t}</span>
+        ))}
+      </div>
+
+      <!-- notched lime badge -->
+      <span
+        class="mono-tiny text-void px-[0.8rem] py-[0.34rem] font-medium"
+        style="background: var(--color-lime); clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%);"
+        data-fade data-delay={0.25}
+      >{site.role.toUpperCase()} — OPEN FOR WORK</span>
+
+      <!-- contact split across columns -->
+      <div class="hidden md:flex items-end gap-[0.9rem]" aria-label="Phone" data-fade data-delay={0.35}>
+        {phoneCols.map((seg, i) => (
+          <span class="flex flex-col items-center gap-1">
+            {i === 0 && <span class="block w-px h-[1.1rem] bg-lime"></span>}
+            <span class="font-heading font-medium text-[1.05rem] text-ink tracking-[0.04em]">{seg}</span>
+          </span>
+        ))}
+      </div>
     </div>
   </div>
 
   <!-- scroll cue -->
   <div class="absolute bottom-[2%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10" data-fade>
-    <span class="mono-tiny text-dim">Scroll down</span>
     <span class="block w-px h-[2.2rem] bg-gradient-to-b from-ink/40 to-transparent"></span>
   </div>
 </section>

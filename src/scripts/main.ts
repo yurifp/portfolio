@@ -154,6 +154,42 @@ function initOdometers() {
 }
 
 /* ------------------------------------------------------------------ */
+/* artboard cards — parallax speeds + clip-path image reveals          */
+/* ------------------------------------------------------------------ */
+function initCardEffects() {
+  if (prefersReduced) return;
+  document.querySelectorAll<HTMLElement>('[data-art-card]').forEach((card) => {
+    const speed = Number(card.dataset.speed ?? 0);
+    if (speed !== 0) {
+      gsap.to(card, {
+        yPercent: speed,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: card.closest('[data-art-scatter]') ?? card,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1.1,
+        },
+      });
+    }
+    const img = card.querySelector<HTMLElement>('.art-card__img');
+    if (img) {
+      gsap.fromTo(
+        img,
+        { clipPath: 'inset(12% 18% 12% 18%)', opacity: 0.4 },
+        {
+          clipPath: 'inset(0% 0% 0% 0%)',
+          opacity: 1,
+          duration: 1.3,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: card, start: 'top 92%' },
+        },
+      );
+    }
+  });
+}
+
+/* ------------------------------------------------------------------ */
 /* section theme flip (dark <-> lime)                                   */
 /* ------------------------------------------------------------------ */
 function initThemeFlips() {
@@ -219,6 +255,21 @@ function initCursor() {
       label.style.opacity = '0';
       dot.style.opacity = '1';
     });
+    /* magnetic pull — target leans toward the pointer, springs back */
+    if (!prefersReduced) {
+      const strength = 0.22;
+      const xTo = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
+      const yTo = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
+      el.addEventListener('mousemove', (e) => {
+        const r = el.getBoundingClientRect();
+        xTo((e.clientX - (r.left + r.width / 2)) * strength);
+        yTo((e.clientY - (r.top + r.height / 2)) * strength);
+      });
+      el.addEventListener('mouseleave', () => {
+        xTo(0);
+        yTo(0);
+      });
+    }
   });
 }
 
@@ -428,6 +479,7 @@ export function initField() {
   initLenis();
   initSplits();
   initOdometers();
+  initCardEffects();
   initThemeFlips();
   initAccordion();
   initCursor();
