@@ -26,7 +26,7 @@ class ExperienceManager {
   /** eased |velocity| in px/frame-ish units — read by shaders as uVelocity */
   velocity = 0;
   /** shared state — the "one value" of one-value-many-destinations */
-  state = { progress: 0 };
+  state = { progress: 0, bodyFade: 0 };
   reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /**
@@ -38,12 +38,28 @@ class ExperienceManager {
     return () => this.frameCbs.delete(cb);
   }
 
+  // Cached measurements — NEVER read layout inside the frame; refresh on
+  // resize / fonts / ScrollTrigger refresh only.
+  private storyEnd = Infinity;
+  private vh = 0;
+
+  private measure = () => {
+    const story = document.querySelector('[data-story]');
+    this.vh = window.innerHeight;
+    this.storyEnd = story ? story.offsetTop + story.offsetHeight : Infinity;
+  };
+
   private raf = (time: number) => {
     if (!this.lenis) return;
     this.lenis.raf(time * 1000);
     // Smooth the velocity so shaders glide instead of stuttering
     this.velocity += (this.rawVelocity - this.velocity) * 0.08;
     this.updateRail();
+    // scrollY is not a layout read; the layout (storyEnd/vh) is cached
+    this.state.bodyFade = Math.min(
+      1,
+      Math.max(0, (window.scrollY - (this.storyEnd - this.vh)) / this.vh),
+    );
 
     const t = time;
     const dt = this.lastT ? Math.min(t - this.lastT, 0.05) : 0.016;
@@ -75,6 +91,14 @@ class ExperienceManager {
 
     gsap.ticker.add(this.raf);
     gsap.ticker.lagSmoothing(0);
+
+    this.measure();
+    window.addEventListener('resize', this.measure, { passive: true });
+    document.fonts?.ready.then(() => {
+      this.measure();
+      ScrollTrigger.refresh();
+    });
+    ScrollTrigger.addEventListener('refresh', this.measure);
 
     // Tab hidden → ticker keeps running but Lenis/RAF work is trivial; the
     // WebGL layer observes visibilitychange itself for the heavy pausing.

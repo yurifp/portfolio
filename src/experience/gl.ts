@@ -47,6 +47,9 @@ export function initGL() {
     uVelocity: { value: 0 },
     uMouse: { value: new THREE.Vector2(-10, -10) },
     uRes: { value: new THREE.Vector2(1, 1) },
+    // 0 inside the story, →1 past it: the field stays alive behind the body,
+    // sparser (smaller, dimmer points) so content stays readable.
+    uBody: { value: 0 },
   };
 
   // ───────────────────────── PASS 1: gradient plane ─────────────────────────
@@ -126,7 +129,7 @@ export function initGL() {
   // escalado para 0→4) mistura as formas com sinos sobrepostos: é o morph.
   const fieldVert = /* glsl */ `
     attribute float aRand;
-    uniform float uTime, uProgress, uVelocity, uSize, uPixelRatio;
+    uniform float uTime, uProgress, uVelocity, uSize, uPixelRatio, uBody;
     uniform vec2 uMouse;
     varying float vCrest;   // crista da onda → realce âmbar no fragment
     varying float vNear;    // proximidade do cursor → âmbar de interação
@@ -208,6 +211,7 @@ export function initGL() {
       // proximidade (o âmbar "acende" maior antes mesmo da cor mudar)
       vCrest = smoothstep(0.06, 0.4, elev);
       float s = uSize * (1.0 + vNear * 1.4 + vCrest * 0.7);
+      s *= mix(1.0, 0.55, uBody); // sparser behind the body sections
       gl_PointSize = s * uPixelRatio * (2.6 / -mv.z);
       vFade = clamp(1.6 - (-mv.z) * 0.32, 0.15, 1.0);
 
@@ -221,6 +225,7 @@ export function initGL() {
   // semântica da paleta, aplicada no shader.
   const fieldFrag = /* glsl */ `
     precision highp float;
+    uniform float uBody;
     varying float vCrest, vNear, vFade;
     void main() {
       vec2 c = gl_PointCoord - 0.5;
@@ -234,6 +239,7 @@ export function initGL() {
       float hot = max(vCrest, vNear);
       vec3 col = mix(ink, amber, hot);
       float alpha = soft * vFade * (0.32 + hot * 0.6);
+      alpha *= mix(1.0, 0.35, uBody); // dimmer, never fighting the content
       gl_FragColor = vec4(col, alpha);
     }
   `;
@@ -279,6 +285,9 @@ export function initGL() {
   let staticDone = false;
   const onVis = () => { hidden = document.hidden; };
   document.addEventListener('visibilitychange', onVis);
+  // No viewport IntersectionObserver anymore: the field is the site's
+  // persistent backdrop (bodyFade dims it past the story), so it renders
+  // wherever the user is. Hidden-tab pause still applies.
 
   // Câmera governada pelo MESMO progresso: leve órbita + arco de altura que
   // mergulha no campo no meio da narrativa e recua para encarar o grid final.
@@ -297,6 +306,7 @@ export function initGL() {
     uniforms.uTime.value = t;
     uniforms.uProgress.value = experience.state.progress;
     uniforms.uVelocity.value = experience.velocity;
+    uniforms.uBody.value = experience.state.bodyFade;
     uniforms.uMouse.value.lerp(mouseTarget, 0.08);
     cameraFor(experience.state.progress);
 

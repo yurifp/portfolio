@@ -528,3 +528,31 @@ body {
     font-size: 1.15rem;
   }
 }
+
+
+/* ─── Fase B: body of the site joins the hero's language ─────────────────── */
+.display.section-title {
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  font-weight: 430;
+  letter-spacing: -0.005em;
+  line-height: 1.05;
+}
+
+/* One hover timing for the whole site */
+a,
+.x-btn,
+header a {
+  transition-duration: var(--dur-s);
+  transition-timing-function: var(--ease-settle);
+}
+
+/* Experience rows gain the telemetry index (real chronological sequence) */
+.exp-row .exp-idx {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--color-dim);
+}
+.exp-row:hover .exp-idx {
+  color: var(--color-signal);
+}

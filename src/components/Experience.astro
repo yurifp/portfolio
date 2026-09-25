@@ -41,15 +41,16 @@ const jobs = [
 <section id="experience" aria-labelledby="experience-title" class="border-b border-line">
   <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
     <div class="mb-8 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
-      <h2 id="experience-title" class="text-2xl font-semibold tracking-tight">Experience</h2>
+      <h2 id="experience-title" class="display section-title">Experience</h2>
       <p class="text-sm text-dim">six years · SENAI CIMATEC + freelance</p>
     </div>
 
     <div class="exp-list">
       {
-        jobs.map((job) => (
+        jobs.map((job, i) => (
           <article class="exp-row">
             <div>
+              <span class="exp-idx">0{i + 1}</span>
               <h3 class="exp-role">{job.role}</h3>
               <p class="exp-org">{job.org}</p>
             </div>
