@@ -1,0 +1,63 @@
+---
+// From Yuri_Resume_EN.pdf (attached 2026-09) — keep in sync with the CV.
+const jobs = [
+  {
+    role: 'Front-End Engineer II',
+    org: 'SENAI CIMATEC · Salvador, BA',
+    when: 'AUG 2023 — SEP 2026',
+    points: [
+      'Component libraries and standardized workflows across modern (React, Next.js, TypeScript) and legacy (JavaScript, jQuery) stacks',
+      'Architecture that raised engineering productivity 10× through reusable components, with WCAG 2.1 compliance and load-performance focus',
+      'Led REST API and third-party integrations inside distributed architectures; championed Jest + React Testing Library in CI/CD',
+    ],
+  },
+  {
+    role: 'Front-End Engineer I',
+    org: 'SENAI CIMATEC · Salvador, BA',
+    when: 'JUL 2022 — APR 2023',
+    points: [
+      'Developed and evolved 170+ institutional websites and e-learning platforms for a large multi-stakeholder user base',
+      'Mobile-first responsive interfaces with HTML5, CSS3, JavaScript, jQuery and Bootstrap',
+      'Front-end performance optimization and cross-browser compatibility across desktop and mobile',
+    ],
+  },
+  {
+    role: 'Full Stack Freelance Developer',
+    org: 'Brazil · remote',
+    when: 'JUL 2020 — MAY 2022',
+    points: [
+      'Modern web applications with JavaScript, React, C#, TypeScript and Node.js',
+      'Responsive interfaces with strong UI/UX, performance and scalability focus',
+      'Interactive 3D experiences with Three.js — the seed of the NASA challenges to come',
+    ],
+  },
+];
+---
+
+<section id="experience" aria-labelledby="experience-title" class="border-b border-line">
+  <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+    <div class="mb-8 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
+      <h2 id="experience-title" class="text-2xl font-semibold tracking-tight">Experience</h2>
+      <p class="text-sm text-dim">six years, three seats — full résumé on request</p>
+    </div>
+
+    <div class="exp-list" data-reveal>
+      {
+        jobs.map((job) => (
+          <article class="exp-row">
+            <div>
+              <h3 class="exp-role">{job.role}</h3>
+              <p class="exp-org">{job.org}</p>
+            </div>
+            <ul>
+              {job.points.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+            <span class="exp-when">{job.when}</span>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

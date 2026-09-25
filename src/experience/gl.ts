@@ -169,7 +169,9 @@ export function initGL() {
     }
 
     void main() {
-      float t = uProgress * 4.0;               // 0..4 em unidades de estação
+      // 3 beats, 4 shapes: the NASA beat morphs Impacts(arc) → GlobeExplorers
+      // (ocean) mid-scroll, so stations live at t = 0,1,2,3 over the story.
+      float t = uProgress * 3.0;               // 0..3 em unidades de estação
       float wF = stationW(0.0, t) + stationW(1.0, t);
       float wA = stationW(2.0, t);
       float wO = stationW(3.0, t);

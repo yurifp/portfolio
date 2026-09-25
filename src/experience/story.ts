@@ -16,7 +16,7 @@ import { experience } from './core';
  * module never runs (see grammar.reducedMotion + the html.js CSS gates).
  */
 
-const BEATS = 5;
+const BEATS = 3;
 /** fraction of the container scroll spent fading between adjacent beats */
 const FADE = 0.1;
 
