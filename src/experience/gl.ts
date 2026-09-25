@@ -297,6 +297,7 @@ export function initGL() {
     renderer.clearDepth();
     renderer.render(sceneField, camField); // pass 2: pontos
     renderer.autoClear = true;
+    if (!staticDone) window.dispatchEvent(new Event('gl:firstframe')); // preloader signal
     staticDone = true;
   });
 

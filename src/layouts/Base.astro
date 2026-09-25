@@ -4,6 +4,7 @@ import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Motion from '../components/Motion.astro';
+import Preloader from '../components/Preloader.astro';
 
 interface Props {
   title: string;
@@ -85,6 +86,7 @@ const jsonLd = {
     <!-- Persistent WebGL host — OUTSIDE the ClientRouter-swapped <main>, so the
          canvas node survives route changes (same trick the reference uses) -->
     <div id="gl-host" class="pointer-events-none fixed inset-0 -z-10" aria-hidden="true"></div>
+    <Preloader />
     <Header />
     <main id="main">
       <slot />
