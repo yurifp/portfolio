@@ -1,29 +1,33 @@
 # yurifp — portfolio
 
-This is the rebuilt portfolio (Astro 7), replacing the previous version of
-this repository. Deployed serverless on Vercel, with a static mirror pipeline
-for GitHub Pages.
+Portfolio of Yuri Ferreira Paulo, software engineer. Rebuilt in the
+"field" design language: a violet-black ground (`#070210`), signal
+accents (lime / ember / violet / cyan), Rajdhani display type on a
+fluid `1.111vw` scale, WebGL particle field, dithered portrait,
+odometer counters — and one loud moment: the Snap-shots section flips
+the whole page to saturated lime. Deployed serverless on Vercel, with
+a static mirror pipeline for GitHub Pages.
 
-Portfolio of Yuri Ferreira Paulo, front-end engineer going full-stack. The
-site is designed to prove the claim instead of stating it: the contact form is
-a typed server action, the view counters persist in Redis, and one codebase
-deploys twice — serverless on Vercel, static mirror on GitHub Pages.
-
-Design concept: **Telemetry** — a dark instrument panel in abyssal blue
-(`#0C1420`), Archivo for text, IBM Plex Mono strictly for data values, and one
-semantic amber (`#F2B441`) reserved for live data and confirmed interaction.
+Reference study (palette, type scale, techniques, section grammar)
+lives in `docs/reference-curtisdesignr.md`. The implementation is
+original; all content is placeholder or own data, centralized for
+easy swapping.
 
 ## Stack
 
-- [Astro 7](https://astro.build) — static-first, islands where state exists
-- React islands (`client:visible`/`client:idle`): project filter with GSAP
-  Flip, live view counters. Everything else is zero-JS `.astro`
-- Tailwind CSS v4 (tokens in `src/styles/global.css` via `@theme`)
-- GSAP + ScrollTrigger + Flip; Lenis for smooth scroll, wired through GSAP's
-  ticker (single frame source)
-- Astro Actions (Zod) + Resend for the contact form
-- Upstash Redis (REST, plain fetch) for per-page view counters
-- `sharp` for the generated OG image (`npm run og`)
+- [Astro 7](https://astro.build) — static-first, zero-JS `.astro` components
+- Tailwind CSS v4 (tokens in `src/styles/global.css` via `@theme`;
+  custom rules in `@layer components` so utilities always win)
+- GSAP + ScrollTrigger — split char/word reveals, odometer counters,
+  section theme flips (dark ↔ lime), progress rail
+- Lenis smooth scroll wired through GSAP's ticker (single frame source)
+- Three.js — hero particle field (7k points, custom shaders, pointer
+  parallax + scroll scrub), also mounted on case-study headers
+- Canvas 2D — Bayer 8×8 dithered portrait (generative today; drop a
+  real image URL in and the same pipeline applies)
+- WebAudio — sound toggle drone, no audio assets
+- `sharp` — generated OG card (`npm run og`) and placeholder artboards
+  (`node scripts/generate-placeholders.mjs`)
 
 ## Run it
 
@@ -33,19 +37,12 @@ cp .env.example .env   # optional locally — see "Backend features"
 npm run dev
 ```
 
-## Backend features (the point)
+## Backend features (inherited)
 
 | Feature | Needs | Without the env var |
 | --- | --- | --- |
 | Contact form (`src/actions/index.ts`) | `RESEND_API_KEY` (+ optional `RESEND_TO`) | Logs to the server console, form still succeeds with an honest note |
 | View counters (`src/lib/views.ts`, `/api/views/[slug]`) | `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | API answers `{ live: false }`, counters render an em dash |
-
-Slugs are allowlisted in `VIEW_SLUGS`; a counter increments once per browser
-session (`sessionStorage`). The endpoint is CORS-open on purpose: the static
-mirror reads the production API so its counters stay alive.
-
-> Resend note: until you verify a domain, the free tier sends only from
-> `onboarding@resend.dev` to your own account e-mail.
 
 ## Two deploy targets, one config
 
@@ -54,36 +51,33 @@ mirror reads the production API so its counters stay alive.
 **Vercel (production, has the backend):** import the repo, add env vars
 `SITE_URL`, `RESEND_API_KEY`, `UPSTASH_REDIS_REST_URL`,
 `UPSTASH_REDIS_REST_TOKEN`. Defaults apply (`output: 'server'`,
-`@astrojs/vercel`). `/api/*` and `/_actions/*` run serverless; the page itself
-is prerendered static.
+`@astrojs/vercel`). `/api/*` and `/_actions/*` run serverless; pages
+are prerendered static.
 
 **GitHub Pages (static mirror of the root `yurifp.github.io`):** push this
 code to the `yurifp/yurifp.github.io` repo, then Settings → Pages → Source:
 **GitHub Actions**. The included workflow builds with `DEPLOY_TARGET=github`
-(pure static, no adapter) and deploys with `actions/deploy-pages@v5`. In the
-mirror, the contact form is replaced by a notice linking to the full version —
-nothing points at a dead endpoint. Update `PUBLIC_VIEWS_API` in the workflow
-to the real Vercel URL after the first deploy so the mirror's counters read
-production.
+(pure static, no adapter) and deploys with `actions/deploy-pages@v5`.
 
-## Content
+## Content — swap everything here
 
-- Projects: `src/content/projects/*.md` — typed collection
-  (`src/content.config.ts`); add a file, the grid updates. `cover: ./cover.jpg`
-  in the frontmatter adds an optimized image (`astro:assets`).
-- Bio draft: `src/components/About.astro` — **TODO(yuri-review)** marker
-  inside; rewrite in your own words before going public.
-- Known signed TODOs: Impacts repo/live links, project cover images.
+- `src/data/site.ts` — wordmark, bio, tags, stats, worked-at roles,
+  project grid (titles/categories/positions/accent colors), socials.
+  This is the single file to edit for 90% of the content.
+- `src/content/projects/*.md` — full case studies (typed collection).
+  Two of them (`aurora-terminal`, `nordwind`) are explicit templates —
+  replace or duplicate per real project.
+- `public/images/work/*.webp` — artboard images; placeholder geometry
+  is generated by `node scripts/generate-placeholders.mjs`. Drop real
+  shots in with the same slugs.
+- `public/cv/yuri-ferreira-en.pdf` — the CV behind "Download CV".
 - OG card: `npm run og` regenerates `public/og.png` after copy changes.
 
 ## Motion rules
 
-One orchestrated moment (hero power-on), one quiet batched reveal (project
-panels), motion that answers user actions (filter reflow via GSAP Flip, case
-expansion, counter count-up). The hero background (`TelemetryMesh`) is the
-single decorative layer: spring-mass grid reacting to the cursor, amber only
-near the pointer, O(n) neighbor connections, `gsap.ticker` as the project's
-only frame source, paused when the tab is hidden or the hero is offscreen,
-and a static frame under `prefers-reduced-motion`.
-`prefers-reduced-motion` disables Lenis and all
-entry/scroll animation; the page renders fully visible without JS.
+Entry reveals via ScrollTrigger only (no click needed): split-text
+chars/words, fades, odometers, marquee strip (CSS). The section theme
+flip is scroll-driven. Lenis + all entry animation disabled under
+`prefers-reduced-motion`; the page renders fully visible without JS.
+The WebGL field pauses offscreen (IntersectionObserver) and disposes
+completely on route teardown.

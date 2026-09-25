@@ -25,9 +25,15 @@ function initLenis() {
   gsap.ticker.lagSmoothing(0);
 }
 
-export function scrollTo(target: string | HTMLElement, offset = 0) {
+export function scrollTo(target: string | HTMLElement | number, offset = 0) {
   if (lenis) lenis.scrollTo(target as never, { offset });
-  else (typeof target === 'string' ? document.querySelector(target) : target)?.scrollIntoView();
+  else if (typeof target === 'number') scrollToPolyfill(target);
+  else
+    (typeof target === 'string' ? document.querySelector(target) : target)?.scrollIntoView();
+}
+
+function scrollToPolyfill(y: number) {
+  window.scrollTo({ top: y, behavior: 'smooth' });
 }
 
 /* ------------------------------------------------------------------ */
@@ -36,7 +42,11 @@ export function scrollTo(target: string | HTMLElement, offset = 0) {
 function splitChars(el: HTMLElement) {
   const text = el.textContent ?? '';
   el.textContent = '';
-  el.setAttribute('aria-label', text);
+  /* accessible original + hidden visual chars */
+  const sr = document.createElement('span');
+  sr.className = 'sr-only';
+  sr.textContent = text;
+  el.appendChild(sr);
   const frag = document.createDocumentFragment();
   for (const ch of text) {
     const wrap = document.createElement('span');
@@ -53,8 +63,11 @@ function splitChars(el: HTMLElement) {
 
 function splitWords(el: HTMLElement) {
   const text = el.textContent ?? '';
-  el.setAttribute('aria-label', text);
   el.textContent = '';
+  const sr = document.createElement('span');
+  sr.className = 'sr-only';
+  sr.textContent = text;
+  el.appendChild(sr);
   const frag = document.createDocumentFragment();
   for (const word of text.split(/\s+/)) {
     const wrap = document.createElement('span');

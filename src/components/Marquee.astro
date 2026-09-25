@@ -1,0 +1,21 @@
+---
+/*
+  Signal marquee — a dark strip between sections. Words separated by
+  signal dots; duplicated content scrolls seamlessly via CSS.
+*/
+const { items = [] } = Astro.props as { items?: string[] };
+const row = [...items, ...items];
+---
+<div class="marquee border-t border-b py-[0.8rem]" style="border-color: var(--line-now);" aria-hidden="true">
+  <div class="marquee__inner">
+    {row.map((t, i) => (
+      <span class="mono-tiny flex items-center gap-[3rem] text-dim">
+        {t}
+        <span
+          class="inline-block w-[5px] h-[5px] rounded-full"
+          style={`background:${['#9df133', '#905cff', '#64e8ff', '#f75049'][i % 4]};`}
+        ></span>
+      </span>
+    ))}
+  </div>
+</div>

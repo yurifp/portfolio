@@ -38,10 +38,10 @@ import { site, socials } from '../data/site';
     <div class="flex items-end justify-between gap-8">
       <div class="overflow-hidden">
         <p class="mono-label mb-3" data-menu-stagger>Connect</p>
-        <ul class="space-y-[0.35rem]">
+        <ul class="space-y-[0.55rem]">
           {socials.menu.map((s) => (
             <li data-menu-stagger>
-              <a href={s.url} class="mono-tiny text-dim hover:text-ink transition-colors">
+              <a href={s.url} class="mono-tiny text-dim hover:text-ink transition-colors inline-block py-[0.4rem] min-h-[24px] box-border">
                 <span class="text-faint mr-2">{s.n}</span>{s.label}
               </a>
             </li>

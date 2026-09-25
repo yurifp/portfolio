@@ -1,8 +1,10 @@
 /*
   Dithered portrait — ordered (Bayer 8×8) dithering over a generative
-  value-noise field, rendered to 2D canvas. Reads like a halftone photo
-  treatment from the print world; swap `imageUrl` for a real portrait
-  and the same pipeline applies.
+  value-noise field, rendered to 2D canvas via ImageData (bulk writes —
+  per-pixel fillRect was a 91s TBT bomb). Terrain is precomputed once;
+  the shimmer only re-evaluates the cheap mass term, at most once per
+  second. Swap `imageUrl` for a real portrait and the same dither
+  pipeline applies.
 */
 const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -48,76 +50,100 @@ function fbm(x: number, y: number) {
   return f;
 }
 
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace('#', '').trim();
+  const n = parseInt(h.length === 3 ? h.replace(/./g, (c) => c + c) : h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
 export function mountPortrait(canvas: HTMLCanvasElement, opts?: { imageUrl?: string }) {
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: false });
   if (!ctx) return;
   const W = (canvas.width = 320);
   const H = (canvas.height = 420);
+  const img = ctx.createImageData(W, H);
+  const data = img.data;
 
-  const luminance = (x: number, y: number) => {
-    /* radial bust-like mass + fbm terrain: bright core, dark ground */
-    const dx = (x / W - 0.5) * 1.6;
-    const dy = (y / H - 0.44) * 1.05;
-    const r = Math.sqrt(dx * dx + dy * dy);
-    const mass = Math.max(0, 1 - r * 1.35);
-    const terrain = fbm(x / 46 + 9, y / 46 + 7);
-    return mass * 0.82 + terrain * 0.34 - 0.12;
-  };
+  /* terrain precomputed once — the expensive part never re-runs */
+  const terrain = new Float32Array(W * H);
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W; x++) terrain[y * W + x] = fbm(x / 46 + 9, y / 46 + 7);
+
+  const BASE = hexToRgb('#070210');
+  let ink: [number, number, number] = [157, 241, 51]; // lime default
 
   const draw = (phase: number) => {
-    const ink = getComputedStyle(document.documentElement).getPropertyValue('--color-lime').trim() || '#9df133';
-    ctx.fillStyle = '#070210';
-    ctx.fillRect(0, 0, W, H);
+    const [r0, g0, b0] = BASE;
+    const [ri, gi, bi] = ink;
     for (let y = 0; y < H; y++) {
+      const rowT = y * W;
+      const dy = (y / H - 0.44) * 1.05;
       for (let x = 0; x < W; x++) {
-        const l = luminance(x + phase, y);
-        const b = BAYER[y & 7][x & 7];
-        if (l > b) {
-          ctx.fillStyle = ink;
-          ctx.fillRect(x, y, 1, 1);
-        }
+        const i = (rowT + x) * 4;
+        const dx = (x / W - 0.5) * 1.6;
+        const mass = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) * 1.35) * 0.82;
+        const l = mass + terrain[rowT + x] * 0.34 - 0.12 + phase * 0.08;
+        const on = l > BAYER[y & 7][x & 7];
+        data[i] = on ? ri : r0;
+        data[i + 1] = on ? gi : g0;
+        data[i + 2] = on ? bi : b0;
+        data[i + 3] = 255;
       }
     }
+    ctx.putImageData(img, 0, 0);
   };
 
+  const readInk = () => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue('--color-lime').trim();
+    if (v.startsWith('#')) ink = hexToRgb(v);
+  };
+  readInk();
   draw(0);
 
   if (opts?.imageUrl) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => {
       const off = document.createElement('canvas');
       off.width = W;
       off.height = H;
       const octx = off.getContext('2d')!;
-      octx.drawImage(img, 0, 0, W, H);
-      const data = octx.getImageData(0, 0, W, H).data;
-      ctx.fillStyle = '#070210';
-      ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-lime').trim() || '#9df133';
+      octx.drawImage(image, 0, 0, W, H);
+      const src = octx.getImageData(0, 0, W, H).data;
+      const [r0, g0, b0] = BASE;
+      const [ri, gi, bi] = ink;
       for (let y = 0; y < H; y++) {
         for (let x = 0; x < W; x++) {
-          const i = (y * W + x) * 4;
-          const l = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
-          if (l > BAYER[y & 7][x & 7]) ctx.fillRect(x, y, 1, 1);
+          const s = (y * W + x) * 4;
+          const l = (src[s] * 0.299 + src[s + 1] * 0.587 + src[s + 2] * 0.114) / 255;
+          const on = l > BAYER[y & 7][x & 7];
+          const i = s;
+          data[i] = on ? ri : r0;
+          data[i + 1] = on ? gi : g0;
+          data[i + 2] = on ? bi : b0;
+          data[i + 3] = 255;
         }
       }
+      ctx.putImageData(img, 0, 0);
     };
-    img.src = opts.imageUrl;
+    image.src = opts.imageUrl;
     return;
   }
 
-  /* slow shimmer when motion is welcome */
+  /* slow shimmer — one redraw per second at most, skipped offscreen */
   if (!prefersReduced) {
-    let raf = 0;
     let visible = true;
     const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
     io.observe(canvas);
     const tick = (t: number) => {
+      if (visible && t - last > 1000) {
+        last = t;
+        draw(Math.sin(t / 2600));
+      }
       raf = requestAnimationFrame(tick);
-      if (visible && Math.floor(t / 90) % 2 === 0) draw(Math.sin(t / 2600) * 26);
     };
-    raf = requestAnimationFrame(tick);
+    let last = 0;
+    let raf = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();

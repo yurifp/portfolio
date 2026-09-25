@@ -7,13 +7,17 @@ import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
-  return projects.map((project) => ({
+  return projects.map((project, i) => ({
     params: { slug: project.id },
-    props: { project },
+    props: {
+      project,
+      prev: projects[(i - 1 + projects.length) % projects.length],
+      next: projects[(i + 1) % projects.length],
+    },
   }));
 }
 
-const { project } = Astro.props;
+const { project, prev, next } = Astro.props;
 const { Content } = await render(project);
 const meta = project.data;
 ---
@@ -36,7 +40,7 @@ const meta = project.data;
     <div class="px-[1.6rem] mb-[4rem]">
       <div class="ticks border" style="border-color: var(--line-now);">
         <img
-          src={`/images/work/${project.slug}.webp`}
+          src={`/images/work/${project.id}.webp`}
           alt={meta.title}
           class="w-full aspect-[21/9] object-cover"
           decoding="async"
@@ -64,6 +68,18 @@ const meta = project.data;
         </div>
       </div>
     </div>
+    <!-- prev / next -->
+    <nav class="px-[1.6rem] pb-[4rem] flex items-stretch justify-between gap-[1rem]" aria-label="Case navigation">
+      <a href={`/work/${prev.id}`} class="flex-1 border py-[1.1rem] px-[1.2rem] group hover:border-ink transition-colors" style="border-color: var(--line-now);">
+        <p class="mono-tiny text-faint mb-1">← Prev</p>
+        <p class="font-heading font-medium text-[1.3rem] uppercase group-hover:text-lime transition-colors">{prev.data.title}</p>
+      </a>
+      <a href="/work" class="mono-tiny flex items-center px-[1rem] border nav-link self-stretch" style="border-color: var(--line-now); color: var(--ink-now);">All</a>
+      <a href={`/work/${next.id}`} class="flex-1 border py-[1.1rem] px-[1.2rem] text-right group hover:border-ink transition-colors" style="border-color: var(--line-now);">
+        <p class="mono-tiny text-faint mb-1">Next →</p>
+        <p class="font-heading font-medium text-[1.3rem] uppercase group-hover:text-lime transition-colors">{next.data.title}</p>
+      </a>
+    </nav>
   </article>
   <Footer />
 </Base>

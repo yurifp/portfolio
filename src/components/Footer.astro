@@ -32,9 +32,9 @@ const year = new Date().getFullYear();
       {Object.entries(socials.footer).map(([group, links]) => (
         <div>
           <p class="mono-tiny text-faint mb-[0.8rem]">{group}</p>
-          <ul class="space-y-[0.45rem]">
+          <ul class="space-y-[0.65rem]">
             {links.map((l) => (
-              <li><a href={l.url} class="mono-tiny nav-link" style="color: var(--ink-now); letter-spacing: 0.32em;">{l.label.toUpperCase()}</a></li>
+              <li><a href={l.url} class="mono-tiny nav-link inline-block py-[0.45rem] min-h-[24px] box-border" style="color: var(--ink-now); letter-spacing: 0.32em;">{l.label.toUpperCase()}</a></li>
             ))}
           </ul>
         </div>
