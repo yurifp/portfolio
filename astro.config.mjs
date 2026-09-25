@@ -22,6 +22,13 @@ export default defineConfig({
   devToolbar: { enabled: false },
   vite: {
     plugins: [tailwindcss()],
+    // The static mirror bakes real view counts at build time (creds may be
+    // ambient), but its same-origin /api is dead JSON — writes are gated off.
+    // The server build (and any mirror pointing PUBLIC_VIEWS_API at prod)
+    // keeps incrementing.
+    define: {
+      'import.meta.env.PUBLIC_VIEWS_WRITABLE': JSON.stringify(isGhPages ? 'false' : 'true'),
+    },
     // Static build: src/actions is parked by scripts/build.mjs, so the real
     // astro:actions module does not exist — resolve imports to a stub instead.
     resolve: isGhPages

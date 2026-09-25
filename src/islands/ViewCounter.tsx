@@ -23,11 +23,12 @@ export default function ViewCounter({ slug, api, variant = 'inline' }: Props) {
 
   useEffect(() => {
     const sessionKey = `viewed:${slug}`;
+    // Baked same-origin JSON (static mirror) is read-only display data; writes
+    // only happen where a real backend answers (server build) or when the
+    // counter explicitly targets the production API (PUBLIC_VIEWS_API).
+    const writable =
+      import.meta.env.PUBLIC_VIEWS_WRITABLE === 'true' || !!import.meta.env.PUBLIC_VIEWS_API;
 
-    // GET first: on a static mirror (no backend host) the baked JSON answers
-    // { live: false } and the counter renders an em dash — no POST ever hits a
-    // host that can't handle it. Where the backend runs, GET proves liveness,
-    // then the once-per-session POST increments.
     fetch(`${base}/api/views/${slug}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { views: number | null; live: boolean } | null) => {
@@ -35,7 +36,7 @@ export default function ViewCounter({ slug, api, variant = 'inline' }: Props) {
         setLive(true);
         setViews(data.views);
 
-        if (sessionStorage.getItem(sessionKey)) return;
+        if (!writable || sessionStorage.getItem(sessionKey)) return;
         sessionStorage.setItem(sessionKey, '1');
         fetch(`${base}/api/views/${slug}`, { method: 'POST' })
           .then((r) => (r.ok ? r.json() : null))
