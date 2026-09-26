@@ -7,7 +7,7 @@
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { initScramble, feedVelocity } from './scramble';
+import { initScramble, feedVelocity, currentVelocity } from './scramble';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -100,7 +100,8 @@ function initSplits() {
       ease: 'power4.out',
       stagger: 0.018,
       delay: Number(el.dataset.delay ?? 0),
-      scrollTrigger: { trigger: el, start: 'top 88%' },
+      /* reverse the reveal when the block scrolls back out */
+      scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' },
     });
   });
   document.querySelectorAll<HTMLElement>('[data-split="words"]').forEach((el) => {
@@ -111,7 +112,7 @@ function initSplits() {
       duration: 0.9,
       ease: 'power4.out',
       stagger: 0.012,
-      scrollTrigger: { trigger: el, start: 'top 88%' },
+      scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' },
     });
   });
   if (prefersReduced) return;
@@ -122,7 +123,7 @@ function initSplits() {
       duration: 1.1,
       ease: 'power3.out',
       delay: Number(el.dataset.delay ?? 0),
-      scrollTrigger: { trigger: el, start: 'top 90%' },
+      scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' },
     });
   });
 }
@@ -482,11 +483,67 @@ function initWipes() {
 }
 
 /* ------------------------------------------------------------------ */
+/* hero exit choreography — scrubbed, so it plays on the way down and
+   rewinds on the way back up: the hero is never static */
+/* ------------------------------------------------------------------ */
+function initHeroChoreo() {
+  if (prefersReduced) return;
+  const hero = document.querySelector('#about');
+  if (!hero || !hero.querySelector('[data-choreo]')) return;
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: hero,
+      start: 'top top',
+      end: '78% top',
+      scrub: 0.8,
+    },
+  });
+  tl.to('[data-choreo="name"], [data-hero-name]', { yPercent: -26, opacity: 0.12 }, 0)
+    .to('[data-choreo="bio"]', { yPercent: -16, opacity: 0 }, 0)
+    .to('[data-choreo="portrait"]', { yPercent: -22, opacity: 0, scale: 0.94 }, 0)
+    .to('[data-choreo="br"]', { yPercent: -16, opacity: 0 }, 0)
+    .to('#about [data-choreo="meta"]', { opacity: 0, stagger: 0.04 }, 0);
+}
+
+/* ------------------------------------------------------------------ */
+/* velocity skew — the whole document leans into the scroll and
+   straightens at rest; sign follows direction (up leans up) */
+/* ------------------------------------------------------------------ */
+function initVelocitySkew() {
+  if (prefersReduced) return;
+  const main = document.getElementById('main');
+  if (!main) return;
+  const setSkew = gsap.quickTo(main, 'skewY', { duration: 0.55, ease: 'power3.out' });
+  gsap.ticker.add(() => {
+    setSkew(gsap.utils.clamp(-1.1, 1.1, currentVelocity() * 0.045));
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* worked-at rows — scrubbed drift, reversible both directions */
+/* ------------------------------------------------------------------ */
+function initRowDrift() {
+  if (prefersReduced) return;
+  document.querySelectorAll<HTMLElement>('.wa-item').forEach((row) => {
+    gsap.from(row, {
+      yPercent: 16,
+      opacity: 0.25,
+      ease: 'none',
+      scrollTrigger: { trigger: row, start: 'top 97%', end: 'top 62%', scrub: 0.6 },
+    });
+  });
+}
+
+/* ------------------------------------------------------------------ */
 export function initField() {
   initLenis();
   initSplits();
   initOdometers();
   initCardEffects();
+  initHeroChoreo();
+  initVelocitySkew();
+  initRowDrift();
   initThemeFlips();
   initAccordion();
   initCursor();

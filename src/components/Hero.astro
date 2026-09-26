@@ -25,22 +25,23 @@ const verticalLabels = ['Scroll down', 'NASA ×2 Nominee', 'Salvador — BR'];
     class="font-heading font-bold absolute -right-[0.5rem] top-[15%] leading-none select-none hidden lg:block"
     style="font-size: 20rem; letter-spacing: -0.08em; color: rgba(245, 240, 235, 0.1);"
     data-scramble
+    data-choreo="br"
     aria-label="BR — Brazil"
   >BR</span>
 
   <!-- tiny red squares -->
-  <span class="absolute top-[30%] left-[1.55rem] w-[8px] h-[8px] bg-ember z-[5]" aria-hidden="true"></span>
-  <span class="absolute bottom-[24%] right-[24%] w-[8px] h-[8px] bg-ember z-[5] hidden md:block" aria-hidden="true"></span>
-  <span class="absolute top-[12%] left-[38%] w-[6px] h-[6px] bg-ember z-[5] hidden md:block" aria-hidden="true"></span>
+  <span class="absolute top-[30%] left-[1.55rem] w-[8px] h-[8px] bg-ember z-[5]" data-choreo="meta" aria-hidden="true"></span>
+  <span class="absolute bottom-[24%] right-[24%] w-[8px] h-[8px] bg-ember z-[5] hidden md:block" data-choreo="meta" aria-hidden="true"></span>
+  <span class="absolute top-[12%] left-[38%] w-[6px] h-[6px] bg-ember z-[5] hidden md:block" data-choreo="meta" aria-hidden="true"></span>
 
   <!-- corner microcopy -->
-  <p class="mono-tiny absolute top-[5.4rem] left-[1.6rem] text-dim z-10">PORTFOLIO<br />©2026</p>
-  <p class="mono-tiny absolute top-[5.4rem] right-[1.6rem] text-dim text-right hidden sm:block z-10">
+  <p class="mono-tiny absolute top-[5.4rem] left-[1.6rem] text-dim z-10" data-choreo="meta">PORTFOLIO<br />©2026</p>
+  <p class="mono-tiny absolute top-[5.4rem] right-[1.6rem] text-dim text-right hidden sm:block z-10" data-choreo="meta">
     {site.born}<br />{site.role.toUpperCase()}
   </p>
 
   <!-- vertical rotated labels, right edge -->
-  <div class="absolute right-[0.9rem] top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center gap-[3.2rem] z-10" aria-hidden="true">
+  <div class="absolute right-[0.9rem] top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center gap-[3.2rem] z-10" data-choreo="meta" aria-hidden="true">
     {verticalLabels.map((l) => (
       <span class="mono-tiny text-faint" style="writing-mode: vertical-rl; transform: rotate(180deg);">{l}</span>
     ))}
@@ -49,7 +50,7 @@ const verticalLabels = ['Scroll down', 'NASA ×2 Nominee', 'Salvador — BR'];
 
   <!-- middle zone: bio left · portrait right -->
   <div class="relative z-10 flex-1 grid md:grid-cols-[1fr_auto] items-center gap-[2.5rem] px-[1.6rem] pt-[8rem] pb-[3rem]">
-    <div class="max-w-[25rem]">
+    <div class="max-w-[25rem]" data-choreo="bio">
       <p class="mono-tiny text-lime mb-3">{bio.lead}</p>
       <div class="space-y-3 text-[0.92rem] leading-[1.55] text-dim">
         <p data-split="words">
@@ -70,13 +71,15 @@ const verticalLabels = ['Scroll down', 'NASA ×2 Nominee', 'Salvador — BR'];
     </div>
 
     <div class="md:justify-self-end w-[180px] sm:w-[210px] ticks" data-cursor="HELLO">
-      <canvas data-portrait class="block w-full h-auto" style="mask-image: radial-gradient(ellipse 92% 88% at 50% 45%, #000 68%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 92% 88% at 50% 45%, #000 68%, transparent 100%);"></canvas>
-      <p class="mono-tiny text-faint mt-2 flex justify-between"><span>PORTRAIT—DITHER</span><span>BAYER 8×8</span></p>
+      <div data-choreo="portrait">
+        <canvas data-portrait class="block w-full h-auto"></canvas>
+        <p class="mono-tiny text-faint mt-2 flex justify-between"><span>PORTRAIT—DITHER</span><span>BAYER 8×8</span></p>
+      </div>
     </div>
   </div>
 
   <!-- giant name + badge + split contact -->
-  <div class="relative z-10 px-[1.6rem] pb-[3.2rem]">
+  <div class="relative z-10 px-[1.6rem] pb-[3.2rem]" data-choreo="name">
     <h1
       class="font-heading uppercase"
       style="font-weight: 300; font-size: 7.6rem; line-height: 0.82; letter-spacing: -0.055em; color: #fff;"

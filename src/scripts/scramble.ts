@@ -30,6 +30,9 @@ export function feedVelocity(v: number) {
   velocity = v;
   lastFeed = performance.now();
 }
+export function currentVelocity() {
+  return velocity;
+}
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -102,8 +105,13 @@ export function initScramble() {
     const dt = Math.min(dtMs / 1000, 0.05);
     /* no scroll events for 120ms → the page is at rest */
     if (performance.now() - lastFeed > 120) velocity = 0;
-    smoothed += (Math.abs(velocity) - smoothed) * Math.min(1, dt * 9);
-    const nowActive = smoothed > 0.55;
+    /* dead zone: trackpad drift tails shouldn't hold the roulette */
+    const v = Math.abs(velocity) < 1 ? 0 : velocity;
+    smoothed += (Math.abs(v) - smoothed) * Math.min(1, dt * 9);
+    /* hysteresis: wake above 1.1, sleep below 0.5 — no flutter,
+       and residual momentum can't keep it green forever */
+    const threshold = active ? 0.5 : 1.1;
+    const nowActive = smoothed > threshold;
 
     if (nowActive && !active) {
       active = true;

@@ -178,6 +178,12 @@
     100% { transform: translate(2%, -1%); }
   }
 
+  /* dithered portrait melts into the void */
+  [data-portrait] {
+    mask-image: radial-gradient(ellipse 92% 88% at 50% 45%, #000 68%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 92% 88% at 50% 45%, #000 68%, transparent 100%);
+  }
+
   /* ---------- split text ---------- */
   .split-line {
     display: inline-block;
