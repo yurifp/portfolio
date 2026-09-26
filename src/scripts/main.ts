@@ -11,6 +11,15 @@ import { initScramble, feedVelocity, currentVelocity } from './scramble';
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* dev-only: this runtime owns the whole page (tickers, controllers,
+   listeners). A soft HMR update would re-execute the module against
+   a live page — half-installed controllers fighting old ones. Decline
+   hot updates so Vite falls back to a FULL PAGE RELOAD: what you see
+   in dev is always the code on disk. */
+if (import.meta.hot) {
+  import.meta.hot.decline();
+}
+
 const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ------------------------------------------------------------------ */
