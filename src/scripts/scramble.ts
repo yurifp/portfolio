@@ -1,9 +1,11 @@
 /*
-  Scroll roulette — characters gamble while the page moves.
-  Green glyphs cycling while scroll velocity is alive; when it dies,
-  a left-to-right wave resolves each char back to its true letter and
-  the inherited color. Registered targets: char-split spans plus any
-  [data-scramble] element (BR mark).
+  Scroll roulette v2 — class-driven color, watchdog-guaranteed rest.
+
+  Glyphs churn per character while the page moves; COLOR is a single
+  CSS class on each host (.is-scrambling), so there are ZERO inline
+  color styles anywhere — a stuck color would require a class that
+  nothing removes, and an independent watchdog removes it whenever
+  the page has been at rest, no matter what the state machine thinks.
 */
 import { gsap } from 'gsap';
 
@@ -14,7 +16,7 @@ const SWAP_JITTER = 0.07;
 const RESOLVE_WAVE = 0.42;
 const RESOLVE_JITTER = 0.12;
 
-interface CharSlot {
+interface Slot {
   el: HTMLElement;
   orig: string;
   nextSwap: number;
@@ -22,8 +24,12 @@ interface CharSlot {
   resolveAt: number | null;
 }
 
-/* velocity source — fed by main.ts (Lenis); goes stale when the
-   emitter stops (Lenis only emits while scrolling) */
+interface Host {
+  el: HTMLElement;
+  field: boolean; /* true → deep-green scramble (dark text on lime) */
+}
+
+/* velocity source — fed by main.ts (Lenis); goes stale at rest */
 let velocity = 0;
 let lastFeed = 0;
 export function feedVelocity(v: number) {
@@ -36,26 +42,24 @@ export function currentVelocity() {
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function scrambleColorFor(el: HTMLElement): string {
-  /* bright lime signals on dark grounds (light settled text);
-     deep green when the text sits dark on the lime field */
+function settledIsDark(el: HTMLElement): boolean {
   const c = getComputedStyle(el).color;
   const m = c.match(/\d+(\.\d+)?/g);
-  if (m) {
-    const [r, g, b] = m.map(Number);
-    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    if (lum >= 0.45) return '#9df133';
-  }
-  return '#2e7a0c';
+  if (!m) return false;
+  const [r, g, b] = m.map(Number);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.45;
 }
 
 export function initScramble() {
   if (reduced) return;
 
-  const slots: CharSlot[] = [];
+  const slots: Slot[] = [];
+  const hosts: Host[] = [];
 
-  const register = (el: HTMLElement, chars: HTMLElement[]) => {
-    chars.forEach((c, i) => {
+  const addHost = (el: HTMLElement, chars: HTMLElement[]) => {
+    if (!chars.length) return;
+    hosts.push({ el, field: settledIsDark(chars[0]) });
+    chars.forEach((c) => {
       slots.push({
         el: c,
         orig: c.textContent ?? '',
@@ -63,17 +67,15 @@ export function initScramble() {
         swapEvery: SWAP_MIN + Math.random() * SWAP_JITTER,
         resolveAt: null,
       });
-      void i;
     });
   };
 
   /* char-split elements */
   document.querySelectorAll<HTMLElement>('[data-split="chars"]').forEach((host) => {
-    const chars = [...host.querySelectorAll<HTMLElement>('.split-line > span')];
-    register(host, chars);
+    addHost(host, [...host.querySelectorAll<HTMLElement>('.split-line > span')]);
   });
 
-  /* whole-element targets (BR mark, wordmark…) — split on the fly */
+  /* whole-element targets (BR mark…) — split into chars on the fly */
   document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((host) => {
     const text = host.textContent ?? '';
     host.setAttribute('aria-label', text);
@@ -92,90 +94,89 @@ export function initScramble() {
       chars.push(wrap);
     }
     host.appendChild(frag);
-    register(host, chars);
+    addHost(host, chars);
   });
 
   if (!slots.length) return;
 
-  let smoothed = 0;
+  const setClasses = (on: boolean) => {
+    hosts.forEach((h) => {
+      h.el.classList.toggle('is-scrambling', on);
+      h.el.classList.toggle('is-scrambling--field', on && h.field);
+    });
+  };
+
   let active = false;
+  let smoothed = 0;
   let waveStart = 0;
+  let waveCleaned = true;
 
   const tick = (time: number, dtMs: number) => {
     const dt = Math.min(dtMs / 1000, 0.05);
-    /* no scroll events for 120ms → the page is at rest */
-    if (performance.now() - lastFeed > 120) velocity = 0;
-    /* dead zone: trackpad drift tails shouldn't hold the roulette */
+    const atRest = performance.now() - lastFeed > 120;
+    if (atRest) velocity = 0;
     const v = Math.abs(velocity) < 1 ? 0 : velocity;
     smoothed += (Math.abs(v) - smoothed) * Math.min(1, dt * 9);
-    /* hysteresis: wake above 1.1, sleep below 0.5 — no flutter,
-       and residual momentum can't keep it green forever */
+    /* hysteresis: wake above 1.1, sleep below 0.5 */
     const threshold = active ? 0.5 : 1.1;
     const nowActive = smoothed > threshold;
 
     if (nowActive && !active) {
       active = true;
-      /* wake every slot */
+      waveCleaned = false;
+      setClasses(true);
       slots.forEach((s) => {
         s.resolveAt = null;
         s.nextSwap = time + Math.random() * s.swapEvery;
-        s.el.style.color = scrambleColorFor(s.el);
       });
     } else if (!nowActive && active) {
       active = false;
       waveStart = time;
-      /* schedule the settling wave — near-to-far by slot order */
+      /* settle wave: near-to-far by slot order */
       slots.forEach((s, i) => {
         s.resolveAt = time + (i / slots.length) * RESOLVE_WAVE + Math.random() * RESOLVE_JITTER;
       });
     }
 
+    /* glyph churn / wave resolve — textContent only, never colors */
     for (const s of slots) {
-      if (active) {
+      if (nowActive) {
         if (time >= s.nextSwap) {
           s.el.textContent = GLYPHS[(Math.random() * GLYPHS.length) | 0];
           s.nextSwap = time + s.swapEvery * (0.6 + Math.random() * 0.8);
         }
       } else if (s.resolveAt !== null && time >= s.resolveAt) {
         s.el.textContent = s.orig === ' ' ? '\u00A0' : s.orig;
-        s.el.style.color = '';
         s.resolveAt = null;
       }
     }
 
-    /* definitive settle — UNCONDITIONAL on rest: no feed for 120ms
-       means the page is still; force the machine asleep and restore
-       anything still colored, whatever state it thinks it's in.
-       This closes every stuck path (clamped wheels at boundaries,
-       stale feeds, races). */
-    const atRest = performance.now() - lastFeed > 120;
-    if (atRest && active) {
-      active = false;
-      waveStart = time;
-      slots.forEach((s) => {
-        s.resolveAt = 0;
-      });
+    /* wave done → colors off (single class flip for every host) */
+    if (!active && !waveCleaned && time - waveStart > RESOLVE_WAVE + RESOLVE_JITTER) {
+      setClasses(false);
+      waveCleaned = true;
     }
-    if (atRest && time - waveStart > 1.2) {
-      for (const s of slots) {
-        if (s.resolveAt === null && s.el.style.color !== '') {
-          s.el.textContent = s.orig === ' ' ? '\u00A0' : s.orig;
-          s.el.style.color = '';
-        }
-      }
-    }
-    void waveStart;
   };
 
   gsap.ticker.add((time, deltaTime) => tick(time, deltaTime));
 
-  /* native-scroll fallback when Lenis is off (reduced motion already
-     returned; this covers programmatic scrollTo) */
-  if (!document.documentElement.classList.contains('lenis')) {
-    let lastY = scrollY;
-    gsap.ticker.add(() => {
-      feedVelocity((scrollY - lastY) * 0.7);
-      lastY = scrollY;
+  /*
+    Watchdog — completely independent of the ticker and the state
+    machine. If the page has been at rest for 400ms, the settled
+    state is enforced: classes off, originals restored. Whatever
+    went wrong upstream, this converges.
+  */
+  setInterval(() => {
+    if (performance.now() - lastFeed <= 400) return;
+    let dirty = hosts.some((h) => h.el.classList.contains('is-scrambling'));
+    if (!dirty) dirty = slots.some((s) => s.resolveAt !== null);
+    if (!dirty) return;
+    active = false;
+    waveCleaned = true;
+    setClasses(false);
+    slots.forEach((s) => {
+      s.el.textContent = s.orig === ' ' ? '\u00A0' : s.orig;
+      s.resolveAt = null;
     });
-  }
+  }, 700);
 }

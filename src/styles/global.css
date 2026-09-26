@@ -195,6 +195,18 @@
     will-change: transform;
   }
 
+  /* ---------- scroll roulette (color is class-only, never inline) ---------- */
+  .is-scrambling .split-line > span,
+  .is-scrambling > span[aria-hidden='true'] {
+    color: var(--color-lime);
+    transition: color 0.15s linear;
+  }
+  /* dark text sitting on the lime field scrambles in deep green */
+  .is-scrambling--field .split-line > span,
+  .is-scrambling--field > span[aria-hidden='true'] {
+    color: #2e7a0c;
+  }
+
   /* ---------- odometer counters ---------- */
   .odo-digit {
     display: inline-block;
