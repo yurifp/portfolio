@@ -284,6 +284,16 @@
     letter-spacing: -0.04em;
   }
 
+  /* CSS-only backstop: if the runtime never boots (dead bundle,
+     hiccup), the curtain lifts by itself — a static page beats a
+     trapped one. Healthy loads release via JS long before 7s. */
+  .preloader {
+    animation: preloader-give-up 0.6s ease 7s forwards;
+  }
+  @keyframes preloader-give-up {
+    to { opacity: 0; visibility: hidden; }
+  }
+
   /* ---------- progress rail ---------- */
   .progress-rail {
     position: fixed;
