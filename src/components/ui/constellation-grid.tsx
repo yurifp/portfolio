@@ -202,7 +202,7 @@ export default function ConstellationGrid({
         const isNear = dist < mouse.radius;
 
         const baseAlpha = isNear
-          ? 0.55 * (0.15 + activity * 0.85)
+          ? 0.5 * activity /* zero green at rest — proximity glow lives and dies with activity */
           : (0.16 + Math.sin(n.pulse) * 0.06) * reveal;
 
         const r = isNear ? n.radius * 2.1 : n.radius + Math.sin(n.pulse) * 0.3;

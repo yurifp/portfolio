@@ -10,11 +10,16 @@
 import { gsap } from 'gsap';
 
 const GLYPHS = '!<>-_\\/[]{}—=+*^?#______ABCDEFGHKMNPRSTUVWXYZ0123456789';
-/* gsap.ticker time is seconds — keep every interval in seconds */
+/* gsap.ticker time is seconds — keep every interval in seconds.
+   Settle is SNAPPY: the wave resolves during the glide tail, so the
+   text is already white by the time the page stops. */
 const SWAP_MIN = 0.055;
 const SWAP_JITTER = 0.07;
-const RESOLVE_WAVE = 0.42;
-const RESOLVE_JITTER = 0.12;
+const RESOLVE_WAVE = 0.22;
+const RESOLVE_JITTER = 0.06;
+const SLEEP_VELOCITY = 2.2;
+const WATCHDOG_MS = 300;
+const WATCHDOG_REST_MS = 250;
 
 interface Slot {
   el: HTMLElement;
@@ -113,12 +118,13 @@ export function initScramble() {
 
   const tick = (time: number, dtMs: number) => {
     const dt = Math.min(dtMs / 1000, 0.05);
-    const atRest = performance.now() - lastFeed > 120;
+    const atRest = performance.now() - lastFeed > WATCHDOG_REST_MS;
     if (atRest) velocity = 0;
     const v = Math.abs(velocity) < 1 ? 0 : velocity;
     smoothed += (Math.abs(v) - smoothed) * Math.min(1, dt * 9);
-    /* hysteresis: wake above 1.1, sleep below 0.5 */
-    const threshold = active ? 0.5 : 1.1;
+    /* hysteresis: wake above 1.1; sleep early — during the glide tail —
+       so the wave resolves while Lenis finishes, not after */
+    const threshold = active ? SLEEP_VELOCITY : 1.1;
     const nowActive = smoothed > threshold;
 
     if (nowActive && !active) {
@@ -162,12 +168,12 @@ export function initScramble() {
 
   /*
     Watchdog — completely independent of the ticker and the state
-    machine. If the page has been at rest for 400ms, the settled
-    state is enforced: classes off, originals restored. Whatever
-    went wrong upstream, this converges.
+    machine. Brief rest already forces the settled state: classes
+    off, originals restored. Whatever went wrong upstream, this
+    converges — fast.
   */
   setInterval(() => {
-    if (performance.now() - lastFeed <= 400) return;
+    if (performance.now() - lastFeed <= WATCHDOG_REST_MS) return;
     let dirty = hosts.some((h) => h.el.classList.contains('is-scrambling'));
     if (!dirty) dirty = slots.some((s) => s.resolveAt !== null);
     if (!dirty) return;
@@ -178,5 +184,5 @@ export function initScramble() {
       s.el.textContent = s.orig === ' ' ? '\u00A0' : s.orig;
       s.resolveAt = null;
     });
-  }, 700);
+  }, WATCHDOG_MS);
 }

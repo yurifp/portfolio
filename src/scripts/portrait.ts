@@ -56,13 +56,9 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-/* low-key ink: lime desaturated toward the void so the portrait
-   reads as a black-and-white treatment melting into #070210 */
-function lowKeyInk(): [number, number, number] {
-  const [r, g, b] = hexToRgb('#9df133');
-  const mix = (c: number) => Math.round(c * 0.55);
-  return [mix(r) + 9, mix(g) + 6, mix(b) + 14];
-}
+/* black-and-white ink — matches the reference's low-key portrait
+   treatment: neutral white dots on the void, no color tint */
+const INK: [number, number, number] = [222, 218, 212];
 
 export function mountPortrait(canvas: HTMLCanvasElement, opts?: { imageUrl?: string }) {
   const ctx = canvas.getContext('2d', { alpha: false });
@@ -78,7 +74,7 @@ export function mountPortrait(canvas: HTMLCanvasElement, opts?: { imageUrl?: str
     for (let x = 0; x < W; x++) terrain[y * W + x] = fbm(x / 46 + 9, y / 46 + 7);
 
   const BASE = hexToRgb('#070210');
-  const ink: [number, number, number] = lowKeyInk();
+  const ink: [number, number, number] = INK;
 
   const draw = (phase: number) => {
     const [r0, g0, b0] = BASE;
