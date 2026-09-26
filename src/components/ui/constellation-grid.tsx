@@ -64,7 +64,7 @@ export default function ConstellationGrid({
       prevY: -1000,
       vx: 0,
       vy: 0,
-      radius: 230,
+      radius: 150,
     };
 
     /* reveal-by-activity: 0 = almost hidden, 1 = full constellation */
@@ -135,9 +135,11 @@ export default function ConstellationGrid({
       const speed = Math.sqrt(mouse.vx * mouse.vx + mouse.vy * mouse.vy);
       const reveal = 0.05 + activity * 0.95;
 
-      /* spring constants — Hooke + damping */
-      const SPRING_K = 18;
-      const DAMPING = 0.82;
+      /* spring constants — softer spring + heavier damping: the mesh
+         glides instead of buzzing back (the 'laggy' feel was
+         underdamped oscillation) */
+      const SPRING_K = 13;
+      const DAMPING = 0.72;
 
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i];
@@ -149,7 +151,7 @@ export default function ConstellationGrid({
 
         if (dist < mouse.radius && dist > 0.001) {
           const power = 1 - dist / mouse.radius;
-          const force = power * (1500 + speed * 150);
+          const force = power * (750 + speed * 85);
           const angle = Math.atan2(dy, dx);
           n.vx -= Math.cos(angle) * force * dt;
           n.vy -= Math.sin(angle) * force * dt;
@@ -195,7 +197,6 @@ export default function ConstellationGrid({
       }
 
       /* nodes + proximity highlights */
-      ctx.font = '8px ui-monospace, SFMono-Regular, Consolas, monospace';
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i];
         const dist = Math.hypot(mouse.x - n.x, mouse.y - n.y);
@@ -213,17 +214,14 @@ export default function ConstellationGrid({
         ctx.arc(n.x, n.y, Math.max(0.5, r), 0, Math.PI * 2);
         ctx.fill();
 
-        if (isNear && dist < 90 && activity > 0.15) {
-          const ring = ((n.pulse * 20) % 30) + 4;
-          const ringAlpha = (1 - ring / 34) * 0.4 * activity;
+        if (isNear && dist < 64 && activity > 0.15) {
+          const ring = ((n.pulse * 16) % 24) + 4;
+          const ringAlpha = (1 - ring / 28) * 0.38 * activity;
           ctx.strokeStyle = `rgba(${accent}, ${ringAlpha})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(n.x, n.y, ring, 0, Math.PI * 2);
           ctx.stroke();
-
-          ctx.fillStyle = `rgba(${accent}, ${0.85 * activity})`;
-          ctx.fillText(n.label, n.x + 10, n.y - 10);
         }
       }
     };
@@ -245,7 +243,8 @@ export default function ConstellationGrid({
 
       const speed = Math.hypot(mouse.vx, mouse.vy);
       activity = Math.min(1, activity + speed * 0.0016 + 0.05);
-      activity *= Math.exp(-dt * 1.7);
+      /* snappier decay — the field answers fast and lets go fast */
+      activity *= Math.exp(-dt * 2.4);
 
       draw(dt);
     };

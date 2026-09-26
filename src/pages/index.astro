@@ -25,5 +25,5 @@ import Footer from '../components/Footer.astro';
   import { mountPortrait } from '../scripts/portrait';
 
   const portrait = document.querySelector<HTMLCanvasElement>('[data-portrait]');
-  if (portrait) mountPortrait(portrait);
+  if (portrait) mountPortrait(portrait, { imageUrl: '/images/portrait.jpg' });
 </script>
