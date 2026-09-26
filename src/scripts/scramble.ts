@@ -143,10 +143,20 @@ export function initScramble() {
       }
     }
 
-    /* definitive settle: long after the wave, anything still carrying
-       inline color or a stray glyph gets force-restored — covers every
-       race where a re-activation interrupted the resolution */
-    if (!active && time - waveStart > 1.2) {
+    /* definitive settle — UNCONDITIONAL on rest: no feed for 120ms
+       means the page is still; force the machine asleep and restore
+       anything still colored, whatever state it thinks it's in.
+       This closes every stuck path (clamped wheels at boundaries,
+       stale feeds, races). */
+    const atRest = performance.now() - lastFeed > 120;
+    if (atRest && active) {
+      active = false;
+      waveStart = time;
+      slots.forEach((s) => {
+        s.resolveAt = 0;
+      });
+    }
+    if (atRest && time - waveStart > 1.2) {
       for (const s of slots) {
         if (s.resolveAt === null && s.el.style.color !== '') {
           s.el.textContent = s.orig === ' ' ? '\u00A0' : s.orig;
