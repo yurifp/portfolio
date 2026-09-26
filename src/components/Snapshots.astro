@@ -42,10 +42,10 @@ const withHref = (p: (typeof homeProjects)[number]) =>
             decoding="async"
           />
         </div>
-        <div class="art-card__cat mono-tiny px-[0.45rem] py-[0.15rem] border font-medium" style="border-color: rgba(7,2,16,0.3); background: var(--field); color: #070210;">
+        <div class="art-card__cat mono-tiny px-[0.45rem] py-[0.15rem] border font-medium" style="border-color: rgba(7,2,16,0.3); background: var(--field); color: #070210;" data-card-meta>
           {p.cat}
         </div>
-        <div class="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-[0.7rem]">
+        <div class="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-[0.7rem]" data-card-meta>
           <h3 class="font-heading font-medium text-[1.15rem] tracking-[0.01em]" style="color: #070210;">{p.title}</h3>
           <span class="mono-tiny nav-link font-medium" style="color: #070210;">Visit</span>
         </div>

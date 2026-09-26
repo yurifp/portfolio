@@ -203,6 +203,18 @@ function initCardEffects() {
         },
       );
     }
+    /* card text meta (tag + title row) rises with the reveal */
+    const metas = card.querySelectorAll<HTMLElement>('[data-card-meta]');
+    if (metas.length) {
+      gsap.from(metas, {
+        y: 26,
+        opacity: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        stagger: 0.08,
+        scrollTrigger: { trigger: card, start: 'top 92%', toggleActions: 'play none none reverse' },
+      });
+    }
   });
 }
 
@@ -210,17 +222,27 @@ function initCardEffects() {
 /* section theme flip (dark <-> lime)                                   */
 /* ------------------------------------------------------------------ */
 function initThemeFlips() {
-  document.querySelectorAll<HTMLElement>('[data-theme-section]').forEach((sec) => {
-    const theme = sec.dataset.themeSection || 'void';
-    ScrollTrigger.create({
-      trigger: sec,
-      start: 'top 55%',
-      end: 'bottom 45%',
-      onToggle(self) {
-        if (self.isActive) document.body.dataset.theme = theme;
-      },
-    });
-  });
+  const secs = [...document.querySelectorAll<HTMLElement>('[data-theme-section]')];
+  if (!secs.length) return;
+  /* deterministic: the page wears the theme of the section that holds
+     the viewport CENTER (with a margin so edges belong to the dark).
+     At the top the center sits in the hero → always void. No trigger
+     state to desync, both directions by construction. */
+  const apply = () => {
+    const center = scrollY + innerHeight / 2;
+    let theme = 'void';
+    for (const sec of secs) {
+      const top = sec.offsetTop;
+      const bottom = top + sec.offsetHeight;
+      if (center > top + innerHeight * 0.12 && center < bottom - innerHeight * 0.12) {
+        theme = sec.dataset.themeSection || 'void';
+      }
+    }
+    if (document.body.dataset.theme !== theme) document.body.dataset.theme = theme;
+  };
+  apply();
+  addEventListener('scroll', apply, { passive: true });
+  addEventListener('resize', apply);
 }
 
 /* ------------------------------------------------------------------ */

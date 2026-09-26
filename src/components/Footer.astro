@@ -5,7 +5,7 @@ const year = new Date().getFullYear();
 ---
 <footer class="relative border-t" style="border-color: var(--line-now);">
   <div class="px-[1.6rem] pt-[5rem] pb-[1.6rem]">
-    <p class="mono-tiny text-dim mb-[1.4rem]">Got an idea worth building?</p>
+    <p class="mono-tiny text-dim mb-[1.4rem]" data-fade>Got an idea worth building?</p>
 
     <a
       href={`mailto:${site.email}`}
@@ -29,8 +29,8 @@ const year = new Date().getFullYear();
     <div class="hairline-h my-[3.4rem]"></div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-[2.5rem] mb-[4rem]">
-      {Object.entries(socials.footer).map(([group, links]) => (
-        <div>
+      {Object.entries(socials.footer).map(([group, links], gi) => (
+        <div data-fade data-delay={0.1 + gi * 0.08}>
           <p class="mono-tiny text-faint mb-[0.8rem]">{group}</p>
           <ul class="space-y-[0.65rem]">
             {links.map((l) => (
@@ -39,14 +39,14 @@ const year = new Date().getFullYear();
           </ul>
         </div>
       ))}
-      <div>
+      <div data-fade data-delay={0.3}>
         <p class="mono-tiny text-faint mb-[0.8rem]">Direct</p>
         <p class="mono-tiny" style="color: var(--ink-now);">{site.email}</p>
         <p class="mono-tiny mt-2 text-dim">{site.location.city}</p>
       </div>
     </div>
 
-    <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3" data-fade data-delay={0.4}>
       <p class="mono-tiny text-faint">@{year} by {site.name}</p>
       <p class="mono-tiny text-faint">BUILT WITH ASTRO · GSAP · THREE.JS</p>
       <a href="#about" class="mono-tiny nav-link text-dim" data-scroll-top>Back to top ↑</a>

@@ -6,8 +6,8 @@ const digits = (v: string) => v.split('');
 <section class="relative border-t border-b" style="border-color: var(--line-now);">
   <div class="px-[1.6rem] py-[4.5rem]">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-x-[2rem] gap-y-[3rem]">
-      {stats.map((s) => (
-        <div>
+      {stats.map((s, i) => (
+        <div data-fade data-delay={i * 0.08}>
           <div class="flex items-baseline gap-[0.15rem] font-heading font-medium text-[3.4rem] leading-none text-white" data-odo={s.value}>
             {digits(s.value).map((d) => (
               <span class="odo-digit" aria-hidden="true">
@@ -18,7 +18,7 @@ const digits = (v: string) => v.split('');
             ))}
             {s.suffix && <span class="text-lime">{s.suffix}</span>}
           </div>
-          <p class="mono-tiny mt-3 text-dim">{s.label}</p>
+          <p class="mono-tiny mt-3 text-dim" data-fade data-delay={0.15 + i * 0.08}>{s.label}</p>
         </div>
       ))}
     </div>
