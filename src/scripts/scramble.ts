@@ -142,6 +142,18 @@ export function initScramble() {
         s.resolveAt = null;
       }
     }
+
+    /* definitive settle: long after the wave, anything still carrying
+       inline color or a stray glyph gets force-restored — covers every
+       race where a re-activation interrupted the resolution */
+    if (!active && time - waveStart > 1.2) {
+      for (const s of slots) {
+        if (s.resolveAt === null && s.el.style.color !== '') {
+          s.el.textContent = s.orig === ' ' ? '\u00A0' : s.orig;
+          s.el.style.color = '';
+        }
+      }
+    }
     void waveStart;
   };
 

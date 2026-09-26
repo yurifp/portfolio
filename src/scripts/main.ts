@@ -537,6 +537,13 @@ function initRowDrift() {
 
 /* ------------------------------------------------------------------ */
 export function initField() {
+  /* idempotent: HMR module re-execution must not stack a second
+     runtime (duplicate tickers fight over the same DOM — the
+     stuck-green-text class of bug) */
+  const w = window as unknown as { __fieldRuntime?: symbol };
+  if (w.__fieldRuntime) return;
+  w.__fieldRuntime = Symbol('field');
+
   initLenis();
   initSplits();
   initOdometers();
