@@ -428,17 +428,33 @@
     opacity: 0.5;
   }
 
-  /* below 700px the scatter collapses into a stacked column */
+  /* flipbook stage cards */
+  .snap-card {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  /* below 700px the flipbook becomes a stacked column (no pin) */
   @media (max-width: 700px) {
-    [data-art-scatter] { height: auto !important; display: flex; flex-direction: column; gap: 1.3rem; }
-    [data-art-scatter] .connector { display: none; }
-    [data-art-card] {
+    [data-art-stage] {
+      height: auto !important;
+      display: flex;
+      flex-direction: column;
+      gap: 1.3rem;
+      padding: 5rem 1.6rem 2.5rem;
+      overflow: visible;
+    }
+    [data-art-stage] > svg { display: none; }
+    [data-art-stage] > div { position: static !important; padding: 0 !important; }
+    [data-art-stage] [data-snap-label] { position: static; }
+    .snap-card {
       position: relative !important;
-      left: auto !important;
-      top: auto !important;
+      inset: auto !important;
       width: 100% !important;
       height: auto !important;
       aspect-ratio: 4 / 3;
+      opacity: 1 !important;
+      transform: none !important;
     }
   }
 

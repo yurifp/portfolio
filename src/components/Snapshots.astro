@@ -1,72 +1,83 @@
 ---
 /*
-  Snap-shots — the lime field. Nine numbered artboards scattered on a
-  column grid, joined by dashed connector paths. Cards parallax at
-  individual speeds and reveal via clip-path (see main.ts).
+  Snap-shots — THE FLIPBOOK.
+  A pinned lime stage: the viewport locks and every scroll beat turns a
+  page — a card flies in from its side, its meta flips up, a connector
+  draws, and the collage accumulates. Scrolling back un-flips every
+  page. Driven by a single scrubbed timeline (see initSnapshots in
+  main.ts); the theme flip rides the pin trigger itself.
 */
 import { homeProjects } from '../data/site';
 import Visit from './Visit.astro';
 
 const withHref = (p: (typeof homeProjects)[number]) =>
   p.cat === 'Case Study' ? `/work/${p.slug}` : '/work';
+/* stage positions: the old 250vh-scatter y compressed into the
+   pinned stage band, cards scaled to collage size */
+const stagePos = (p: (typeof homeProjects)[number]) => ({
+  left: `${p.x}%`,
+  top: `${16 + p.y * 0.52}%`,
+  width: `${Math.round(p.w * 0.62)}px`,
+  height: `${Math.round(p.h * 0.62)}px`,
+});
 ---
-<section class="relative" data-theme-section="lime">
-  <!-- corner labels of the field -->
-  <p class="mono-tiny absolute top-[1.2rem] left-[1.6rem] z-20" style="color: rgba(7,2,16,0.6);">FIELD/WORKS — {String(homeProjects.length).padStart(2, '0')}</p>
-  <p class="mono-tiny absolute top-[1.2rem] right-[1.6rem] z-20" style="color: rgba(7,2,16,0.6);">©2026 — YFP</p>
+<section class="relative" id="snapshots">
+  <div class="snap-stage h-screen relative overflow-hidden" data-art-stage data-art-scatter>
+    <!-- corner labels of the field -->
+    <p class="mono-tiny absolute top-[1.2rem] left-[1.6rem] z-20 font-medium" style="color: rgba(7,2,16,0.6);" data-snap-label>FIELD/WORKS — {String(homeProjects.length).padStart(2, '0')}</p>
+    <p class="mono-tiny absolute top-[1.2rem] right-[1.6rem] z-20 font-medium" style="color: rgba(7,2,16,0.6);" data-snap-label>©2026 — YFP</p>
 
-  <div class="px-[1.6rem] pt-[5rem]">
-    <div class="flex items-baseline justify-between mb-[3rem]">
-      <h2 class="display-section" data-split="chars">Snap-shots</h2>
-      <a href="/work" class="mono-tiny nav-link inline-block py-[0.45rem] min-h-[24px] box-border hidden sm:inline-block" style="color: var(--ink-now);">
-        View all — {homeProjects.length}+ projects
-      </a>
+    <!-- heading + view all -->
+    <div class="absolute top-[13%] inset-x-0 px-[1.6rem] z-20 flex items-baseline justify-between">
+      <h2 class="display-section" data-split="chars" data-stage-split>Snap-shots</h2>
+      <span class="overflow-hidden hidden sm:inline-block">
+        <a href="/work" class="mono-tiny nav-link inline-block py-[0.45rem] min-h-[24px] box-border font-medium" style="color: var(--ink-now);" data-snap-viewall>
+          View all — {homeProjects.length}+ projects
+        </a>
+      </span>
     </div>
-  </div>
 
-  <div class="relative w-full" data-art-scatter style="height: 250vh;">
+    <!-- the pages of the flipbook -->
     {homeProjects.map((p, i) => (
       <article
-        class="art-card ticks absolute"
-        data-art-card
-        data-speed={((i % 3) - 1) * 6}
+        class="art-card ticks absolute snap-card"
+        data-snap-card
         data-cursor="VISIT"
-        style={`left:${p.x}%; top:${p.y}%; width:${p.w}px; height:${p.h}px;`}
+        style={stagePos(p)}
       >
-        <span class="mono-tiny absolute top-[0.55rem] right-[0.6rem] z-[3] font-medium" style="color: rgba(7,2,16,0.65);">{String(i + 1).padStart(2, '0')}</span>
+        <span class="mono-tiny absolute top-[0.55rem] right-[0.6rem] z-[3] font-medium" style="color: rgba(7,2,16,0.65);" data-card-meta>{String(i + 1).padStart(2, '0')}</span>
         <a href={withHref(p)} class="absolute inset-0 z-[3]" aria-label={`${p.title} — ${p.cat}`}></a>
         <div class="art-card__img">
-          <img
-            src={`/images/work/${p.slug}.webp`}
-            alt={p.title}
-            loading={i < 3 ? 'eager' : 'lazy'}
-            decoding="async"
-          />
+          <img src={`/images/work/${p.slug}.webp`} alt={p.title} loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
         </div>
         <div class="art-card__cat mono-tiny px-[0.45rem] py-[0.15rem] border font-medium" style="border-color: rgba(7,2,16,0.3); background: var(--field); color: #070210;" data-card-meta>
           {p.cat}
         </div>
         <div class="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-[0.7rem]" data-card-meta>
-          <h3 class="font-heading font-medium text-[1.15rem] tracking-[0.01em]" style="color: #070210;">{p.title}</h3>
+          <h3 class="font-heading font-medium text-[1.05rem] tracking-[0.01em]" style="color: #070210;">{p.title}</h3>
           <span class="mono-tiny font-medium" style="color: #070210;"><Visit /></span>
         </div>
         <span class="absolute -top-[5px] -left-[5px] w-[9px] h-[9px] rounded-full z-[4]" style={`background:${p.accent};`}></span>
       </article>
     ))}
 
-    <!-- dashed connectors between successive cards -->
-    <svg class="connector inset-0 w-full h-full" aria-hidden="true" preserveAspectRatio="none">
+    <!-- connectors draw as their pages land -->
+    <svg class="absolute inset-0 w-full h-full z-[1] pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       {homeProjects.slice(0, -1).map((p, i) => {
         const q = homeProjects[i + 1];
         return (
           <line
-            x1={`${p.x + 7}%`}
-            y1={`${p.y + 5}%`}
-            x2={`${q.x + 7}%`}
-            y2={`${q.y + 5}%`}
-            stroke="rgba(7,2,16,0.35)"
+            data-connector
+            pathLength="1"
+            x1={`${p.x + 5}%`}
+            y1={`${16 + p.y * 0.52 + 10}%`}
+            x2={`${q.x + 5}%`}
+            y2={`${16 + q.y * 0.52 + 10}%`}
+            stroke="rgba(7,2,16,0.3)"
             stroke-width="1"
-            stroke-dasharray="3 6"
+            vector-effect="non-scaling-stroke"
+            stroke-dasharray="1"
+            stroke-dashoffset="1"
           />
         );
       })}

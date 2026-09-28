@@ -100,45 +100,57 @@ function splitWords(el: HTMLElement) {
 }
 
 function initSplits() {
+  /* FLIPBOOK: every reveal is scrubbed — tied to scroll POSITION, not
+     time. Each pixel of scroll moves letters; scrolling back un-moves
+     them. Elements inside the pinned stage are owned by its timeline. */
+  const inStage = (el: Element) => !!el.closest('[data-art-stage]');
   document.querySelectorAll<HTMLElement>('[data-split="chars"]').forEach((el) => {
     const chars = splitChars(el);
-    if (prefersReduced) return;
-    gsap.from(chars, {
-      yPercent: 115,
-      duration: 1.1,
-      ease: 'power4.out',
-      stagger: 0.018,
-      delay: Number(el.dataset.delay ?? 0),
-      /* reverse the reveal when the block scrolls back out */
-      scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' },
-    });
+    if (prefersReduced || inStage(el)) return;
+    gsap.fromTo(
+      chars,
+      { yPercent: 115 },
+      {
+        yPercent: 0,
+        ease: 'none',
+        stagger: 0.02,
+        scrollTrigger: { trigger: el, start: 'top 94%', end: 'top 45%', scrub: 0.6 },
+      },
+    );
   });
   document.querySelectorAll<HTMLElement>('[data-split="words"]').forEach((el) => {
     const words = splitWords(el);
-    if (prefersReduced) return;
-    gsap.from(words, {
-      yPercent: 115,
-      duration: 0.9,
-      ease: 'power4.out',
-      stagger: 0.012,
-      scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' },
-    });
+    if (prefersReduced || inStage(el)) return;
+    gsap.fromTo(
+      words,
+      { yPercent: 115 },
+      {
+        yPercent: 0,
+        ease: 'none',
+        stagger: 0.012,
+        scrollTrigger: { trigger: el, start: 'top 94%', end: 'top 50%', scrub: 0.6 },
+      },
+    );
   });
   if (prefersReduced) return;
   document.querySelectorAll<HTMLElement>('[data-fade]').forEach((el) => {
-    gsap.from(el, {
-      y: 44,
-      opacity: 0,
-      duration: 1.1,
-      ease: 'power3.out',
-      delay: Number(el.dataset.delay ?? 0),
-      scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' },
-    });
+    if (inStage(el)) return;
+    gsap.fromTo(
+      el,
+      { y: 44, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top 96%', end: 'top 62%', scrub: 0.6 },
+      },
+    );
   });
 }
 
 /* ------------------------------------------------------------------ */
-/* odometers                                                            */
+/* odometers — digits roll with SCROLL POSITION: every tick of the
+   wheel moves the columns, both directions */
 /* ------------------------------------------------------------------ */
 function initOdometers() {
   document.querySelectorAll<HTMLElement>('[data-odo]').forEach((el) => {
@@ -158,20 +170,18 @@ function initOdometers() {
       return;
     }
     apply(0);
-    gsap.to({ p: 0 }, {
-      p: 1,
-      duration: 1.8,
-      ease: 'power2.inOut',
-      onUpdate() {
-        apply((this.targets()[0] as { p: number }).p);
-      },
-      scrollTrigger: { trigger: el, start: 'top 85%' },
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 97%',
+      end: 'top 55%',
+      scrub: 0.35,
+      onUpdate: (self) => apply(self.progress),
     });
   });
 }
 
 /* ------------------------------------------------------------------ */
-/* artboard cards — parallax speeds + clip-path image reveals          */
+/* artboard cards (outside the stage) — scrubbed clip reveals          */
 /* ------------------------------------------------------------------ */
 function initCardEffects() {
   if (prefersReduced) return;
@@ -197,25 +207,111 @@ function initCardEffects() {
         {
           clipPath: 'inset(0% 0% 0% 0%)',
           opacity: 1,
-          duration: 1.3,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: card, start: 'top 92%' },
+          ease: 'none',
+          scrollTrigger: { trigger: card, start: 'top 96%', end: 'top 55%', scrub: 0.6 },
         },
       );
     }
-    /* card text meta (tag + title row) rises with the reveal */
     const metas = card.querySelectorAll<HTMLElement>('[data-card-meta]');
     if (metas.length) {
-      gsap.from(metas, {
-        y: 26,
-        opacity: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-        stagger: 0.08,
-        scrollTrigger: { trigger: card, start: 'top 92%', toggleActions: 'play none none reverse' },
-      });
+      gsap.fromTo(
+        metas,
+        { y: 26, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          ease: 'none',
+          stagger: 0.08,
+          scrollTrigger: { trigger: card, start: 'top 96%', end: 'top 62%', scrub: 0.6 },
+        },
+      );
     }
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* THE FLIPBOOK — Snap-shots pinned stage. The viewport locks on the
+   lime field and every scroll beat turns a page: heading flips in,
+   a card flies from its side with rotation, its meta rises, a
+   connector draws, the collage accumulates. Back up = un-flip.
+/* ------------------------------------------------------------------ */
+function initSnapshots() {
+  const stage = document.querySelector<HTMLElement>('[data-art-stage]');
+  if (!stage) return;
+  const cards = [...stage.querySelectorAll<HTMLElement>('[data-snap-card]')];
+  if (!cards.length) return;
+
+  /* mobile: no pin — cards stack in normal flow (CSS handles it) */
+  if (prefersReduced || matchMedia('(max-width: 700px)').matches) {
+    stage.querySelectorAll<HTMLElement>('[data-snap-label], [data-snap-viewall]').forEach((el) => (el.style.opacity = '1'));
+    return;
+  }
+
+  const headChars = stage.querySelectorAll('[data-stage-split] .split-line > span');
+  const connectors = [...stage.querySelectorAll<SVGLineElement>('[data-connector]')];
+  const labels = stage.querySelectorAll('[data-snap-label]');
+  const viewAll = stage.querySelector<HTMLElement>('[data-snap-viewall]');
+
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: stage,
+      start: 'top top',
+      end: '+=340%',
+      pin: true,
+      scrub: 0.7,
+      anticipatePin: 1,
+      /* the lime field owns the theme for the whole pin */
+      onToggle(self) {
+        document.body.dataset.theme = self.isActive ? 'lime' : 'void';
+      },
+    },
+  });
+
+  /* page 0: corner labels + heading flips */
+  tl.fromTo(labels, { opacity: 0 }, { opacity: 1, duration: 0.04, stagger: 0.015 }, 0);
+  if (headChars.length) {
+    tl.fromTo(headChars, { yPercent: 120 }, { yPercent: 0, duration: 0.34, stagger: 0.028 }, 0.02);
+  }
+  if (viewAll) {
+    tl.fromTo(viewAll, { yPercent: 130 }, { yPercent: 0, duration: 0.16 }, 0.3);
+  }
+
+  /* pages 1..9: one card per beat, alternating entry sides */
+  const beat = 0.072;
+  cards.forEach((card, i) => {
+    const at = 0.1 + i * beat;
+    const side = i % 2 === 0 ? -1 : 1;
+    tl.fromTo(
+      card,
+      {
+        x: side * (90 + (i % 3) * 40),
+        y: 110,
+        rotation: side * 5,
+        opacity: 0,
+        scale: 0.72,
+      },
+      { x: 0, y: 0, rotation: 0, opacity: 1, scale: 1, duration: 0.62 },
+      at,
+    );
+    const metas = card.querySelectorAll('[data-card-meta]');
+    if (metas.length) {
+      tl.fromTo(metas, { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.22, stagger: 0.06 }, at + 0.34);
+    }
+  });
+
+  /* connectors draw once both of their cards have landed */
+  connectors.forEach((line, i) => {
+    tl.fromTo(
+      line,
+      { strokeDashoffset: 1 },
+      { strokeDashoffset: 0, duration: 0.3 },
+      0.1 + (i + 1) * beat + 0.18,
+    );
+  });
+
+  /* closing beat: the whole collage breathes into place */
+  tl.fromTo(stage, { scale: 0.985 }, { scale: 1, duration: 0.12 }, 0.9);
 }
 
 /* ------------------------------------------------------------------ */
@@ -579,6 +675,7 @@ export function initField() {
   initSplits();
   initOdometers();
   initCardEffects();
+  initSnapshots();
   initHeroChoreo();
   initVelocitySkew();
   initRowDrift();
