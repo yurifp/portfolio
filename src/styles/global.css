@@ -63,6 +63,9 @@
     --z-menu: 100;
     --z-loader: 1000;
 
+    /* 12-column axis grid between the two axes */
+    --col-gap: clamp(12px, 1.2vw, 32px);
+
     /* fluid type — nothing below 11px in any viewport; body also caps
        by viewport HEIGHT so short screens never squeeze the film */
     --fs-hud: clamp(11px, 0.4vw + 6px, 15px);
@@ -344,6 +347,69 @@
     .flip-track { display: none; }
   }
 
+  /* ---------- HERO ZONE GRID (docs/hero-layout.md) ----------
+     One grid of zones; every text lives in a cell, in flow.
+     C1 (1-4) | C2 sphere (5-7) | C3 portrait (8-12). */
+  .hero-zones {
+    padding: 0 calc(var(--gutter) + var(--rail-lane)) var(--gutter) var(--gutter);
+  }
+  .hero-intro {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .hero-c1 { grid-column: 1 / 5; }
+  .hero-c2 { grid-column: 5 / 8; }
+  .hero-c3 { grid-column: 9 / 13; }
+  @media (min-width: 1700px) {
+    .hero-c1 { grid-column: 1 / 4; }
+    .hero-c2 { grid-column: 4 / 7; }
+    .hero-c3 { grid-column: 10 / 13; }
+  }
+  @media (max-width: 900px) {
+    .hero-c1 { grid-column: 1 / 13; }
+    .hero-c2 { display: none; }
+    .hero-c3 { grid-column: 1 / 13; align-items: flex-start; }
+  }
+
+  /* guides generated FROM the same grid: borders on column edges */
+  .hero-guides {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+    padding: 0 calc(var(--gutter) + var(--rail-lane)) var(--gutter) var(--gutter);
+  }
+  .hero-guides .g4 { grid-column: 4 / 5; border-right: 1px solid var(--line-now); }
+  .hero-guides .g7 { grid-column: 7 / 8; border-right: 1px solid var(--line-now); }
+
+  /* FERREIRA offset = exactly one column (via the same gap math) */
+  .hero-ferreira { margin-left: calc((100% - 11 * var(--col-gap)) / 12 + var(--col-gap)); }
+
+  /* phone tick = ::before system (lime index marker) */
+  .phone-row .phone-seg:first-child::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 1.1rem;
+    background: var(--color-lime);
+  }
+
+  /* ---------- ?debug=layout — dashed zones, red on intersection ---------- */
+  [data-debug-layout] .zone {
+    outline: 1px dashed rgba(100, 232, 255, 0.55);
+    outline-offset: 2px;
+    position: relative;
+  }
+  [data-debug-layout] .zone::after {
+    content: attr(data-zone);
+    position: absolute;
+    top: -14px; left: 0;
+    font: 10px ui-monospace, monospace;
+    color: rgba(100, 232, 255, 0.8);
+    letter-spacing: 0.1em;
+  }
+  [data-debug-layout] [data-zone-box] { outline: 1px dashed rgba(245, 240, 235, 0.4); }
+  [data-debug-layout] .dbg-collide { outline: 2px solid #ff3b00 !important; }
+
   /* ---------- split text ---------- */
   .split-line {
     display: inline-block;
@@ -446,22 +512,36 @@
     to { opacity: 0; visibility: hidden; }
   }
 
-  /* ---------- progress rail — lives EXCLUSIVELY in --rail-lane ---------- */
+  /* ---------- progress rail — lives EXCLUSIVELY in --rail-lane ----------
+     3-row grid: label / (pct + track + SCROLL) / label — one slot each */
   .progress-rail {
     position: fixed;
-    /* centered inside the lane column */
-    right: calc((var(--rail-lane) - 12px) / 2);
-    top: 50%;
-    translate: 0 -50%;
+    /* the BOX must live entirely inside the lane — explicit width so
+       rotated labels can't inflate it into the content axis */
+    width: calc(var(--rail-lane) - 10px);
+    right: 5px;
+    top: var(--gutter);
+    bottom: var(--gutter);
     z-index: var(--z-rail);
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
     align-items: center;
-    gap: 0.6rem;
+    justify-items: center;
+    gap: 2vh;
+    pointer-events: none;
   }
+  .progress-rail .rail-slot {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    letter-spacing: 0.14em;
+  }
+  .progress-rail .rail-mid { flex: 1; }
+  .progress-rail .mono-tiny { white-space: nowrap; }
   .progress-rail__track {
     width: 1.5px;
-    height: 8rem;
+    flex: 1;
+    min-height: 5rem;
     background: var(--line-now);
     position: relative;
   }
@@ -475,37 +555,28 @@
     transform: scaleY(0);
   }
 
-  /* short viewports: tighten the middle zone so the bio never rides
-     into the name band */
-  @media (max-height: 740px) {
-    .hero-middle { padding-top: 1.4rem !important; padding-bottom: 0.9rem !important; }
-    .hero-middle .bio-paras { row-gap: 0.55rem !important; }
-    .hero-middle .bio-lead { margin-bottom: 0.5rem !important; }
-    .hero-middle .bio-avail { margin-top: 0.6rem !important; }
+  /* bio body — class-based so short-viewport overrides win (no inline) */
+  .bio-body {
+    font-size: var(--fs-body);
+    line-height: 1.5;
+    color: var(--color-dim);
+    text-wrap: balance;
   }
 
-  /* lane labels — pinned to the lane's very ends, clear of the rail */
-  .lane-labels { top: calc(var(--gutter) + 6px); }
-  .lane-labels.lane-labels--bottom { top: auto; bottom: calc(var(--gutter) + 6px); }
-  .lane-labels span {
-    font-family: var(--font-mono);
-    font-size: var(--fs-hud);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-dim); /* ≥4.5:1 on the void */
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    white-space: nowrap;
+  /* short viewports: the sacrifice ladder (spec §5) — paragraph first,
+     then the nav-band offset and paddings give back height */
+  .zone-b { margin-top: calc(var(--gutter) + 3.4em); }
+  .hero-intro { padding-top: 2vh; }
+  .bio-avail { margin-top: 3vh; }
+  @media (max-height: 740px) {
+    .bio-body { font-size: 14px; }
+    .hero-c3 .ticks { width: min(320px, calc(26vh * 0.75)); }
+    .zone-b { margin-top: calc(var(--gutter) + 2.6em); }
+    .hero-intro { padding-top: 1vh; }
+    .bio-avail { margin-top: 2vh; }
   }
-  .lane-labels {
-    position: absolute;
-    right: calc((var(--rail-lane) - 12px) / 2);
-    z-index: var(--z-hud);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    pointer-events: none;
-  }
+
+  /* (lane labels now live INSIDE the rail's 3-row grid — see .progress-rail) */
 
   /* ---------- marquee ---------- */
   .marquee { overflow: hidden; white-space: nowrap; }

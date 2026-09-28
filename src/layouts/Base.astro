@@ -45,6 +45,10 @@ const jsonLd = {
       window.__pageErrors = [];
       addEventListener('error', (e) => window.__pageErrors.push(String(e.message)));
       addEventListener('unhandledrejection', (e) => window.__pageErrors.push('REJ: ' + String(e.reason)));
+      // ?debug=layout — dashed zones; main.ts paints red on intersections
+      if (location.search.includes('debug=layout')) {
+        document.documentElement.setAttribute('data-debug-layout', '');
+      }
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />
