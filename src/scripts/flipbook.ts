@@ -113,7 +113,7 @@ export function initFlipbook() {
     .to('[data-choreo="portrait"]', { yPercent: -26, scale: 0.92, opacity: 0, duration: 0.05 }, 0.05)
     .to('[data-choreo="br"]', { yPercent: -40, opacity: 0, duration: 0.05 }, 0.045)
     .to('#about [data-choreo="meta"]', { opacity: 0, duration: 0.03 }, 0.04)
-    .to('[data-flip-frame="hero"] [data-fade], [data-flip-frame="hero"] .mono-tiny.text-ember',
+    .to('[data-flip-frame="hero"] [data-fade], [data-flip-frame="hero"] [data-avail]',
       { opacity: 0, y: -18, stagger: 0.006, duration: 0.04 }, 0.05)
     .to(heroFrame, { autoAlpha: 0, duration: 0.035 }, 0.105);
 

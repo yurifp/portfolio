@@ -6,13 +6,13 @@
 import { site, socials } from '../data/site';
 ---
 
-<!-- nav -->
-<nav class="fixed top-0 inset-x-0 z-[120] mix-blend-difference text-white">
-  <div class="flex items-start justify-between px-[1.6rem] pt-[1.2rem]">
-    <a href="/" class="flex items-center gap-3 group" aria-label="Home">
+<!-- nav — one axis: logo left, cluster right (at the safe edge), top = gutter -->
+<nav class="fixed top-0 inset-x-0 mix-blend-difference text-white" style="z-index: var(--z-hud);">
+  <div class="flex items-center justify-between" style="padding: var(--gutter) var(--gutter) 0 0;">
+    <a href="/" class="flex items-center gap-3 group" style="margin-left: var(--gutter);" aria-label="Home">
       <span class="font-heading font-semibold text-[1.05rem] tracking-[0.02em] uppercase">{site.wordmark}</span>
     </a>
-    <div class="flex items-center gap-[1.6rem]">
+    <div class="flex items-center gap-[1.6rem]" style="padding-right: var(--rail-lane);">
       <button data-sound-btn aria-pressed="false" class="mono-tiny flex items-center gap-2 hover:opacity-70 transition-opacity">
         <span class="inline-block w-[6px] h-[6px] rounded-full bg-white"></span>
         Sound — <span>Off</span>

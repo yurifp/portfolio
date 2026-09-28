@@ -45,6 +45,35 @@
     --field: #070210;
     --ink-now: #f5f0eb;
     --line-now: rgba(245, 240, 235, 0.16);
+
+    /* ---- HERO LAYOUT TOKENS (audit round) --------------------------------
+       --gutter: page margin on all four sides.
+       --rail-lane: EXCLUSIVE right column for the progress rail and its
+       vertical labels — nothing else enters it. Right-aligned content
+       stops at the safe edge = 100% - gutter - rail-lane. */
+    --gutter: clamp(16px, 1.6vw, 44px);
+    --rail-lane: clamp(28px, 2.4vw, 56px);
+    --safe-right: calc(var(--gutter) + var(--rail-lane));
+
+    /* layer order — no loose numbers */
+    --z-ghost: 1;
+    --z-content: 10;
+    --z-hud: 50;
+    --z-rail: 60;
+    --z-menu: 100;
+    --z-loader: 1000;
+
+    /* fluid type — nothing below 11px in any viewport; body also caps
+       by viewport HEIGHT so short screens never squeeze the film */
+    --fs-hud: clamp(11px, 0.4vw + 6px, 15px);
+    --fs-body: min(clamp(16px, 0.5vw + 12px, 28px), 2.7vh);
+    --fs-name: min(8.2vw, 16vh);
+  }
+  @media (max-width: 700px) {
+    :root {
+      --rail-lane: 20px; /* thin lane on mobile */
+      --fs-name: min(20vw, 16vh); /* name spans ~90% width */
+    }
   }
 
   /* fluid root — at 1600px viewport 1rem = 17.78px */
@@ -119,15 +148,15 @@
 
   .mono-label {
     font-family: var(--font-mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.1em;
+    font-size: var(--fs-hud);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-dim);
   }
 
   .mono-tiny {
     font-family: var(--font-mono);
-    font-size: 0.58rem;
+    font-size: var(--fs-hud);
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
@@ -417,20 +446,21 @@
     to { opacity: 0; visibility: hidden; }
   }
 
-  /* ---------- progress rail ---------- */
+  /* ---------- progress rail — lives EXCLUSIVELY in --rail-lane ---------- */
   .progress-rail {
     position: fixed;
-    right: 1.1rem;
+    /* centered inside the lane column */
+    right: calc((var(--rail-lane) - 12px) / 2);
     top: 50%;
     translate: 0 -50%;
-    z-index: 60;
+    z-index: var(--z-rail);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
   }
   .progress-rail__track {
-    width: 1px;
+    width: 1.5px;
     height: 8rem;
     background: var(--line-now);
     position: relative;
@@ -438,11 +468,43 @@
   .progress-rail__fill {
     position: absolute;
     top: 0; left: 0;
-    width: 1px;
+    width: 1.5px;
     height: 100%;
     background: var(--ink-now);
     transform-origin: top;
     transform: scaleY(0);
+  }
+
+  /* short viewports: tighten the middle zone so the bio never rides
+     into the name band */
+  @media (max-height: 740px) {
+    .hero-middle { padding-top: 1.4rem !important; padding-bottom: 0.9rem !important; }
+    .hero-middle .bio-paras { row-gap: 0.55rem !important; }
+    .hero-middle .bio-lead { margin-bottom: 0.5rem !important; }
+    .hero-middle .bio-avail { margin-top: 0.6rem !important; }
+  }
+
+  /* lane labels — pinned to the lane's very ends, clear of the rail */
+  .lane-labels { top: calc(var(--gutter) + 6px); }
+  .lane-labels.lane-labels--bottom { top: auto; bottom: calc(var(--gutter) + 6px); }
+  .lane-labels span {
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-dim); /* ≥4.5:1 on the void */
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+  .lane-labels {
+    position: absolute;
+    right: calc((var(--rail-lane) - 12px) / 2);
+    z-index: var(--z-hud);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
   }
 
   /* ---------- marquee ---------- */
