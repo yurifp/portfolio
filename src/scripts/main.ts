@@ -17,7 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
    hot updates so Vite falls back to a FULL PAGE RELOAD: what you see
    in dev is always the code on disk. */
 if (import.meta.hot) {
-  import.meta.hot.decline();
+  (import.meta.hot as unknown as { decline?: () => void }).decline?.();
 }
 
 const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -29,11 +29,12 @@ let lenis: Lenis | null = null;
 
 function initLenis() {
   if (prefersReduced) return;
+  /* flipbook crank: lerp smoothing (0.1) — the wheel charges inertia,
+     the timeline plays through it */
   lenis = new Lenis({
-    duration: 1.45,
+    lerp: 0.1,
     wheelMultiplier: 1,
     touchMultiplier: 1.6,
-    easing: (t: number) => 1 - Math.pow(1 - t, 3.4),
   });
   lenis.on('scroll', (e: { velocity: number }) => feedVelocity(e.velocity));
   lenis.on('scroll', ScrollTrigger.update);
@@ -55,7 +56,7 @@ function scrollToPolyfill(y: number) {
 /* ------------------------------------------------------------------ */
 /* split text — chars for headings, words for body                      */
 /* ------------------------------------------------------------------ */
-function splitChars(el: HTMLElement) {
+export function splitChars(el: HTMLElement) {
   const text = el.textContent ?? '';
   el.textContent = '';
   /* accessible original + hidden visual chars */
@@ -77,7 +78,7 @@ function splitChars(el: HTMLElement) {
   return [...el.querySelectorAll<HTMLElement>('.split-line > span')];
 }
 
-function splitWords(el: HTMLElement) {
+export function splitWords(el: HTMLElement) {
   const text = el.textContent ?? '';
   el.textContent = '';
   const sr = document.createElement('span');
@@ -671,16 +672,22 @@ export function initField() {
   if (w.__fieldRuntime) return;
   w.__fieldRuntime = Symbol('field');
 
+  /* the home page is a FILM: the flipbook owns every reveal inside
+     the stage — main only runs the chrome there */
+  const film = !!document.querySelector('[data-flip-stage]');
+
   initLenis();
-  initSplits();
-  initOdometers();
-  initCardEffects();
-  initSnapshots();
-  initHeroChoreo();
-  initVelocitySkew();
-  initRowDrift();
-  initThemeFlips();
-  initAccordion();
+  if (!film) {
+    initSplits();
+    initOdometers();
+    initCardEffects();
+    initSnapshots();
+    initHeroChoreo();
+    initVelocitySkew();
+    initRowDrift();
+    initThemeFlips();
+    initAccordion();
+  }
   initCursor();
   initMenu();
   initSound();

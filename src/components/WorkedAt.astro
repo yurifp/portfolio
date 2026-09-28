@@ -8,10 +8,11 @@ import { workedAt } from '../data/site';
 
     <div class="border-t" style="border-color: var(--line-now);">
       {workedAt.map((job, i) => (
-        <div class="wa-item" data-open={job.n === '01' ? 'true' : 'false'}>
+        <div class="wa-item">
           <button
             class="wa-head w-full flex items-center gap-[1.2rem] py-[1.15rem] text-left group"
-            aria-expanded={job.n === '01' ? 'true' : 'false'}
+            aria-expanded="false"
+            tabindex="-1"
           >
             <span class="mono-tiny text-faint w-[2rem] shrink-0">{job.n}</span>
             <span class="font-heading font-medium text-[1.5rem] leading-none uppercase tracking-[0.01em] group-hover:text-lime transition-colors wa-org">{job.org}</span>

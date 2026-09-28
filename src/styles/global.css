@@ -242,6 +242,79 @@
     border: 1px solid var(--line-now);
   }
 
+  /* ---------- THE FLIPBOOK STAGE ---------- */
+  .flip-track {
+    position: relative;
+    height: 1100vh;
+  }
+  .flip-stage {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  [data-flip-frame] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  [data-flip-frame].is-live { pointer-events: auto; }
+  /* frames fill the stage; each frame's own section centers */
+  [data-flip-frame] > section,
+  [data-flip-frame] > footer,
+  [data-flip-frame] > div {
+    min-height: 100%;
+  }
+  [data-flip-frame='stats'] > section,
+  [data-flip-frame='work'] > section,
+  [data-flip-frame='foot'] > footer,
+  [data-flip-frame='marquee'] > div {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .flip-track { position: relative; }
+
+  /* worked-at panels open by SCROLL: the timeline tweens --wa-rows */
+  .wa-panel {
+    display: grid;
+    grid-template-rows: var(--wa-rows, 0fr);
+  }
+  .wa-item { --wa-rows: 0fr; }
+
+  /* fallbacks: reduced motion (JS marks) and mobile — the film becomes
+     a plain stacked page, everything visible */
+  .flip-stage[data-static] {
+    height: auto;
+    overflow: visible;
+  }
+  .flip-stage[data-static] [data-flip-frame] {
+    position: relative;
+    inset: auto;
+    opacity: 1 !important;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .flip-stage[data-static] ~ .flip-track,
+  .flip-stage[data-static] .flip-track { display: none; }
+  @media (max-width: 700px) {
+    .flip-stage {
+      height: auto;
+      overflow: visible;
+    }
+    [data-flip-frame] {
+      position: relative;
+      inset: auto;
+      opacity: 1 !important;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .flip-track { display: none; }
+  }
+
   /* ---------- split text ---------- */
   .split-line {
     display: inline-block;
@@ -280,19 +353,11 @@
   }
   .odo-digit__col span { height: 1em; line-height: 1; }
 
-  /* ---------- worked-at accordion ---------- */
+  /* ---------- worked-at accordion (film: --wa-rows is scrub-tweened) ---------- */
   .wa-item { border-bottom: 1px solid var(--line-now); }
   .wa-head .wa-org { transition: transform 0.5s var(--ease-field), color 0.3s; }
   .wa-head:hover .wa-org { transform: translateX(10px); }
-  .wa-panel {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.65s var(--ease-field);
-  }
-  .wa-item[data-open='true'] .wa-panel { grid-template-rows: 1fr; }
   .wa-panel > div { overflow: hidden; }
-  .wa-plus { transition: transform 0.45s var(--ease-field); }
-  .wa-item[data-open='true'] .wa-plus { transform: rotate(45deg); }
 
   /* ---------- custom cursor ---------- */
   .cursor-root {

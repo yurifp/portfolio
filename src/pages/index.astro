@@ -3,27 +3,35 @@ export const prerender = true;
 
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
-import Stats from '../components/Stats.astro';
 import Marquee from '../components/Marquee.astro';
+import Stats from '../components/Stats.astro';
 import Snapshots from '../components/Snapshots.astro';
 import WorkedAt from '../components/WorkedAt.astro';
 import Footer from '../components/Footer.astro';
 ---
-
 <Base>
-  <Hero />
-  <Marquee
-    items={['SELECTED WORK', 'CASE STUDIES', 'WEB EXPERIENCES', '3D & MOTION', 'APP INTERFACES', 'TYPE & GRID']}
-  />
-  <Snapshots />
-  <WorkedAt />
-  <Stats />
-  <Footer />
+  <!-- THE FLIPBOOK: the track wraps the sticky stage — the crank is
+       the track's own scroll distance -->
+  <div class="flip-track" data-flip-track>
+    <div class="flip-stage" data-flip-stage>
+      <div data-flip-frame="hero"><Hero /></div>
+      <div data-flip-frame="marquee">
+        <Marquee items={['SELECTED WORK', 'CASE STUDIES', 'WEB EXPERIENCES', '3D & MOTION', 'APP INTERFACES', 'TYPE & GRID']} />
+      </div>
+      <div data-flip-frame="stats"><Stats /></div>
+      <div data-flip-frame="snap"><Snapshots /></div>
+      <div data-flip-frame="work"><WorkedAt /></div>
+      <div data-flip-frame="foot"><Footer /></div>
+    </div>
+  </div>
 </Base>
 
 <script>
   import { mountPortrait } from '../scripts/portrait';
+  import { initFlipbook } from '../scripts/flipbook';
 
   const portrait = document.querySelector<HTMLCanvasElement>('[data-portrait]');
   if (portrait) mountPortrait(portrait, { imageUrl: '/images/portrait.jpg' });
+
+  initFlipbook();
 </script>

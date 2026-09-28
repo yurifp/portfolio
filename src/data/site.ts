@@ -95,22 +95,24 @@ export const socials = {
 
 /* Home grid — 9 scattered artboards. Real projects first, placeholders after.
    accent: signal color of the card frame + connector node. */
+/* Home film — REAL portfolio entries (resume + built work), zero
+   placeholder brands. x/y place cards on the pinned stage. */
 export const homeProjects = [
   { slug: 'impacts', title: 'Impacts', cat: 'Case Study', accent: '#64e8ff', w: 460, h: 330, x: 6, y: 0 },
   { slug: 'globeexplorers', title: 'Globe Explorers', cat: 'Case Study', accent: '#905cff', w: 300, h: 420, x: 38, y: 4 },
   { slug: 'this-site', title: 'This Site', cat: 'Web Design', accent: '#9df133', w: 380, h: 280, x: 58, y: 2 },
-  { slug: 'aurora-terminal', title: 'Aurora Terminal', cat: 'Web Design', accent: '#f75049', w: 320, h: 240, x: 12, y: 40 },
-  { slug: 'tidepool', title: 'Tidepool', cat: 'App Design', accent: '#64e8ff', w: 280, h: 380, x: 36, y: 34 },
-  { slug: 'nordwind', title: 'Nordwind Studio', cat: 'Web Design', accent: '#905cff', w: 420, h: 300, x: 56, y: 38 },
-  { slug: 'paper-lantern', title: 'Paper Lantern', cat: 'App Design', accent: '#f75049', w: 300, h: 400, x: 8, y: 72 },
-  { slug: 'sandbar', title: 'Sandbar Banking', cat: 'App Design', accent: '#9df133', w: 440, h: 310, x: 34, y: 68 },
-  { slug: 'static-bloom', title: 'Static Bloom', cat: 'Web Design', accent: '#64e8ff', w: 340, h: 250, x: 60, y: 74 },
+  { slug: 'cimatec-ds', title: 'CIMATEC Design System', cat: 'Web Design', accent: '#f75049', w: 320, h: 240, x: 12, y: 40 },
+  { slug: 'cimatec-elearning', title: 'CIMATEC E-learning 170+', cat: 'Web Design', accent: '#64e8ff', w: 280, h: 380, x: 36, y: 34 },
+  { slug: 'freelance-3d', title: 'Freelance 3D Interfaces', cat: 'Web Design', accent: '#905cff', w: 420, h: 300, x: 56, y: 38 },
+  { slug: 'nasa-x2', title: 'NASA Space Apps ×2', cat: 'Recognition', accent: '#9df133', w: 300, h: 400, x: 8, y: 72 },
+  { slug: 'wcag-audit', title: 'WCAG 2.1 Accessibility', cat: 'Engineering', accent: '#f75049', w: 440, h: 310, x: 34, y: 68 },
 ];
 
-/* /work page — everything above + the long tail */
+/* /work page — the film grid above + the long tail */
 export const workPageProjects = [
   ...homeProjects,
-  { slug: 'driftwood', title: 'Driftwood', cat: 'Web Design', accent: '#905cff', w: 360, h: 270 },
-  { slug: 'paloma', title: 'Paloma', cat: 'App Design', accent: '#f75049', w: 300, h: 400 },
-  { slug: 'cortex-analytics', title: 'Cortex Analytics', cat: 'Web Design', accent: '#9df133', w: 420, h: 300 },
+  { slug: 'aurora-terminal', title: 'Aurora Terminal', cat: 'Web Design', accent: '#f75049', w: 360, h: 270 },
+  { slug: 'nordwind', title: 'Nordwind Studio', cat: 'Web Design', accent: '#905cff', w: 420, h: 300 },
+  { slug: 'tidepool', title: 'Tidepool', cat: 'App Design', accent: '#64e8ff', w: 300, h: 400 },
+  { slug: 'paper-lantern', title: 'Paper Lantern', cat: 'App Design', accent: '#f75049', w: 300, h: 400 },
 ];

@@ -8,18 +8,24 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import sharp from 'sharp';
 
 const PROJECTS = [
-  { slug: 'impacts', accent: '#64e8ff', w: 920, h: 660, motif: 'orbits' },
-  { slug: 'globeexplorers', accent: '#905cff', w: 600, h: 840, motif: 'globe' },
-  { slug: 'this-site', accent: '#9df133', w: 760, h: 560, motif: 'grid' },
-  { slug: 'aurora-terminal', accent: '#f75049', w: 640, h: 480, motif: 'wave' },
-  { slug: 'tidepool', accent: '#64e8ff', w: 560, h: 760, motif: 'tide' },
-  { slug: 'nordwind', accent: '#905cff', w: 840, h: 600, motif: 'wind' },
-  { slug: 'paper-lantern', accent: '#f75049', w: 600, h: 800, motif: 'lantern' },
-  { slug: 'sandbar', accent: '#9df133', w: 880, h: 620, motif: 'sand' },
-  { slug: 'static-bloom', accent: '#64e8ff', w: 680, h: 500, motif: 'bloom' },
-  { slug: 'driftwood', accent: '#905cff', w: 720, h: 540, motif: 'wave' },
-  { slug: 'paloma', accent: '#f75049', w: 600, h: 800, motif: 'bloom' },
-  { slug: 'cortex-analytics', accent: '#9df133', w: 840, h: 600, motif: 'grid' },
+  { slug: 'impacts', accent: '#64e8ff', w: 920, h: 660, motif: 'orbits', tag: 'NASA 2025 — GLOBAL NOMINEE' },
+  { slug: 'globeexplorers', accent: '#905cff', w: 600, h: 840, motif: 'globe', tag: 'NASA 2024 — GLOBAL NOMINEE' },
+  { slug: 'this-site', accent: '#9df133', w: 760, h: 560, motif: 'grid', tag: 'THIS PORTFOLIO — ASTRO+GSAP' },
+  { slug: 'aurora-terminal', accent: '#f75049', w: 640, h: 480, motif: 'wave', tag: 'CASE TEMPLATE' },
+  { slug: 'tidepool', accent: '#64e8ff', w: 560, h: 760, motif: 'tide', tag: 'CASE TEMPLATE' },
+  { slug: 'nordwind', accent: '#905cff', w: 840, h: 600, motif: 'wind', tag: 'CASE TEMPLATE' },
+  { slug: 'paper-lantern', accent: '#f75049', w: 600, h: 800, motif: 'lantern', tag: 'CASE TEMPLATE' },
+  { slug: 'sandbar', accent: '#9df133', w: 880, h: 620, motif: 'sand', tag: 'CASE TEMPLATE' },
+  { slug: 'static-bloom', accent: '#64e8ff', w: 680, h: 500, motif: 'bloom', tag: 'CASE TEMPLATE' },
+  { slug: 'driftwood', accent: '#905cff', w: 720, h: 540, motif: 'wave', tag: 'CASE TEMPLATE' },
+  { slug: 'paloma', accent: '#f75049', w: 600, h: 800, motif: 'bloom', tag: 'CASE TEMPLATE' },
+  { slug: 'cortex-analytics', accent: '#9df133', w: 840, h: 600, motif: 'grid', tag: 'CASE TEMPLATE' },
+  /* real portfolio entries (resume facts) */
+  { slug: 'cimatec-ds', accent: '#f75049', w: 840, h: 620, motif: 'grid', tag: 'SENAI CIMATEC — DESIGN SYSTEM' },
+  { slug: 'cimatec-elearning', accent: '#64e8ff', w: 880, h: 640, motif: 'grid', tag: 'SENAI CIMATEC — 170+ PLATFORMS' },
+  { slug: 'freelance-3d', accent: '#905cff', w: 720, h: 560, motif: 'bloom', tag: 'FREELANCE — THREE.JS INTERFACES' },
+  { slug: 'nasa-x2', accent: '#9df133', w: 800, h: 600, motif: 'orbits', tag: 'NASA SPACE APPS — NOMINEE X2' },
+  { slug: 'wcag-audit', accent: '#f75049', w: 760, h: 560, motif: 'tide', tag: 'WCAG 2.1 — ACCESSIBILITY' },
 ];
 
 /* deterministic pseudo-random per slug */
@@ -137,7 +143,7 @@ function svgFor(p) {
   ${grid}
   ${motifSvg(p.motif, r, W, H, A)}
   <text x="24" y="${H - 22}" font-family="monospace" font-size="19" fill="#f5f0eb" fill-opacity="0.5" letter-spacing="4">${p.slug.toUpperCase()}</text>
-  <text x="24" y="40" font-family="monospace" font-size="15" fill="${A}" letter-spacing="3">PLACEHOLDER — SWAP ME</text>
+  <text x="24" y="40" font-family="monospace" font-size="15" fill="${A}" letter-spacing="3">${p.tag || 'FIELD/WORK'}</text>
   <path d="M 12 12 h 16 M 12 12 v 16" stroke="#f5f0eb" stroke-opacity="0.7" stroke-width="1.5" fill="none"/>
   <path d="M ${W - 12} ${H - 12} h -16 M ${W - 12} ${H - 12} v -16" stroke="#f5f0eb" stroke-opacity="0.7" stroke-width="1.5" fill="none"/>
 </svg>`;
