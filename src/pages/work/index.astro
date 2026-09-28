@@ -3,21 +3,36 @@ export const prerender = true;
 
 import Base from '../../layouts/Base.astro';
 import Footer from '../../components/Footer.astro';
+import Visit from '../../components/Visit.astro';
 import { workPageProjects } from '../../data/site';
 import { getCollection } from 'astro:content';
 
 const caseStudies = new Set((await getCollection('projects')).map((p) => p.id));
 const href = (slug: string) => (caseStudies.has(slug) ? `/work/${slug}` : '#');
+const cats = ['All', 'Case Study', 'Web Design', 'App Design'];
 ---
 <Base title="Work — Yuri Ferreira Paulo" description="Selected projects: case studies, web and app design.">
   <section class="min-h-screen px-[1.6rem] pt-[7rem] pb-[4rem]">
     <p class="mono-tiny text-dim mb-2">Index</p>
-    <h1 class="display-section mb-[3.5rem]" data-split="chars">Selected<br />Work</h1>
+    <h1 class="display-section mb-[2.6rem]" data-split="chars">Selected<br />Work</h1>
+
+    <!-- filter chips -->
+    <div class="flex flex-wrap gap-[0.6rem] mb-[2.8rem]" role="group" aria-label="Filter by category">
+      {cats.map((c, i) => (
+        <button
+          class="mono-tiny px-[0.7rem] py-[0.4rem] min-h-[24px] box-border border transition-colors"
+          style="border-color: var(--line-now); color: var(--ink-now);"
+          data-filter={i === 0 ? 'all' : c}
+          aria-pressed={i === 0 ? 'true' : 'false'}
+        >{c}</button>
+      ))}
+    </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[1.6rem] gap-y-[2.6rem]">
       {workPageProjects.map((p, i) => (
         <article
           class={`art-card ticks aspect-[4/3] ${i % 5 === 0 ? 'sm:aspect-[3/4]' : ''}`}
+          data-cat={p.cat}
           data-cursor="VISIT"
         >
           <a href={href(p.slug)} class="absolute inset-0 z-[3]" aria-label={`${p.title} — ${p.cat}`}></a>
@@ -29,7 +44,7 @@ const href = (slug: string) => (caseStudies.has(slug) ? `/work/${slug}` : '#');
           </div>
           <div class="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-[0.7rem]">
             <h2 class="font-heading font-medium text-[1.15rem]" style="color: var(--ink-now);">{p.title}</h2>
-            <span class="mono-tiny" style="color: var(--ink-now);">↗</span>
+            <span class="mono-tiny font-medium" style="color: var(--ink-now);"><Visit /></span>
           </div>
           <span class="absolute -top-[5px] -left-[5px] w-[9px] h-[9px] rounded-full z-[4]" style={`background:${p.accent};`}></span>
         </article>
@@ -38,3 +53,61 @@ const href = (slug: string) => (caseStudies.has(slug) ? `/work/${slug}` : '#');
   </section>
   <Footer />
 </Base>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const chips = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-cat]')];
+
+  chips.forEach((chip) =>
+    chip.addEventListener('click', () => {
+      const f = chip.dataset.filter!;
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      const hide: HTMLElement[] = [];
+      const show: HTMLElement[] = [];
+      cards.forEach((card) => {
+        (f === 'all' || card.dataset.cat === f ? show : hide).push(card);
+      });
+      hide.forEach((card) => {
+        if (card.hidden) return;
+        if (reduced) {
+          card.hidden = true;
+          return;
+        }
+        gsap.to(card, {
+          autoAlpha: 0,
+          y: -14,
+          duration: 0.26,
+          ease: 'power2.in',
+          onComplete: () => {
+            card.hidden = true;
+            ScrollTrigger.refresh();
+          },
+        });
+        /* belt-and-suspenders: hidden must apply even if rAF is
+           frozen (background tab) when the tween can't tick */
+        setTimeout(() => {
+          card.hidden = true;
+          ScrollTrigger.refresh();
+        }, 420);
+      });
+      show.forEach((card, i) => {
+        if (!card.hidden && !hide.includes(card)) return;
+        card.hidden = false;
+        if (reduced) return;
+        gsap.fromTo(
+          card,
+          { autoAlpha: 0, y: 22 },
+          { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power3.out', delay: 0.05 + i * 0.045,
+            onComplete: () => ScrollTrigger.refresh() },
+        );
+      });
+      if (!hide.length) ScrollTrigger.refresh();
+    }),
+  );
+</script>

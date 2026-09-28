@@ -12,25 +12,33 @@ export async function getStaticPaths() {
     params: { slug: project.id },
     props: {
       project,
+      index: i + 1,
+      total: projects.length,
       prev: projects[(i - 1 + projects.length) % projects.length],
       next: projects[(i + 1) % projects.length],
     },
   }));
 }
 
-const { project, prev, next } = Astro.props;
+const { project, index, total, prev, next } = Astro.props;
 const { Content } = await render(project);
 const meta = project.data;
 ---
 <Base title={`${meta.title} — Yuri Ferreira Paulo`} description={meta.description}>
   <article class="min-h-screen">
     <!-- case hero -->
-    <header class="px-[1.6rem] pt-[8rem] pb-[3.5rem] relative">
+    <header class="px-[1.6rem] pt-[8rem] pb-[3.5rem] relative overflow-clip">
       <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
         <ConstellationGrid client:load density={44} />
       </div>
+      <!-- chapter index watermark -->
+      <span
+        class="font-heading font-bold absolute -right-[0.4rem] top-[6%] leading-none select-none"
+        style="font-size: 15rem; letter-spacing: -0.08em; color: rgba(245, 240, 235, 0.08);"
+        aria-hidden="true"
+      >{String(index).padStart(2, '0')}</span>
       <div class="relative z-10">
-        <p class="mono-tiny text-lime mb-3">{meta.role}</p>
+        <p class="mono-tiny text-lime mb-3">{meta.role} — CASE {String(index).padStart(2, '0')}/{String(total).padStart(2, '0')}</p>
         <h1 class="display-hero" data-split="chars">{meta.title}</h1>
         <div class="flex flex-wrap gap-x-[2rem] gap-y-1 mt-[1.6rem]">
           <p class="mono-tiny text-dim">YEAR — {meta.year}</p>
@@ -86,3 +94,36 @@ const meta = project.data;
   </article>
   <Footer />
 </Base>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    /* rendered markdown: chapters, paragraphs, lists rise; images
+       unmask like artboards */
+    document.querySelectorAll<HTMLElement>('.cs-body h2, .cs-body h3, .cs-body p, .cs-body ul, .cs-body ol').forEach((el) => {
+      gsap.from(el, {
+        y: 34,
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' },
+      });
+    });
+    document.querySelectorAll<HTMLElement>('.cs-body img').forEach((img) => {
+      gsap.fromTo(
+        img,
+        { clipPath: 'inset(10% 16% 10% 16%)', opacity: 0.35 },
+        {
+          clipPath: 'inset(0% 0% 0% 0%)',
+          opacity: 1,
+          duration: 1.25,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: img, start: 'top 92%', toggleActions: 'play none none reverse' },
+        },
+      );
+    });
+  }
+</script>

@@ -23,11 +23,27 @@ metrics:
     value: YOLO model detecting marine debris in real time
 ---
 
-GlobeExplorers is an environmental-education game built on NASA's GLOBE
-Program protocols. A YOLO computer-vision model detects marine debris in real
-time while live environmental data streams in from the GLOBE API — the game
-world is not a backdrop, it is a visualization of measurements happening
-outside the player's window.
+## Overview
 
-Co-developed for NASA Space Apps Challenge 2024 (Salvador/Bahia site),
-presented to the international jury and nominated at global level.
+GlobeExplorers is an environmental-education game built on NASA's GLOBE
+Program protocols. The game world is not a backdrop — it is a visualization
+of measurements happening outside the player's window.
+
+![GlobeExplorers — globe study artboard](/images/work/globeexplorers.webp)
+
+## The challenge
+
+Make live environmental science legible inside a game loop: players should
+feel the data, not read it.
+
+## The build
+
+- YOLO computer-vision model detecting marine debris in real time
+- Environmental readings streamed from the GLOBE API at play time
+- Game interface and integration co-developed in C# and JavaScript
+
+## The outcome
+
+Presented to the international jury at the Salvador/Bahia site and
+nominated at global level — the first of the portfolio's two NASA
+global nominations.

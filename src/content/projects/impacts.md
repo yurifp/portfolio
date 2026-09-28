@@ -23,11 +23,30 @@ metrics:
     value: Non-specialist public — the brief was accessibility of science
 ---
 
+## Overview
+
 Impacts turns trajectory and impact data for a hypothetical near-Earth asteroid
 into an interactive 3D experience: the user flies the scenario, adjusts
-parameters and reads the consequences, instead of parsing a table. The hard
-part was not the WebGL — it was translating complex astronomical datasets into
-a narrative a general audience can operate without a manual.
+parameters and reads the consequences, instead of parsing a table.
 
-Built and pitched in 48 hours for NASA Space Apps Challenge 2025, presented to
-an international judging panel, and nominated at global level.
+![Impacts — orbital study artboard](/images/work/impacts.webp)
+
+## The challenge
+
+The hard part was not the WebGL — it was translating complex astronomical
+datasets into a narrative a general audience can operate without a manual.
+Numbers had to become terrain the user could inhabit.
+
+## The build
+
+- Three.js scene fed by real trajectory datasets
+- Parameter controls that recompute the scenario live
+- Consequences written as space, not as footnotes
+
+Built and pitched in 48 hours for NASA Space Apps Challenge 2025,
+presented to an international judging panel.
+
+## The outcome
+
+Nominated at global level — one of two NASA Space Apps global nominations
+in the portfolio.

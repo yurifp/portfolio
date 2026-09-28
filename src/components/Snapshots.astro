@@ -5,6 +5,7 @@
   individual speeds and reveal via clip-path (see main.ts).
 */
 import { homeProjects } from '../data/site';
+import Visit from './Visit.astro';
 
 const withHref = (p: (typeof homeProjects)[number]) =>
   p.cat === 'Case Study' ? `/work/${p.slug}` : '/work';
@@ -47,7 +48,7 @@ const withHref = (p: (typeof homeProjects)[number]) =>
         </div>
         <div class="absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between p-[0.7rem]" data-card-meta>
           <h3 class="font-heading font-medium text-[1.15rem] tracking-[0.01em]" style="color: #070210;">{p.title}</h3>
-          <span class="mono-tiny nav-link font-medium" style="color: #070210;">Visit</span>
+          <span class="mono-tiny font-medium" style="color: #070210;"><Visit /></span>
         </div>
         <span class="absolute -top-[5px] -left-[5px] w-[9px] h-[9px] rounded-full z-[4]" style={`background:${p.accent};`}></span>
       </article>

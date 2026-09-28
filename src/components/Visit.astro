@@ -1,0 +1,5 @@
+---
+/* VISIT with per-letter hover choreography (reference-style) */
+const letters = 'VISIT'.split('');
+---
+<span class="visit-word" aria-hidden="true">{letters.map((l) => <span class="v">{l}</span>)}</span>
