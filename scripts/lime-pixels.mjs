@@ -169,11 +169,11 @@ const iconInfo = await page.evaluate(() => ({
   textDithers: document.querySelectorAll('canvas[data-dither]:not([data-dither-icon])').length,
 }));
 results.icons = iconInfo;
-if (iconInfo.slugs.length !== 4 || iconInfo.textDithers !== 0) failures.push('ICONS: ' + JSON.stringify(iconInfo));
+if (iconInfo.slugs.length !== 10 || iconInfo.textDithers !== 0) failures.push('ICONS: ' + JSON.stringify(iconInfo));
 
 writeFileSync(out, JSON.stringify({ url, selftest, results, failures }, null, 1));
 console.log(selftest ? '[SELFTEST — expecting items 1-4 to FAIL]' : '[RUN]');
-console.log('fill ok:', results.fill.filter((f) => f.ok).length + '/8', '| stroke:', results.stroke.ok, '| chamfer:', results.chamfer.notchIsBg && results.chamfer.cornerIsBg, '| lines ok:', lineChecks.filter((l) => l.ok).length, '| text ok:', results.text.filter((t) => t.ok).length + '/8');
+console.log('fill ok:', results.fill.filter((f) => f.ok).length + '/' + results.fill.length, '| stroke:', results.stroke.ok, '| chamfer:', results.chamfer.notchIsBg && results.chamfer.cornerIsBg, '| lines ok:', lineChecks.filter((l) => l.ok).length, '| text ok:', results.text.filter((t) => t.ok).length + '/' + results.text.length);
 console.log('failures:', failures.length);
 failures.slice(0, 8).forEach((f) => console.log('  ✗', f));
 await browser.close();

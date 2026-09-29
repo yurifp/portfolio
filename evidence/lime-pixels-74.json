@@ -1,0 +1,280 @@
+{
+ "url": "http://localhost:4322/",
+ "selftest": false,
+ "results": {
+  "fill": [
+   {
+    "card": 0,
+    "ratios": [
+     0.802,
+     0.807,
+     0.81
+    ],
+    "ok": true
+   },
+   {
+    "card": 1,
+    "ratios": [
+     0.805,
+     0.805,
+     0.807
+    ],
+    "ok": true
+   },
+   {
+    "card": 2,
+    "ratios": [
+     0.802,
+     0.81,
+     0.804
+    ],
+    "ok": true
+   },
+   {
+    "card": 3,
+    "ratios": [
+     0.801,
+     0.807,
+     0.805
+    ],
+    "ok": true
+   },
+   {
+    "card": 4,
+    "ratios": [
+     0.807,
+     0.802,
+     0.805
+    ],
+    "ok": true
+   },
+   {
+    "card": 5,
+    "ratios": [
+     0.804,
+     0.803,
+     0.809
+    ],
+    "ok": true
+   },
+   {
+    "card": 6,
+    "ratios": [
+     0.804,
+     0.804,
+     0.804
+    ],
+    "ok": true
+   },
+   {
+    "card": 7,
+    "ratios": [
+     0.804,
+     0.809,
+     0.803
+    ],
+    "ok": true
+   },
+   {
+    "card": 8,
+    "ratios": [
+     0.804,
+     0.812,
+     0.802
+    ],
+    "ok": true
+   },
+   {
+    "card": 9,
+    "ratios": [
+     0.804,
+     0.804,
+     0.803
+    ],
+    "ok": true
+   },
+   {
+    "card": 10,
+    "ratios": [
+     0.808,
+     0.805,
+     0.804
+    ],
+    "ok": true
+   },
+   {
+    "card": 11,
+    "ratios": [
+     0.804,
+     0.806,
+     0.804
+    ],
+    "ok": true
+   },
+   {
+    "card": 12,
+    "ratios": [
+     0.804,
+     0.804,
+     0.809
+    ],
+    "ok": true
+   },
+   {
+    "card": 13,
+    "ratios": [
+     0.807,
+     0.809,
+     0.808
+    ],
+    "ok": true
+   }
+  ],
+  "stroke": {
+   "ratios": [
+    0.656,
+    0.644,
+    0.86,
+    0.641
+   ],
+   "fillRef": 0.806,
+   "ok": true
+  },
+  "chamfer": {
+   "notchIsBg": true,
+   "midPainted": true,
+   "cornerIsBg": true,
+   "nearCornerPainted": true
+  },
+  "lines": [
+   {
+    "x": 389,
+    "on": 0.881,
+    "off": 0.997,
+    "ok": true
+   },
+   {
+    "x": 738,
+    "on": 0.882,
+    "off": 0.999,
+    "ok": true
+   },
+   {
+    "x": 1086,
+    "on": 0.884,
+    "off": 1.001,
+    "ok": true
+   },
+   {
+    "x": 1434,
+    "on": 0.884,
+    "off": 1,
+    "ok": true
+   },
+   {
+    "x": 1782,
+    "on": 0.888,
+    "off": 1,
+    "ok": true
+   },
+   {
+    "x": 2131,
+    "on": 0.883,
+    "off": 1.007,
+    "ok": true
+   }
+  ],
+  "text": [
+   {
+    "card": 0,
+    "dark": 590,
+    "ok": true
+   },
+   {
+    "card": 1,
+    "dark": 639,
+    "ok": true
+   },
+   {
+    "card": 2,
+    "dark": 507,
+    "ok": true
+   },
+   {
+    "card": 3,
+    "dark": 570,
+    "ok": true
+   },
+   {
+    "card": 4,
+    "dark": 135,
+    "ok": true
+   },
+   {
+    "card": 5,
+    "dark": 356,
+    "ok": true
+   },
+   {
+    "card": 6,
+    "dark": 135,
+    "ok": true
+   },
+   {
+    "card": 7,
+    "dark": 123,
+    "ok": true
+   },
+   {
+    "card": 8,
+    "dark": 203,
+    "ok": true
+   },
+   {
+    "card": 9,
+    "dark": 50,
+    "ok": true
+   },
+   {
+    "card": 10,
+    "dark": 296,
+    "ok": true
+   },
+   {
+    "card": 11,
+    "dark": 120,
+    "ok": true
+   },
+   {
+    "card": 12,
+    "dark": 147,
+    "ok": true
+   },
+   {
+    "card": 13,
+    "dark": 195,
+    "ok": true
+   }
+  ],
+  "geometry": {
+   "colSpread": 0,
+   "minGap": 49
+  },
+  "icons": {
+   "slugs": [
+    "nodedotjs",
+    "typescript",
+    "react",
+    "threedotjs",
+    "astro",
+    "gsap",
+    "nextdotjs",
+    "tailwindcss",
+    "postgresql",
+    "docker"
+   ],
+   "textDithers": 0
+  }
+ },
+ "failures": []
+}

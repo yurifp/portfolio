@@ -6,84 +6,138 @@
    {
     "card": 0,
     "ratios": [
-     0.992,
-     1.002,
-     1.001
+     1,
+     1,
+     1
     ],
     "ok": false
    },
    {
     "card": 1,
     "ratios": [
-     0.996,
-     0.996,
-     0.994
+     1.004,
+     1,
+     0.999
     ],
     "ok": false
    },
    {
     "card": 2,
     "ratios": [
-     0.999,
-     0.991,
-     0.998
+     1,
+     0.997,
+     1.005
     ],
     "ok": false
    },
    {
     "card": 3,
     "ratios": [
-     0.998,
      0.997,
-     0.996
+     1.004,
+     1.004
     ],
     "ok": false
    },
    {
     "card": 4,
     "ratios": [
-     0.996,
-     0.996,
-     1.001
+     1.001,
+     1.003,
+     1.004
     ],
     "ok": false
    },
    {
     "card": 5,
     "ratios": [
-     0.994,
-     0.999,
-     1.001
+     1.002,
+     1.002,
+     0.999
     ],
     "ok": false
    },
    {
     "card": 6,
     "ratios": [
-     0.996,
-     0.996,
-     0.996
+     1.004,
+     1.001,
+     1
     ],
     "ok": false
    },
    {
     "card": 7,
     "ratios": [
-     0.995,
-     0.996,
-     0.994
+     0.999,
+     1.004,
+     0.997
+    ],
+    "ok": false
+   },
+   {
+    "card": 8,
+    "ratios": [
+     0.997,
+     1.003,
+     1.002
+    ],
+    "ok": false
+   },
+   {
+    "card": 9,
+    "ratios": [
+     1.003,
+     1.003,
+     1.004
+    ],
+    "ok": false
+   },
+   {
+    "card": 10,
+    "ratios": [
+     1,
+     1,
+     1.004
+    ],
+    "ok": false
+   },
+   {
+    "card": 11,
+    "ratios": [
+     1.001,
+     1,
+     1.004
+    ],
+    "ok": false
+   },
+   {
+    "card": 12,
+    "ratios": [
+     1.001,
+     0.997,
+     1.001
+    ],
+    "ok": false
+   },
+   {
+    "card": 13,
+    "ratios": [
+     1,
+     1.001,
+     1
     ],
     "ok": false
    }
   ],
   "stroke": {
    "ratios": [
-    0.999,
-    0.999,
+    1,
+    0.997,
     null,
     null
    ],
-   "fillRef": 0.998,
+   "fillRef": 1,
    "ok": false
   },
   "chamfer": {
@@ -95,38 +149,38 @@
   "lines": [
    {
     "x": 0,
-    "on": 0.994,
-    "off": 0.996,
+    "on": 0.999,
+    "off": 0.998,
     "ok": false
    },
    {
     "x": 0,
-    "on": 0.994,
-    "off": 0.996,
+    "on": 0.999,
+    "off": 0.998,
     "ok": false
    },
    {
     "x": 0,
-    "on": 0.994,
-    "off": 0.996,
+    "on": 0.999,
+    "off": 0.998,
     "ok": false
    },
    {
     "x": 0,
-    "on": 0.994,
-    "off": 0.996,
+    "on": 0.999,
+    "off": 0.998,
     "ok": false
    },
    {
     "x": 0,
-    "on": 0.994,
-    "off": 0.996,
+    "on": 0.999,
+    "off": 0.998,
     "ok": false
    },
    {
-    "x": 2479,
-    "on": 0.996,
-    "off": 0.996,
+    "x": 0,
+    "on": 0.999,
+    "off": 0.998,
     "ok": false
    }
   ],
@@ -170,6 +224,36 @@
     "card": 7,
     "dark": 0,
     "ok": false
+   },
+   {
+    "card": 8,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 9,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 10,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 11,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 12,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 13,
+    "dark": 0,
+    "ok": false
    }
   ],
   "geometry": {
@@ -181,28 +265,40 @@
     "nodedotjs",
     "typescript",
     "react",
-    "threedotjs"
+    "threedotjs",
+    "astro",
+    "gsap",
+    "nextdotjs",
+    "tailwindcss",
+    "postgresql",
+    "docker"
    ],
    "textDithers": 0
   }
  },
  "failures": [
-  "FILL card0: 0.992,1.002,1.001",
-  "FILL card1: 0.996,0.996,0.994",
-  "FILL card2: 0.999,0.991,0.998",
-  "FILL card3: 0.998,0.997,0.996",
-  "FILL card4: 0.996,0.996,1.001",
-  "FILL card5: 0.994,0.999,1.001",
-  "FILL card6: 0.996,0.996,0.996",
-  "FILL card7: 0.995,0.996,0.994",
+  "FILL card0: 1,1,1",
+  "FILL card1: 1.004,1,0.999",
+  "FILL card2: 1,0.997,1.005",
+  "FILL card3: 0.997,1.004,1.004",
+  "FILL card4: 1.001,1.003,1.004",
+  "FILL card5: 1.002,1.002,0.999",
+  "FILL card6: 1.004,1.001,1",
+  "FILL card7: 0.999,1.004,0.997",
+  "FILL card8: 0.997,1.003,1.002",
+  "FILL card9: 1.003,1.003,1.004",
+  "FILL card10: 1,1,1.004",
+  "FILL card11: 1.001,1,1.004",
+  "FILL card12: 1.001,0.997,1.001",
+  "FILL card13: 1,1.001,1",
   "STROKE not darker than fill",
   "CHANFRO: {\"notchIsBg\":true,\"midPainted\":false,\"cornerIsBg\":false,\"nearCornerPainted\":false}",
-  "LINE x=0: on 0.99 off 1.00",
-  "LINE x=0: on 0.99 off 1.00",
-  "LINE x=0: on 0.99 off 1.00",
-  "LINE x=0: on 0.99 off 1.00",
-  "LINE x=0: on 0.99 off 1.00",
-  "LINE x=2479: on 1.00 off 1.00",
+  "LINE x=0: on 1.00 off 1.00",
+  "LINE x=0: on 1.00 off 1.00",
+  "LINE x=0: on 1.00 off 1.00",
+  "LINE x=0: on 1.00 off 1.00",
+  "LINE x=0: on 1.00 off 1.00",
+  "LINE x=0: on 1.00 off 1.00",
   "TEXT card0: only 0 dark px",
   "TEXT card1: only 0 dark px",
   "TEXT card2: only 0 dark px",
@@ -211,6 +307,12 @@
   "TEXT card5: only 0 dark px",
   "TEXT card6: only 0 dark px",
   "TEXT card7: only 0 dark px",
+  "TEXT card8: only 0 dark px",
+  "TEXT card9: only 0 dark px",
+  "TEXT card10: only 0 dark px",
+  "TEXT card11: only 0 dark px",
+  "TEXT card12: only 0 dark px",
+  "TEXT card13: only 0 dark px",
   "GAP card0: 0px",
   "GAP card1: 0px",
   "GAP card2: 0px",
@@ -218,6 +320,12 @@
   "GAP card4: 0px",
   "GAP card5: 0px",
   "GAP card6: 0px",
-  "GAP card7: 0px"
+  "GAP card7: 0px",
+  "GAP card8: 0px",
+  "GAP card9: 0px",
+  "GAP card10: 0px",
+  "GAP card11: 0px",
+  "GAP card12: 0px",
+  "GAP card13: 0px"
  ]
 }

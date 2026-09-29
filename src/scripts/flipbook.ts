@@ -132,10 +132,10 @@ export function initFlipbook() {
       }
       return found;
     };
-    const limeCards = qs(limeFrame, '[data-lime-card]', 8);
-    const limeReveals = qs(limeFrame, '[data-lime-reveal]', 8);
-    const limeLines = qs(limeFrame, '.lime-line', 5);
-    const limeLabels = qs(limeFrame, '[data-lime-label]', 8);
+    const limeCards = qs(limeFrame, '[data-lime-card]', 14);
+    const limeReveals = qs(limeFrame, '[data-lime-reveal]', 14);
+    const limeLines = qs(limeFrame, '.lime-line', 7);
+    const limeLabels = qs(limeFrame, '[data-lime-label]', 14);
 
     /* dither canvases — SVG logo paths via Path2D (real icons, not
        letters); built synchronously, one draw after mount */
@@ -167,17 +167,18 @@ export function initFlipbook() {
         { clipPath: 'inset(100% 0% 0% 0%)' },
         { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.015 }, 0.12);
 
-    /* 13.5–14.5 column lines draw top→bottom, staggered */
+    /* 13.5–14.5 column lines draw top→bottom, staggered (7 lines,
+       tighter stagger so the tail overlaps card 1 — no dead zone) */
     limeLines.forEach((line, i) => {
-      tl.fromTo(line, { scaleY: 0 }, { scaleY: 1, duration: 0.006 }, 0.135 + i * 0.0015);
+      tl.fromTo(line, { scaleY: 0 }, { scaleY: 1, duration: 0.006 }, 0.135 + i * 0.0008);
     });
 
     /* 14.0–27.4: eight entry windows, one per card, in board order
        (4 stats then 4 tools; starts 14.0 — no dead zone) */
-    const windowDur = 0.024;
-    const step = 0.015;
+    const windowDur = 0.02;
+    const step = 0.0084;
     limeCards.forEach((unit, cardIdx) => {
-      const at = 0.14 + cardIdx * step;
+      const at = 0.142 + cardIdx * step;
 
       /* 0–0.35 open: the REVEAL layer clip left→right (% units) */
       tl.fromTo(limeReveals[cardIdx],
@@ -209,15 +210,17 @@ export function initFlipbook() {
       }
     });
 
-    /* 27.4–29.0 micro-parallax ±8px alternate by column (never static) */
+    /* 27.4–29.0 micro-parallax alternate by column (never static);
+       scaled down with the cards (was ±8px at 5×3) */
+    const parallaxPx = Math.max(4, Math.min(8, innerWidth * 0.003));
     limeCards.forEach((card, i) => {
       const col = i % 2 === 0 ? 1 : -1;
-      tl.fromTo(card, { y: col * 8 }, { y: col * -8, duration: 0.016 }, 0.274);
+      tl.fromTo(card, { y: col * parallaxPx }, { y: col * -parallaxPx, duration: 0.016 }, 0.274);
     });
 
-    /* 29.0–30.0 exit: cards up, wipe retracts up */
+    /* 29.0–30.0 exit: cards up, wipe retracts up (stagger by column) */
     limeCards.forEach((card, i) => {
-      tl.to(card, { yPercent: -40, duration: 0.008 }, 0.29 + (i % 5) * 0.0015);
+      tl.to(card, { yPercent: -40, duration: 0.008 }, 0.29 + (i % 7) * 0.0015);
     });
     tl.to(limeFrame, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.01 }, 0.29)
       .to(limeFrame, { autoAlpha: 0, duration: 0.001 }, 0.299);

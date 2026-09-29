@@ -1,0 +1,190 @@
+{
+ "url": "https://yurifp-portfolio.vercel.app/",
+ "selftest": false,
+ "results": {
+  "fill": [
+   {
+    "card": 0,
+    "ratios": [
+     0.807,
+     0.803,
+     0.808
+    ],
+    "ok": true
+   },
+   {
+    "card": 1,
+    "ratios": [
+     0.803,
+     0.804,
+     0.803
+    ],
+    "ok": true
+   },
+   {
+    "card": 2,
+    "ratios": [
+     0.804,
+     0.803,
+     0.805
+    ],
+    "ok": true
+   },
+   {
+    "card": 3,
+    "ratios": [
+     0.807,
+     0.808,
+     0.804
+    ],
+    "ok": true
+   },
+   {
+    "card": 4,
+    "ratios": [
+     0.806,
+     0.803,
+     0.8
+    ],
+    "ok": true
+   },
+   {
+    "card": 5,
+    "ratios": [
+     0.8,
+     0.802,
+     0.805
+    ],
+    "ok": true
+   },
+   {
+    "card": 6,
+    "ratios": [
+     0.8,
+     0.804,
+     0.807
+    ],
+    "ok": true
+   },
+   {
+    "card": 7,
+    "ratios": [
+     0.803,
+     0.8,
+     0.803
+    ],
+    "ok": true
+   }
+  ],
+  "stroke": {
+   "ratios": [
+    0.643,
+    0.642,
+    0.656,
+    0.761
+   ],
+   "fillRef": 0.806,
+   "ok": true
+  },
+  "chamfer": {
+   "notchIsBg": true,
+   "midPainted": true,
+   "cornerIsBg": true,
+   "nearCornerPainted": true
+  },
+  "lines": [
+   {
+    "x": 529,
+    "on": 0.881,
+    "off": 0.995,
+    "ok": true
+   },
+   {
+    "x": 1016,
+    "on": 0.884,
+    "off": 0.998,
+    "ok": true
+   },
+   {
+    "x": 1504,
+    "on": 0.879,
+    "off": 1,
+    "ok": true
+   },
+   {
+    "x": 1991,
+    "on": 0.88,
+    "off": 1.003,
+    "ok": true
+   },
+   {
+    "x": 2479,
+    "on": 0.882,
+    "off": 1.001,
+    "ok": true
+   },
+   {
+    "x": 2479,
+    "on": 0.882,
+    "off": 1.001,
+    "ok": true
+   }
+  ],
+  "text": [
+   {
+    "card": 0,
+    "dark": 1189,
+    "ok": true
+   },
+   {
+    "card": 1,
+    "dark": 1304,
+    "ok": true
+   },
+   {
+    "card": 2,
+    "dark": 999,
+    "ok": true
+   },
+   {
+    "card": 3,
+    "dark": 1131,
+    "ok": true
+   },
+   {
+    "card": 4,
+    "dark": 303,
+    "ok": true
+   },
+   {
+    "card": 5,
+    "dark": 711,
+    "ok": true
+   },
+   {
+    "card": 6,
+    "dark": 296,
+    "ok": true
+   },
+   {
+    "card": 7,
+    "dark": 256,
+    "ok": true
+   }
+  ],
+  "geometry": {
+   "colSpread": 0,
+   "minGap": 59
+  },
+  "icons": {
+   "slugs": [
+    "nodedotjs",
+    "typescript",
+    "react",
+    "threedotjs"
+   ],
+   "textDithers": 0
+  }
+ },
+ "failures": []
+}

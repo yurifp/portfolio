@@ -671,7 +671,7 @@
     position: absolute;
     inset: 0;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     padding: 0 calc(var(--gutter) + var(--rail-lane)) 0 var(--gutter);
     pointer-events: none;
   }
@@ -688,8 +688,8 @@
     left: var(--gutter);
     right: calc(var(--gutter) + var(--rail-lane));
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    grid-template-rows: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
   }
 
   /* cell = grid position ONLY. card = parallax/exit. reveal = animated
@@ -707,19 +707,25 @@
   .lime-card__shape {
     height: 100%;
     background: var(--lime-card-stroke);
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 36%, 12px calc(36% - 12px), 12px calc(11% + 12px), 0 11%);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--chamfer-cut)), calc(100% - var(--chamfer-cut)) 100%, 0 100%, 0 36%, var(--chamfer-notch) calc(36% - var(--chamfer-notch)), var(--chamfer-notch) calc(11% + var(--chamfer-notch)), 0 11%);
   }
   .lime-card__fill {
     position: absolute;
-    inset: 1.5px;
+    inset: var(--card-stroke);
     background: var(--lime-card-fill);
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12.5px), calc(100% - 12.5px) 100%, 0 100%, 0 36%, 10.5px calc(36% - 10.5px), 10.5px calc(11% + 10.5px), 0 11%);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--chamfer-cut) + 1.5px), calc(100% - var(--chamfer-cut) + 1.5px) 100%, 0 100%, 0 36%, calc(var(--chamfer-notch) - 1.5px) calc(36% - var(--chamfer-notch) + 1.5px), calc(var(--chamfer-notch) - 1.5px) calc(11% + var(--chamfer-notch) - 1.5px), 0 11%);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: var(--card-pad, clamp(12px, 1vw, 28px));
+    padding: var(--card-pad);
   }
-  :root { --card-pad: clamp(12px, 1vw, 28px); }
+  :root {
+    --card-pad: clamp(9px, 0.72vw, 20px);
+    --card-stroke: 1.5px;
+    --chamfer-notch: clamp(7px, 0.5vw, 12px);
+    --chamfer-cut: clamp(9px, 0.55vw, 14px);
+  }
+  @media (max-width: 1500px) { :root { --card-stroke: 1px; } }
 
   .lime-label {
     align-self: flex-end;
@@ -729,7 +735,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.16em;
-    font-size: clamp(12px, 0.95vw, 26px);
+    font-size: clamp(11px, 0.75vw, 21px);
     line-height: 1.25;
     color: var(--lime-ink);
     text-wrap: balance;
@@ -738,7 +744,7 @@
     align-self: flex-start;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
-    font-size: clamp(56px, min(6.4vw, 12.5vh), 180px);
+    font-size: clamp(40px, min(4.5vw, 9.4vh), 128px);
     line-height: 0.9;
     letter-spacing: -0.02em;
     color: var(--lime-ink);
@@ -754,21 +760,22 @@
     width: auto;
   }
 
-  /* mobile static fallback: 2×4, all eight cells */
-  @media (max-width: 768px) {
+  /* mobile/tablet (< 1200px): two sequential frames inside the same
+     band — stats 2×2 first, stacks 3×4 after (no checkerboard) */
+  @media (max-width: 1199px) {
     .lime-grid {
       top: auto;
       bottom: auto;
       position: relative;
       height: auto;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       grid-template-rows: none;
-      grid-auto-rows: minmax(24vh, auto);
+      grid-auto-rows: minmax(19vh, auto);
       padding: var(--gutter) calc(var(--gutter) + var(--rail-lane)) var(--gutter) var(--gutter);
     }
-    .lime-cell { grid-area: auto !important; min-height: 22vh; }
+    .lime-cell { grid-area: auto !important; min-height: 17vh; }
     .lime-lines { display: none; }
-    .lime-dither { height: 7vh !important; }
+    .lime-dither { height: clamp(44px, 8vh, 90px) !important; }
   }
 
   /* (marquee deleted with the 12–30% lime rebuild) */

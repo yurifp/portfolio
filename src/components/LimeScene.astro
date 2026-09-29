@@ -1,37 +1,49 @@
 ---
 /*
-  THE LIME SCENE (film 12–30%).
-  Roles: .lime-cell (grid) · .lime-card (parallax/exit) ·
-  .lime-card__reveal (animated clip) · .lime-card__shape (STATIC
-  chamfer) · content. CSS base = composed resting state.
-  Paint uses LITERAL tokens (the color-mix/var(--lime) chain resolved
-  empty and left every card transparent — postmortem in git history).
-  8 cards: 4 stats + 4 tool icons (simple-icons paths, dithered).
+  THE LIME SCENE (film 12–30%) — 7×4 DENSITY GRID.
+  Roles unchanged: cell / card / reveal / shape / content.
+  CSS base = composed resting state. Paint = literal tokens.
+  14 cards: 4 stats (row 1: cols 1,3,5,7) + 10 stacks (checkerboard
+  cells where col+row is even, row by row, left to right).
 */
-import { stats, tools } from '../data/site';
-import { siNodedotjs, siTypescript, siReact, siThreedotjs } from 'simple-icons';
+import { stats } from '../data/site';
+import { stacks } from '../data/stacks';
+import {
+  siNodedotjs, siTypescript, siReact, siThreedotjs, siAstro,
+  siGreensock, siNextdotjs, siTailwindcss, siPostgresql, siDocker,
+} from 'simple-icons';
 
-const ICONS: Record<string, { slug: string; path: string }> = {
-  'Node.js': { slug: 'nodedotjs', path: siNodedotjs.path },
-  TypeScript: { slug: 'typescript', path: siTypescript.path },
-  React: { slug: 'react', path: siReact.path },
-  'Three.js': { slug: 'threedotjs', path: siThreedotjs.path },
+const ICON_PATHS: Record<string, string> = {
+  siNodedotjs: siNodedotjs.path,
+  siTypescript: siTypescript.path,
+  siReact: siReact.path,
+  siThreedotjs: siThreedotjs.path,
+  siAstro: siAstro.path,
+  siGreensock: siGreensock.path,
+  siNextdotjs: siNextdotjs.path,
+  siTailwindcss: siTailwindcss.path,
+  siPostgresql: siPostgresql.path,
+  siDocker: siDocker.path,
 };
 
-/* board order: 4 stats (1,1)(3,1)(5,1)(2,2) then 4 tools (4,2)(1,3)(3,3)(5,3) */
+/* checkerboard cells (col+row even) in entry order: row by row, L→R.
+   Row 1 (stats): (1,1)(3,1)(5,1)(7,1) · row 2: (2,2)(4,2)(6,2) ·
+   row 3: (1,3)(3,3)(5,3)(7,3) · row 4: (2,4)(4,4)(6,4) */
 const statCells = [
-  { col: 1, row: 1 }, { col: 3, row: 1 }, { col: 5, row: 1 }, { col: 2, row: 2 },
+  { col: 1, row: 1 }, { col: 3, row: 1 }, { col: 5, row: 1 }, { col: 7, row: 1 },
 ];
-const toolCells = [
-  { col: 4, row: 2 }, { col: 1, row: 3 }, { col: 3, row: 3 }, { col: 5, row: 3 },
+const stackCells = [
+  { col: 2, row: 2 }, { col: 4, row: 2 }, { col: 6, row: 2 },
+  { col: 1, row: 3 }, { col: 3, row: 3 }, { col: 5, row: 3 }, { col: 7, row: 3 },
+  { col: 2, row: 4 }, { col: 4, row: 4 }, { col: 6, row: 4 },
 ];
-const sceneTools = Object.entries(ICONS);
+
 const digits = (v: string) => v.split('');
 const area = (c: number, r: number) => `${r} / ${c} / ${r + 1} / ${c + 1}`;
 ---
 <div class="lime-stage absolute inset-0" style="background: #9df133;">
   <div class="lime-lines" aria-hidden="true">
-    {[1, 2, 3, 4, 5].map(() => <span class="lime-line"></span>)}
+    {[1, 2, 3, 4, 5, 6, 7].map(() => <span class="lime-line"></span>)}
   </div>
 
   <div class="lime-grid" data-lime-grid>
@@ -59,14 +71,14 @@ const area = (c: number, r: number) => `${r} / ${c} / ${r + 1} / ${c + 1}`;
       </div>
     ))}
 
-    {sceneTools.map(([name, icon]) => (
-      <div class="lime-cell" data-lime-cell style={`grid-area: ${area(toolCells[sceneTools.findIndex(([n]) => n === name)].col, toolCells[sceneTools.findIndex(([n]) => n === name)].row)};`}>
+    {stacks.map((t, i) => (
+      <div class="lime-cell" data-lime-cell style={`grid-area: ${area(stackCells[i].col, stackCells[i].row)};`}>
         <div class="lime-card" data-lime-card>
           <div class="lime-card__reveal" data-lime-reveal>
             <div class="lime-card__shape" data-lime-shape>
               <div class="lime-card__fill">
-                <p class="lime-label" data-lime-label>{name.toUpperCase()}</p>
-                <canvas class="lime-dither" data-dither-icon={icon.slug} data-icon-path={icon.path} style="height: clamp(64px, 22vh, 160px);"></canvas>
+                <p class="lime-label" data-lime-label>{t.label.toUpperCase()}</p>
+                <canvas class="lime-dither" data-dither-icon={t.id} data-icon-path={ICON_PATHS[t.icon]} style="height: clamp(44px, 15vh, 112px);"></canvas>
               </div>
             </div>
           </div>
