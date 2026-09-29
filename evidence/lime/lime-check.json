@@ -1,0 +1,3655 @@
+{
+ "url": "http://localhost:4322/",
+ "shots": [
+  {
+   "cp": 0.13,
+   "state": {
+    "progress": 0.13452914798206278,
+    "railPct": "13%",
+    "theme": "lime",
+    "cards": [
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        41,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        41,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        164,
+        223,
+        338,
+        68
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        68,
+        333,
+        258,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1016,
+        139,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1139,
+        248,
+        338,
+        135
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        317,
+        343,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1991,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2114,
+        243,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        333,
+        171,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        529,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        529,
+        509,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        651,
+        597,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        556,
+        687,
+        240,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1504,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1504,
+        525,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1820,
+        573,
+        144,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1531,
+        748,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1016,
+        880,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1271,
+        927,
+        206,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        1102,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1991,
+        896,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2349,
+        943,
+        103,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        1118,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     }
+    ],
+    "marca": {
+     "op": 0,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      41,
+      888,
+      488,
+      370
+     ]
+    },
+    "marcaCanvas": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      220,
+      1008,
+      130,
+      130
+     ]
+    },
+    "railSlots": [
+     {
+      "txt": "NASA × 2",
+      "color": "rgb(29, 24, 37)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SCROLL",
+      "color": "rgb(29, 24, 37)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SALVADOR",
+      "color": "rgb(29, 24, 37)",
+      "bg": "rgb(166, 222, 56)"
+     }
+    ],
+    "pageErrors": []
+   }
+  },
+  {
+   "cp": 0.14,
+   "state": {
+    "progress": 0.14349775784753363,
+    "railPct": "14%",
+    "theme": "lime",
+    "cards": [
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        41,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        41,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        164,
+        223,
+        338,
+        68
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        68,
+        333,
+        258,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1016,
+        139,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1139,
+        248,
+        338,
+        135
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        317,
+        343,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1991,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2114,
+        243,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        333,
+        171,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        529,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        529,
+        509,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        651,
+        597,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        556,
+        687,
+        240,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1504,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1504,
+        525,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1820,
+        573,
+        144,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1531,
+        748,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1016,
+        880,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1271,
+        927,
+        206,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        1102,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1991,
+        896,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2349,
+        943,
+        103,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        1118,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     }
+    ],
+    "marca": {
+     "op": 0,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      41,
+      888,
+      488,
+      370
+     ]
+    },
+    "marcaCanvas": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      220,
+      1008,
+      130,
+      130
+     ]
+    },
+    "railSlots": [
+     {
+      "txt": "NASA × 2",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SCROLL",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SALVADOR",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     }
+    ],
+    "pageErrors": []
+   }
+  },
+  {
+   "cp": 0.17,
+   "state": {
+    "progress": 0.17937219730941703,
+    "railPct": "18%",
+    "theme": "lime",
+    "cards": [
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        41,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        41,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        164,
+        182,
+        338,
+        68
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        68,
+        333,
+        258,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1016,
+        139,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1139,
+        166,
+        338,
+        135
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        317,
+        343,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0.5205,
+       "vis": "visible",
+       "clip": "inset(0% 47.9524% 0% 0%)",
+       "rect": [
+        1991,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2114,
+        243,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        333,
+        171,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        529,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        529,
+        509,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        651,
+        597,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        556,
+        687,
+        240,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1504,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1504,
+        525,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1820,
+        573,
+        144,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1531,
+        748,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1016,
+        880,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1271,
+        927,
+        206,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        1102,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1991,
+        896,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2349,
+        943,
+        103,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        1118,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     }
+    ],
+    "marca": {
+     "op": 0,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      41,
+      888,
+      488,
+      370
+     ]
+    },
+    "marcaCanvas": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      220,
+      1008,
+      130,
+      130
+     ]
+    },
+    "railSlots": [
+     {
+      "txt": "NASA × 2",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SCROLL",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SALVADOR",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     }
+    ],
+    "pageErrors": []
+   }
+  },
+  {
+   "cp": 0.2,
+   "state": {
+    "progress": 0.2062780269058296,
+    "railPct": "21%",
+    "theme": "lime",
+    "cards": [
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        41,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        41,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        164,
+        182,
+        338,
+        68
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        68,
+        333,
+        258,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1016,
+        139,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1139,
+        166,
+        338,
+        135
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        317,
+        343,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1991,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2114,
+        182,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        333,
+        171,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        529,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        529,
+        509,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        651,
+        537,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        556,
+        687,
+        240,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1504,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0.1521,
+       "vis": "visible",
+       "clip": "inset(0% 84.7857% 0% 0%)",
+       "rect": [
+        1504,
+        525,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1820,
+        573,
+        144,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1531,
+        748,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1016,
+        880,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1271,
+        927,
+        206,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        1102,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "inset(0% 100% 0% 0%)",
+       "rect": [
+        1991,
+        896,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2349,
+        943,
+        103,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        1118,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     }
+    ],
+    "marca": {
+     "op": 0,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      41,
+      888,
+      488,
+      370
+     ]
+    },
+    "marcaCanvas": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      220,
+      1008,
+      130,
+      130
+     ]
+    },
+    "railSlots": [
+     {
+      "txt": "NASA × 2",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SCROLL",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SALVADOR",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     }
+    ],
+    "pageErrors": []
+   }
+  },
+  {
+   "cp": 0.24,
+   "state": {
+    "progress": 0.242152466367713,
+    "railPct": "24%",
+    "theme": "lime",
+    "cards": [
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        41,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        41,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        164,
+        182,
+        338,
+        68
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        68,
+        333,
+        258,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1016,
+        139,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1139,
+        166,
+        338,
+        135
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        317,
+        343,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1991,
+        155,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2114,
+        182,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        333,
+        171,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        529,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        529,
+        509,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        651,
+        537,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        556,
+        687,
+        240,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1504,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1504,
+        525,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1820,
+        553,
+        144,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1531,
+        748,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1016,
+        880,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1271,
+        907,
+        206,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        1102,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 0.8514,
+       "vis": "visible",
+       "clip": "inset(0% 14.8571% 0% 0%)",
+       "rect": [
+        1991,
+        896,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 0.245,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2349,
+        938,
+        103,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        1118,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     }
+    ],
+    "marca": {
+     "op": 0,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      41,
+      888,
+      488,
+      370
+     ]
+    },
+    "marcaCanvas": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      220,
+      1008,
+      130,
+      130
+     ]
+    },
+    "railSlots": [
+     {
+      "txt": "NASA × 2",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SCROLL",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SALVADOR",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     }
+    ],
+    "pageErrors": []
+   }
+  },
+  {
+   "cp": 0.28,
+   "state": {
+    "progress": 0.28699551569506726,
+    "railPct": "29%",
+    "theme": "lime",
+    "cards": [
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        41,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        41,
+        142,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        164,
+        169,
+        338,
+        68
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        68,
+        320,
+        258,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1016,
+        152,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1139,
+        179,
+        338,
+        135
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        330,
+        343,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1991,
+        142,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2114,
+        169,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        320,
+        171,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        529,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        529,
+        522,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        651,
+        550,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        556,
+        700,
+        240,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1504,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1504,
+        512,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1820,
+        540,
+        144,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1531,
+        735,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1016,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1016,
+        893,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1271,
+        920,
+        206,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1043,
+        1115,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        1991,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "inset(0%)",
+       "rect": [
+        1991,
+        883,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2349,
+        910,
+        103,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "visible",
+       "clip": "none",
+       "rect": [
+        2019,
+        1105,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     }
+    ],
+    "marca": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      41,
+      888,
+      488,
+      370
+     ]
+    },
+    "marcaCanvas": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      220,
+      1008,
+      130,
+      130
+     ]
+    },
+    "railSlots": [
+     {
+      "txt": "NASA × 2",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SCROLL",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SALVADOR",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     }
+    ],
+    "pageErrors": []
+   }
+  },
+  {
+   "cp": 0.3,
+   "state": {
+    "progress": 0.30493273542600896,
+    "railPct": "30%",
+    "theme": "lime",
+    "cards": [
+     {
+      "cell": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        41,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "inset(0%)",
+       "rect": [
+        41,
+        -9,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        164,
+        18,
+        338,
+        68
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        68,
+        169,
+        258,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1016,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "inset(0%)",
+       "rect": [
+        1016,
+        7,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1139,
+        34,
+        338,
+        135
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1043,
+        185,
+        343,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1991,
+        147,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "inset(0%)",
+       "rect": [
+        1991,
+        -9,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        2114,
+        18,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        2019,
+        169,
+        171,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        529,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "inset(0%)",
+       "rect": [
+        529,
+        377,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        651,
+        405,
+        338,
+        101
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        556,
+        555,
+        240,
+        165
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1504,
+        517,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "inset(0%)",
+       "rect": [
+        1504,
+        361,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1820,
+        389,
+        144,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1531,
+        584,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1016,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "inset(0%)",
+       "rect": [
+        1016,
+        747,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1271,
+        775,
+        206,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1043,
+        970,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     },
+     {
+      "cell": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        1991,
+        888,
+        488,
+        370
+       ]
+      },
+      "reveal": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "inset(0%)",
+       "rect": [
+        1991,
+        731,
+        488,
+        370
+       ]
+      },
+      "label": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        2349,
+        759,
+        103,
+        34
+       ]
+      },
+      "content": {
+       "op": 1,
+       "vis": "hidden",
+       "clip": "none",
+       "rect": [
+        2019,
+        954,
+        120,
+        120
+       ]
+      },
+      "contentInsideCell": true
+     }
+    ],
+    "marca": {
+     "op": 0,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      41,
+      888,
+      488,
+      370
+     ]
+    },
+    "marcaCanvas": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      220,
+      1008,
+      130,
+      130
+     ]
+    },
+    "railSlots": [
+     {
+      "txt": "NASA × 2",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SCROLL",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     },
+     {
+      "txt": "SALVADOR",
+      "color": "rgb(7, 2, 16)",
+      "bg": "rgb(166, 222, 56)"
+     }
+    ],
+    "pageErrors": []
+   }
+  }
+ ],
+ "arrivals": {
+  "slow": [
+   {
+    "cell": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      41,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "inset(0%)",
+     "rect": [
+      41,
+      -9,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      164,
+      18,
+      338,
+      68
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      68,
+      169,
+      258,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1016,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "inset(0%)",
+     "rect": [
+      1016,
+      7,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1139,
+      34,
+      338,
+      135
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1043,
+      185,
+      343,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1991,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "inset(0%)",
+     "rect": [
+      1991,
+      -9,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      2114,
+      18,
+      338,
+      101
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      2019,
+      169,
+      171,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      529,
+      517,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "inset(0%)",
+     "rect": [
+      529,
+      377,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      651,
+      405,
+      338,
+      101
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      556,
+      555,
+      240,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1504,
+      517,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "inset(0%)",
+     "rect": [
+      1504,
+      361,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1820,
+      389,
+      144,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1531,
+      584,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1016,
+      888,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "inset(0%)",
+     "rect": [
+      1016,
+      747,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1271,
+      775,
+      206,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1043,
+      970,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      1991,
+      888,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "inset(0%)",
+     "rect": [
+      1991,
+      731,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      2349,
+      759,
+      103,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "hidden",
+     "clip": "none",
+     "rect": [
+      2019,
+      954,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   }
+  ],
+  "reload": [
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      41,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      41,
+      149,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      164,
+      176,
+      338,
+      68
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      68,
+      327,
+      258,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1016,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1016,
+      145,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1139,
+      172,
+      338,
+      135
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1043,
+      323,
+      343,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1991,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1991,
+      149,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      2114,
+      176,
+      338,
+      101
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      2019,
+      327,
+      171,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      529,
+      517,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      529,
+      515,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      651,
+      543,
+      338,
+      101
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      556,
+      693,
+      240,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1504,
+      517,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1504,
+      519,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1820,
+      547,
+      144,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1531,
+      742,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1016,
+      888,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1016,
+      886,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1271,
+      913,
+      206,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1043,
+      1108,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1991,
+      888,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1991,
+      890,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      2349,
+      917,
+      103,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      2019,
+      1112,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   }
+  ],
+  "from60": [
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      41,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      41,
+      140,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      164,
+      167,
+      338,
+      68
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      68,
+      318,
+      258,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1016,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1016,
+      154,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1139,
+      181,
+      338,
+      135
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1043,
+      332,
+      343,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1991,
+      147,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1991,
+      140,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      2114,
+      167,
+      338,
+      101
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      2019,
+      318,
+      171,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      529,
+      517,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      529,
+      524,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      651,
+      552,
+      338,
+      101
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      556,
+      702,
+      240,
+      165
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1504,
+      517,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1504,
+      510,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1820,
+      538,
+      144,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1531,
+      733,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1016,
+      888,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1016,
+      894,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1271,
+      922,
+      206,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1043,
+      1117,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   },
+   {
+    "cell": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      1991,
+      888,
+      488,
+      370
+     ]
+    },
+    "reveal": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "inset(0%)",
+     "rect": [
+      1991,
+      881,
+      488,
+      370
+     ]
+    },
+    "label": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      2349,
+      908,
+      103,
+      34
+     ]
+    },
+    "content": {
+     "op": 1,
+     "vis": "visible",
+     "clip": "none",
+     "rect": [
+      2019,
+      1103,
+      120,
+      120
+     ]
+    },
+    "contentInsideCell": true
+   }
+  ]
+ },
+ "failures": [],
+ "consoleMsgs": []
+}

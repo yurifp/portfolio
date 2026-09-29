@@ -607,9 +607,8 @@
     letter-spacing: 0.14em;
   }
   .progress-rail .rail-mid { flex: 1; color: var(--hud-ink); }
-  .progress-rail .rail-mid > .mono-tiny:last-child {
-    /* SCROLL reads vertically inside the lane — horizontal text was
-       clipping to "SCROL" at lane width */
+  .progress-rail .rail-scroll {
+    /* vertical inside the lane; color from the scrubbed hud ink */
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     white-space: nowrap;
@@ -689,18 +688,20 @@
     grid-template-rows: repeat(3, minmax(0, 1fr));
   }
 
-  /* cell wrapper takes the grid slot + GSAP animations; the card
-     inside keeps its static chamfer clip untouched */
-  .lime-cell {
-    position: relative;
-    clip-path: inset(0 100% 0 0);
-    opacity: 0;
-  }
+  /* cell = grid position ONLY. card = parallax/exit. reveal = animated
+     clip. shape = STATIC chamfer. CSS base = FINAL state (composed):
+     if the timeline fails, the scene shows — never empty */
+  .lime-cell { position: relative; }
   .lime-cell .lime-card { height: 100%; }
+  .lime-card__reveal { height: 100%; }
 
   /* card: stroke layer + inset fill layer, chamfered via clip-path */
   .lime-card {
     position: relative;
+    /* parallax + exit live here (GSAP y) — no visual of its own */
+  }
+  .lime-card__shape {
+    height: 100%;
     background: var(--lime-card-stroke);
     clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 36%, 12px calc(36% - 12px), 12px calc(11% + 12px), 0 11%);
   }
@@ -765,7 +766,6 @@
       padding: var(--gutter) calc(var(--gutter) + var(--rail-lane)) var(--gutter) var(--gutter);
     }
     .lime-cell, .lime-marca { grid-area: auto !important; min-height: 22vh; }
-    .lime-cell { clip-path: none; opacity: 1; }
     .lime-marca { order: 99; }
     .lime-lines { display: none; }
     .lime-dither { height: 7vh !important; }

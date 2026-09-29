@@ -1,13 +1,17 @@
 ---
 /*
-  THE LIME SCENE (film 12–30%) — 5×3 axis grid, checkerboard cards.
-  Copy is EXACTLY the existing stats/tools data. Odometers roll by
-  scroll inside their entry windows (see flipbook.ts); tool icons and
-  the YF marca render through the dither engine (dither.ts).
+  THE LIME SCENE (film 12–30%).
+  ROLES (one per element — the stuck-clip postmortem):
+    .lime-cell        → grid position ONLY (no visual, no clip)
+    .lime-card        → parallax + exit (GSAP y)
+    .lime-card__reveal→ animated clip-path inset (opening)
+    .lime-card__shape → STATIC chamfer polygon (stroke + fill layers)
+    label / number / icon → animated individually
+  CSS base = the FINAL resting state: if the timeline ever fails,
+  the scene renders composed, never empty.
 */
 import { stats, tools } from '../data/site';
 
-/* first three tools per the brief's named order */
 const sceneTools = ['Node.js', 'TypeScript', 'React'].map((name) => ({
   name,
   monogram: name[0],
@@ -30,27 +34,30 @@ const digits = (v: string) => v.split('');
 const area = (c: number, r: number) => `${r} / ${c} / ${r + 1} / ${c + 1}`;
 ---
 <div class="lime-stage absolute inset-0" style="background: var(--lime);">
-  <!-- 6 column lines, drawn from the grid itself (full viewport) -->
+  <!-- 6 column lines, drawn from the grid itself -->
   <div class="lime-lines" aria-hidden="true">
     {[1, 2, 3, 4, 5].map(() => <span class="lime-line"></span>)}
   </div>
 
-  <!-- the 5×3 grid on the two axes -->
   <div class="lime-grid" data-lime-grid>
     {stats.map((s, i) => (
-      <div class="lime-cell" data-lime-card style={`grid-area: ${area(statCells[i].col, statCells[i].row)};`}>
-        <div class="lime-card">
-          <div class="lime-card__fill">
-            <p class="lime-label" data-lime-label>{s.label.toUpperCase()}</p>
-            <div class="lime-number font-heading" data-lime-odo={s.value.replace(/\D/g, '')}>
-              {digits(s.value.replace(/\D/g, '')).map(() => (
-                <span class="odo-digit" aria-hidden="true">
-                  <span class="odo-digit__col">
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => <span>{n}</span>)}
-                  </span>
-                </span>
-              ))}
-              {s.suffix && <span class="lime-suffix">{s.suffix}</span>}
+      <div class="lime-cell" data-lime-cell style={`grid-area: ${area(statCells[i].col, statCells[i].row)};`}>
+        <div class="lime-card" data-lime-card>
+          <div class="lime-card__reveal" data-lime-reveal>
+            <div class="lime-card__shape" data-lime-shape>
+              <div class="lime-card__fill">
+                <p class="lime-label" data-lime-label>{s.label.toUpperCase()}</p>
+                <div class="lime-number font-heading" data-lime-odo={s.value.replace(/\D/g, '')}>
+                  {digits(s.value.replace(/\D/g, '')).map(() => (
+                    <span class="odo-digit" aria-hidden="true">
+                      <span class="odo-digit__col">
+                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => <span>{n}</span>)}
+                      </span>
+                    </span>
+                  ))}
+                  {s.suffix && <span class="lime-suffix">{s.suffix}</span>}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -58,11 +65,15 @@ const area = (c: number, r: number) => `${r} / ${c} / ${r + 1} / ${c + 1}`;
     ))}
 
     {sceneTools.map((t, i) => (
-      <div class="lime-cell" data-lime-card style={`grid-area: ${area(toolCells[i].col, toolCells[i].row)};`}>
-        <div class="lime-card">
-          <div class="lime-card__fill">
-            <p class="lime-label" data-lime-label>{t.name.toUpperCase()}</p>
-            <canvas class="lime-dither" data-dither={t.monogram} style="height: 9vh;"></canvas>
+      <div class="lime-cell" data-lime-cell style={`grid-area: ${area(toolCells[i].col, toolCells[i].row)};`}>
+        <div class="lime-card" data-lime-card>
+          <div class="lime-card__reveal" data-lime-reveal>
+            <div class="lime-card__shape" data-lime-shape>
+              <div class="lime-card__fill">
+                <p class="lime-label" data-lime-label>{t.name.toUpperCase()}</p>
+                <canvas class="lime-dither" data-dither={t.monogram} style="height: 9vh;"></canvas>
+              </div>
+            </div>
           </div>
         </div>
       </div>
