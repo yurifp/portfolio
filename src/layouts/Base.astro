@@ -43,7 +43,7 @@ const jsonLd = {
     <script is:inline>
       // console-cleanliness probe: page errors land here, tests read them
       window.__pageErrors = [];
-      addEventListener('error', (e) => window.__pageErrors.push(String(e.message)));
+      addEventListener('error', (e) => window.__pageErrors.push(String(e.message) + ' @ ' + (e.filename || '?') + ':' + (e.lineno || 0) + ' || ' + String(e.error && e.error.stack ? e.error.stack.split('\\n').slice(0, 4).join(' < ') : '')));
       addEventListener('unhandledrejection', (e) => window.__pageErrors.push('REJ: ' + String(e.reason)));
       // ?debug=layout — dashed zones; main.ts paints red on intersections
       if (location.search.includes('debug=layout')) {

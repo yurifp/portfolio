@@ -7,7 +7,7 @@ export const site = {
   wordmark: 'YURI.FERREIRA',
   name: 'Yuri Ferreira Paulo',
   role: 'software engineer',
-  born: "95'",
+  born: "97'",
   location: {
     city: 'Salvador, BR',
     timezone: 'America/Bahia',

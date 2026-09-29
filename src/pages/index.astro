@@ -3,8 +3,7 @@ export const prerender = true;
 
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
-import Marquee from '../components/Marquee.astro';
-import Stats from '../components/Stats.astro';
+import LimeScene from '../components/LimeScene.astro';
 import Snapshots from '../components/Snapshots.astro';
 import WorkedAt from '../components/WorkedAt.astro';
 import Footer from '../components/Footer.astro';
@@ -15,10 +14,7 @@ import Footer from '../components/Footer.astro';
   <div class="flip-track" data-flip-track>
     <div class="flip-stage" data-flip-stage>
       <div data-flip-frame="hero"><Hero /></div>
-      <div data-flip-frame="marquee">
-        <Marquee items={['SELECTED WORK', 'CASE STUDIES', 'WEB EXPERIENCES', '3D & MOTION', 'APP INTERFACES', 'TYPE & GRID']} />
-      </div>
-      <div data-flip-frame="stats"><Stats /></div>
+      <div data-flip-frame="lime"><LimeScene /></div>
       <div data-flip-frame="snap"><Snapshots /></div>
       <div data-flip-frame="work"><WorkedAt /></div>
       <div data-flip-frame="foot"><Footer /></div>

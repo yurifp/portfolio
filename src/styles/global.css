@@ -71,6 +71,9 @@
     --fs-hud: clamp(11px, 0.4vw + 6px, 15px);
     --fs-body: min(clamp(16px, 0.5vw + 12px, 28px), 2.7vh);
     --fs-name: min(8.2vw, 16vh);
+
+    /* HUD ink: scrubbed by the film (light on void, ink on lime) */
+    --hud-ink: #f5f0eb;
   }
   @media (max-width: 700px) {
     :root {
@@ -238,9 +241,9 @@
     border-color: var(--ink-now);
   }
 
-  /* sound dot breathes while on */
-  [data-sound-btn][aria-pressed='true'] span:first-child {
-    animation: sound-pulse 1.7s ease-in-out infinite;
+  /* sound dot breathes while on — now aria-checked (rebuilt switch) */
+  [data-sound-btn][aria-checked='true'] .sound__dot {
+    animation: sound-pulse 1.7s ease-in-out;
   }
   @keyframes sound-pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
@@ -299,10 +302,8 @@
   [data-flip-frame] > div {
     min-height: 100%;
   }
-  [data-flip-frame='stats'] > section,
   [data-flip-frame='work'] > section,
-  [data-flip-frame='foot'] > footer,
-  [data-flip-frame='marquee'] > div {
+  [data-flip-frame='foot'] > footer {
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -358,20 +359,37 @@
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
   .hero-c1 { grid-column: 1 / 5; }
-  .hero-c2 { grid-column: 5 / 8; }
+  /* C2 (cols 5-8) stays EMPTY by design — no sphere anymore */
   .hero-c3 { grid-column: 9 / 13; }
   @media (min-width: 1700px) {
     .hero-c1 { grid-column: 1 / 4; }
-    .hero-c2 { grid-column: 4 / 7; }
     .hero-c3 { grid-column: 10 / 13; }
   }
   @media (max-width: 900px) {
     .hero-c1 { grid-column: 1 / 13; }
-    .hero-c2 { display: none; }
     .hero-c3 { grid-column: 1 / 13; align-items: flex-start; }
   }
 
-  /* guides generated FROM the same grid: borders on column edges */
+  /* name block: tag opens it (left axis), BR counterweights right */
+  .name-tag {
+    color: #070210;
+    background: var(--color-lime);
+    padding: 0.45em 0.9em;
+    font-weight: 500;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%);
+    margin-bottom: 1.6vh;
+  }
+  /* foot: cue centered on the VIEWPORT axis (only text allowed) */
+  .hero-cue {
+    left: 50vw; /* viewport unit — must sit on the section, not the padded zone */
+    transform: translateX(-50%);
+    bottom: var(--gutter);
+    z-index: var(--z-hud);
+  }
+  .hero-name-block { margin-top: max(16px, 1.2vh); }
+  /* deterministic text gaps (≥12px rule) — CSS, not arbitrary utilities */
+  .bio-body > p + p { margin-top: max(14px, 1.6vh); }
+  .hero-tags { gap: 14px; }
   .hero-guides {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -409,6 +427,57 @@
   }
   [data-debug-layout] [data-zone-box] { outline: 1px dashed rgba(245, 240, 235, 0.4); }
   [data-debug-layout] .dbg-collide { outline: 2px solid #ff3b00 !important; }
+
+  /* ---------- SOUND switch (rebuilt per spec) ---------- */
+  .sound {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: inherit;
+    /* same box metrics as MENU: height/padding/radius, transparent
+       border at rest so hover never shifts layout */
+    padding: 0.4rem 0.7rem;
+    min-height: 24px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: none;
+    cursor: pointer;
+    transition: border-color 200ms ease;
+  }
+  @media (hover: hover) {
+    .sound:hover, .sound:focus-visible { border-color: rgba(255, 255, 255, 0.35); }
+  }
+  .sound:focus-visible { outline: none; border-color: rgba(255, 255, 255, 0.35); }
+  .sound__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transition: background 200ms ease, box-shadow 200ms ease;
+  }
+  .sound[aria-checked='true'] .sound__dot {
+    background: var(--color-lime);
+    box-shadow: 0 0 0 3px rgba(157, 241, 51, 0.2);
+  }
+  .sound__state {
+    display: inline-grid;
+    overflow: clip;
+    line-height: 1.1;
+  }
+  .sound__state > span {
+    grid-area: 1 / 1;
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+  .sound__state [data-s='on'] { opacity: 0; transform: translateY(0.6em); }
+  .sound[aria-checked='true'] .sound__state [data-s='off'] { opacity: 0; transform: translateY(-0.6em); }
+  .sound[aria-checked='true'] .sound__state [data-s='on'] { opacity: 1; transform: translateY(0); }
+  @media (max-width: 768px) {
+    .sound { min-height: 44px; }
+  }
 
   /* ---------- split text ---------- */
   .split-line {
@@ -529,6 +598,7 @@
     justify-items: center;
     gap: 2vh;
     pointer-events: none;
+    color: var(--hud-ink);
   }
   .progress-rail .rail-slot {
     writing-mode: vertical-rl;
@@ -536,13 +606,21 @@
     white-space: nowrap;
     letter-spacing: 0.14em;
   }
-  .progress-rail .rail-mid { flex: 1; }
+  .progress-rail .rail-mid { flex: 1; color: var(--hud-ink); }
+  .progress-rail .rail-mid > .mono-tiny:last-child {
+    /* SCROLL reads vertically inside the lane — horizontal text was
+       clipping to "SCROL" at lane width */
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    letter-spacing: 0.14em;
+  }
   .progress-rail .mono-tiny { white-space: nowrap; }
   .progress-rail__track {
     width: 1.5px;
     flex: 1;
     min-height: 5rem;
-    background: var(--line-now);
+    background: color-mix(in srgb, var(--hud-ink) 30%, transparent);
     position: relative;
   }
   .progress-rail__fill {
@@ -550,7 +628,7 @@
     top: 0; left: 0;
     width: 1.5px;
     height: 100%;
-    background: var(--ink-now);
+    background: var(--hud-ink);
     transform-origin: top;
     transform: scaleY(0);
   }
@@ -578,19 +656,122 @@
 
   /* (lane labels now live INSIDE the rail's 3-row grid — see .progress-rail) */
 
-  /* ---------- marquee ---------- */
-  .marquee { overflow: hidden; white-space: nowrap; }
-  .marquee__inner {
-    display: inline-flex;
-    gap: 3rem;
-    padding-right: 3rem;
-    animation: marquee 26s linear infinite;
-    will-change: transform;
+  /* ---------- THE LIME SCENE (film 12–30%) ---------- */
+  .lime-stage {
+    --lime-ink: var(--color-void);
+    --lime-card-fill: color-mix(in oklab, var(--lime) 84%, black);
+    --lime-card-stroke: color-mix(in oklab, var(--lime) 68%, black);
+    --lime-line: color-mix(in oklab, var(--lime) 88%, black);
   }
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-100%); }
+  .lime-lines {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 0 calc(var(--gutter) + var(--rail-lane)) 0 var(--gutter);
+    pointer-events: none;
   }
+  .lime-line {
+    border-right: 1px solid var(--lime-line);
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  .lime-line:last-child { border-right: none; }
+
+  .lime-grid {
+    position: absolute;
+    top: 11vh;
+    bottom: 6vh;
+    left: var(--gutter);
+    right: calc(var(--gutter) + var(--rail-lane));
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+
+  /* cell wrapper takes the grid slot + GSAP animations; the card
+     inside keeps its static chamfer clip untouched */
+  .lime-cell {
+    position: relative;
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  .lime-cell .lime-card { height: 100%; }
+
+  /* card: stroke layer + inset fill layer, chamfered via clip-path */
+  .lime-card {
+    position: relative;
+    background: var(--lime-card-stroke);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 36%, 12px calc(36% - 12px), 12px calc(11% + 12px), 0 11%);
+  }
+  .lime-card__fill {
+    position: absolute;
+    inset: 1.5px;
+    background: var(--lime-card-fill);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12.5px), calc(100% - 12.5px) 100%, 0 100%, 0 36%, 10.5px calc(36% - 10.5px), 10.5px calc(11% + 10.5px), 0 11%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--card-pad, clamp(12px, 1vw, 28px));
+  }
+  :root { --card-pad: clamp(12px, 1vw, 28px); }
+
+  .lime-label {
+    align-self: flex-end;
+    max-width: 78%;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: clamp(12px, 1.05vw, 30px);
+    line-height: 1.25;
+    color: var(--lime-ink);
+    text-wrap: balance;
+  }
+  .lime-number {
+    align-self: flex-start;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(56px, min(6.4vw, 12.5vh), 180px);
+    line-height: 0.9;
+    color: var(--lime-ink);
+    display: flex;
+    align-items: baseline;
+  }
+  .lime-suffix { font-size: inherit; }
+  .lime-dither {
+    align-self: flex-start;
+    aspect-ratio: 1;
+    width: auto;
+  }
+  .lime-marca {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lime-marca .lime-dither { align-self: center; height: 35%; }
+
+  /* mobile static fallback: 2×4, same order, marca last */
+  @media (max-width: 768px) {
+    .lime-grid {
+      top: auto;
+      bottom: auto;
+      position: relative;
+      height: auto;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: none;
+      grid-auto-rows: minmax(24vh, auto);
+      padding: var(--gutter) calc(var(--gutter) + var(--rail-lane)) var(--gutter) var(--gutter);
+    }
+    .lime-cell, .lime-marca { grid-area: auto !important; min-height: 22vh; }
+    .lime-cell { clip-path: none; opacity: 1; }
+    .lime-marca { order: 99; }
+    .lime-lines { display: none; }
+    .lime-dither { height: 7vh !important; }
+  }
+
+  /* (marquee deleted with the 12–30% lime rebuild) */
 
   /* ---------- project cards (artboard) ---------- */
   .art-card {

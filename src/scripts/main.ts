@@ -474,8 +474,7 @@ function initSound() {
     await ctx.resume();
     on = !on;
     gain!.gain.linearRampToValueAtTime(on ? 0.045 : 0, ctx.currentTime + 0.6);
-    btn.querySelector('span')!.textContent = on ? 'On' : 'Off';
-    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-checked', String(on));
   });
 }
 

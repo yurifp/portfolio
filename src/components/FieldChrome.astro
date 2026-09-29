@@ -6,22 +6,27 @@
 import { site, socials } from '../data/site';
 ---
 
-<!-- nav — one axis: logo left, cluster right (at the safe edge), top = gutter -->
-<nav class="fixed top-0 inset-x-0 mix-blend-difference text-white" style="z-index: var(--z-hud);">
+<!-- nav — one axis: logo left, cluster right (at the safe edge), top = gutter.
+     Color = --hud-ink, scrubbed by the film (light on void, ink on lime). -->
+<nav class="fixed top-0 inset-x-0" style="z-index: var(--z-hud); color: var(--hud-ink);">
   <div class="flex items-center justify-between" style="padding: var(--gutter) var(--gutter) 0 0;">
     <a href="/" class="flex items-center gap-3 group" style="margin-left: var(--gutter);" aria-label="Home">
       <span class="font-heading font-semibold text-[1.05rem] tracking-[0.02em] uppercase">{site.wordmark}</span>
     </a>
     <div class="flex items-center gap-[1.6rem]" style="padding-right: var(--rail-lane);">
-      <button data-sound-btn aria-pressed="false" class="mono-tiny flex items-center gap-2 hover:opacity-70 transition-opacity">
-        <span class="inline-block w-[6px] h-[6px] rounded-full bg-white"></span>
-        Sound — <span>Off</span>
+      <button class="sound" data-sound-btn role="switch" aria-checked="false">
+        <span class="sound__dot" aria-hidden="true"></span>
+        <span class="sound__label">SOUND —</span>
+        <span class="sound__state" aria-hidden="true">
+          <span data-s="off">OFF</span>
+          <span data-s="on">ON</span>
+        </span>
       </button>
       <div class="mono-tiny text-right leading-[1.7] hidden sm:block">
         <div>{site.location.city} / <span data-clock>--:--</span></div>
-        <div class="opacity-60">{site.location.coords}</div>
+        <div style="opacity: 0.6;">{site.location.coords}</div>
       </div>
-      <button data-menu-btn aria-expanded="false" class="mono-tiny flex items-center gap-2 px-[0.7rem] py-[0.4rem] min-h-[24px] box-border border border-white/40 hover:bg-white hover:text-black transition-colors">
+      <button data-menu-btn aria-expanded="false" class="mono-tiny flex items-center gap-2 px-[0.7rem] py-[0.4rem] min-h-[24px] box-border hover:bg-white hover:text-black transition-colors" style="border: 1px solid color-mix(in srgb, var(--hud-ink) 40%, transparent);">
         Menu
       </button>
     </div>

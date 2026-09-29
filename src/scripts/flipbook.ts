@@ -14,6 +14,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { splitChars, splitWords } from './main';
+import { mountDither, type DitherHandle } from './dither';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,14 +35,16 @@ export function initFlipbook() {
       if (el.dataset.split === 'chars') splitChars(el);
       else splitWords(el);
     });
+    /* the mode decision must track the breakpoint: resizing across
+       700px re-decides (clean reload — deterministic either side) */
+    matchMedia('(max-width: 700px)').addEventListener('change', () => location.reload());
     return;
   }
 
   const frames = [...stage.querySelectorAll<HTMLElement>('[data-flip-frame]')];
   const frame = (name: string) => stage.querySelector<HTMLElement>(`[data-flip-frame="${name}"]`)!;
   const heroFrame = frame('hero');
-  const marqFrame = frame('marquee');
-  const statsFrame = frame('stats');
+  const limeFrame = frame('lime');
   const snapFrame = frame('snap');
   const workFrame = frame('work');
   const footFrame = frame('foot');
@@ -62,25 +65,9 @@ export function initFlipbook() {
   const footCtaChars = charsOf('[data-flip-frame="foot"] a[data-split="chars"]');
 
   /* odometers — digits roll by scroll position */
-  const odos: Array<{ cols: HTMLElement[]; target: string }> = [];
-  stage.querySelectorAll<HTMLElement>('[data-odo]').forEach((el) => {
-    odos.push({
-      cols: [...el.querySelectorAll<HTMLElement>('.odo-digit__col')],
-      target: el.dataset.odo ?? '0',
-    });
-  });
-  const applyOdo = (p: number) => {
-    odos.forEach(({ cols, target }) => {
-      const shown = Math.round(Number(target) * p)
-        .toString()
-        .padStart(cols.length, '0');
-      cols.forEach((col, i) => {
-        col.style.transform = `translateY(-${Number(shown[i] ?? 0) * 10}%)`;
-      });
-    });
-  };
-  applyOdo(0);
-  const odoProxy = { p: 0 };
+  /* (old whole-page odometers left with Stats — lime cards own theirs) */
+  /* (the old whole-page odometer system left with Stats — the lime
+     scene owns its per-card odometers below) */
 
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
@@ -94,10 +81,18 @@ export function initFlipbook() {
       invalidateOnRefresh: true,
       onUpdate(self) {
         const p = self.progress;
-        /* the lime field owns this band of the film */
-        document.body.dataset.theme = p > 0.3 && p < 0.72 ? 'lime' : 'void';
+        /* lime owns 12–30; snap (also lime) owns 30–72 */
+        document.body.dataset.theme = p > 0.132 && p < 0.72 ? 'lime' : 'void';
+        /* HUD ink scrub: light→ink as the lime wipe covers (13.0–13.5),
+           back to light at snap exit (71.5–73) */
+        const ramp = (x: number, a: number, b: number) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+        const mixT = ramp(p, 0.13, 0.135) * (1 - ramp(p, 0.715, 0.73));
+        const r = Math.round(245 + (7 - 245) * mixT);
+        const g = Math.round(240 + (2 - 240) * mixT);
+        const b = Math.round(235 + (16 - 235) * mixT);
+        document.documentElement.style.setProperty('--hud-ink', `rgb(${r},${g},${b})`);
         /* only the live frame takes pointer events */
-        const live = p < 0.13 ? 'hero' : p >= 0.3 && p < 0.725 ? 'snap' : p > 0.93 ? 'foot' : '';
+        const live = p < 0.118 ? 'hero' : p >= 0.13 && p < 0.295 ? 'lime' : p >= 0.3 && p < 0.725 ? 'snap' : p > 0.93 ? 'foot' : '';
         frames.forEach((f) => f.classList.toggle('is-live', f.dataset.flipFrame === live));
       },
     },
@@ -115,31 +110,118 @@ export function initFlipbook() {
     .to('#about [data-choreo="meta"]', { opacity: 0, duration: 0.03 }, 0.04)
     .to('[data-flip-frame="hero"] [data-fade], [data-flip-frame="hero"] [data-avail]',
       { opacity: 0, y: -18, stagger: 0.006, duration: 0.04 }, 0.05)
-    .to(heroFrame, { autoAlpha: 0, duration: 0.035 }, 0.105);
+    /* hero must be FULLY gone before 12.0% (was ending at 14%) */
+    .to(heroFrame, { autoAlpha: 0, duration: 0.03 }, 0.088);
 
-  /* ============ MARQUEE band passes ============ */
-  tl.set(marqFrame, { autoAlpha: 1 }, 0.1)
-    .fromTo(marqFrame, { yPercent: 8 }, { yPercent: -8, duration: 0.06 }, 0.1)
-    .to(marqFrame, { autoAlpha: 0, duration: 0.02 }, 0.155);
+  /* ============ THE LIME SCENE (12–30%) ============ */
+  const limeCards = [...limeFrame.querySelectorAll<HTMLElement>('[data-lime-card]')];
+  const limeMarca = limeFrame.querySelector<HTMLElement>('[data-lime-marca]');
+  const limeLines = [...limeFrame.querySelectorAll<HTMLElement>('.lime-line')];
 
-  /* ============ STATS — odometers roll by crank ============ */
-  tl.set(statsFrame, { autoAlpha: 1 }, 0.115)
-    .fromTo(statsFrame, { yPercent: 6 }, { yPercent: 0, duration: 0.05 }, 0.115)
-    .to(odoProxy, {
-      p: 1,
-      duration: 0.1,
-      onUpdate: () => applyOdo(odoProxy.p),
-    }, 0.14)
-    .fromTo('[data-flip-frame="stats"] .mono-tiny.text-dim',
-      { y: 26, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.008, duration: 0.04 }, 0.185)
-    .fromTo('[data-flip-frame="stats"] [data-fade]',
-      { y: 26, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.008, duration: 0.035 }, 0.225)
-    .to(statsFrame, { autoAlpha: 0, yPercent: -7, duration: 0.045 }, 0.27);
+  /* dither canvases (tools + marca) — built synchronously so the
+     timeline can bind resolution to each cell's window */
+  const ditherMap = new Map<HTMLCanvasElement, DitherHandle>();
+  limeFrame.querySelectorAll<HTMLCanvasElement>('[data-dither]').forEach((cv) => {
+    ditherMap.set(cv, mountDither(cv, cv.dataset.dither || 'Y', { ink: '#070210' }));
+  });
+
+  /* per-card odometers */
+  const limeOdos: Array<{ cols: HTMLElement[]; target: string }> = [];
+  limeFrame.querySelectorAll<HTMLElement>('[data-lime-odo]').forEach((el) => {
+    limeOdos.push({
+      cols: [...el.querySelectorAll<HTMLElement>('.odo-digit__col')],
+      target: el.dataset.limeOdo ?? '0',
+    });
+  });
+  const applyLimeOdo = (idx: number, p: number) => {
+    const o = limeOdos[idx];
+    if (!o) return;
+    const shown = Math.round(Number(o.target) * p)
+      .toString()
+      .padStart(o.cols.length, '0');
+    o.cols.forEach((col, i) => {
+      col.style.transform = `translateY(-${Number(shown[i] ?? 0) * 10}%)`;
+    });
+  };
+  limeOdos.forEach((_, i) => applyLimeOdo(i, 0));
+
+  /* 12.0–13.5 wipe in from the bottom */
+  tl.set(limeFrame, { autoAlpha: 1 }, 0.12)
+    .fromTo(limeFrame,
+      { clipPath: 'inset(100% 0 0 0)' },
+      { clipPath: 'inset(0% 0 0 0)', duration: 0.015 }, 0.12);
+
+  /* 13.5–14.5 column lines draw top→bottom, staggered */
+  limeLines.forEach((line, i) => {
+    tl.fromTo(line, { scaleY: 0 }, { scaleY: 1, duration: 0.006 }, 0.135 + i * 0.0015);
+  });
+
+  /* 14.5–27.4: eight entry windows, one per cell, in board order */
+  const windowDur = 0.024;
+  const step = 0.015;
+  const cells: Array<HTMLElement | null> = [...limeCards, limeMarca];
+  const cardLabels = limeCards.map((c) => c.querySelectorAll('[data-lime-label]'));
+  cells.forEach((cell, i) => {
+    const at = 0.145 + i * step;
+    if (!cell) return;
+    if (cell.classList.contains('lime-card')) {
+      const cardIdx = limeCards.indexOf(cell);
+      /* 0–0.35 open: clip left→right */
+      tl.fromTo(cell,
+        { clipPath: 'inset(0 100% 0 0)', opacity: 0 },
+        { clipPath: 'inset(0 0% 0 0)', opacity: 1, duration: windowDur * 0.35 }, at);
+      /* 0.2–0.6 label words rise, masked */
+      const label = cardLabels[cardIdx]?.[0];
+      if (label) {
+        tl.fromTo(label,
+          { yPercent: 60, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: windowDur * 0.4 }, at + windowDur * 0.2);
+      }
+      /* 0.35–0.85 odometer rolls / dither resolves */
+      const odoIdx = limeOdos.length ? cardIdx : -1;
+      if (odoIdx >= 0 && limeOdos[odoIdx]) {
+        const prox = { p: 0 };
+        tl.to(prox, {
+          p: 1,
+          duration: windowDur * 0.5,
+          onUpdate: () => applyLimeOdo(odoIdx, prox.p),
+        }, at + windowDur * 0.35);
+      }
+    } else {
+      /* marca: dither resolves from coarse */
+      tl.fromTo(cell, { opacity: 0 }, { opacity: 1, duration: windowDur * 0.3 }, at);
+    }
+    /* dither resolution tied to this cell's window */
+    const cv = cell.querySelector?.('[data-dither]') as HTMLCanvasElement | null;
+    const handle = cv ? ditherMap.get(cv) : undefined;
+    if (handle) {
+      const prox = { r: 6 };
+      tl.to(prox, {
+        r: 28,
+        duration: windowDur * 0.5,
+        onUpdate: () => handle.draw(prox.r),
+      }, at + windowDur * 0.35);
+    }
+  });
+
+  /* 27.4–29.0 micro-parallax ±8px alternate by column (never static) */
+  limeCards.forEach((card, i) => {
+    const col = i % 2 === 0 ? 1 : -1;
+    tl.fromTo(card, { y: col * 8 }, { y: col * -8, duration: 0.016 }, 0.274);
+  });
+
+  /* 29.0–30.0 exit: cards up ~8vh stagger by column, wipe retracts up */
+  limeCards.forEach((card, i) => {
+    tl.to(card, { yPercent: -40, duration: 0.008 }, 0.29 + (i % 5) * 0.0015);
+  });
+  tl.to(limeMarca, { opacity: 0, duration: 0.006 }, 0.29)
+    .to(limeFrame, { clipPath: 'inset(0 0 100% 0)', duration: 0.01 }, 0.29)
+    .to(limeFrame, { autoAlpha: 0, duration: 0.001 }, 0.299);
 
   /* ============ SNAP — the lime flipbook of cards ============ */
   const cards = [...snapFrame.querySelectorAll<HTMLElement>('[data-snap-card]')];
   const connectors = [...snapFrame.querySelectorAll<SVGLineElement>('[data-connector]')];
-  tl.set(snapFrame, { autoAlpha: 1 }, 0.3);
+  tl.set(snapFrame, { autoAlpha: 1 }, 0.285);
   tl.fromTo('[data-snap-label]', { opacity: 0 }, { opacity: 1, stagger: 0.012, duration: 0.025 }, 0.305);
   if (snapHeadChars.length) {
     tl.fromTo(snapHeadChars, { yPercent: 120 }, { yPercent: 0, stagger: 0.012, duration: 0.045 }, 0.31);

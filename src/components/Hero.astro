@@ -6,10 +6,9 @@ import ConstellationGrid from './ui/constellation-grid';
 const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
 ---
 <!--
-  HERO = ONE GRID OF ZONES. Every text lives inside a zone cell, in
-  normal flow — boxes in flow cannot overlap by construction.
-  Rows: nav-band | head2 | intro | name | foot.
-  Zone map in docs/hero-layout.md (A1/A2 are the fixed chrome nav).
+  HERO = ONE GRID OF ZONES (docs/hero-layout.md). Frame-1 polish:
+  no sphere, no floating red dots, tag opens the name block, BR is a
+  stroked counterweight on FERREIRA's baseline, cue centered at 50vw.
 -->
 <section class="hero-grid relative h-full min-h-0 flex flex-col" id="about">
   <!-- WebGL signal field -->
@@ -22,18 +21,11 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
     <span class="g4"></span><span class="g7"></span>
   </div>
 
-  <!-- BR ghost — free cell (cols 7-9, intro band), ≤6% -->
-  <span
-    class="font-heading font-bold absolute select-none hidden lg:block pointer-events-none"
-    style="font-size: min(9vw, 18vh); line-height: 1; letter-spacing: -0.06em; color: rgba(245,240,235,0.05); left: 50%; top: 24%; z-index: var(--z-ghost);"
-    data-scramble
-    data-choreo="br"
-    aria-label="BR — Brazil"
-  >BR</span>
-
-  <!-- decorative red pixels (max 3, free cells only) -->
-  <span class="absolute w-[8px] h-[8px] bg-ember pointer-events-none hidden md:block" style="top: 40%; left: calc(50% - 24px); z-index: var(--z-ghost);" data-choreo="meta" aria-hidden="true"></span>
-  <span class="absolute w-[8px] h-[8px] bg-ember pointer-events-none hidden md:block" style="top: 30%; left: 62%; z-index: var(--z-ghost);" data-choreo="meta" aria-hidden="true"></span>
+  <!-- scroll cue — child of the SECTION so 50vw means the viewport -->
+  <div class="hero-cue absolute flex flex-col items-center gap-1 pointer-events-none" data-choreo="meta">
+    <span class="block w-px h-[2.2rem] bg-gradient-to-b from-ink/40 to-transparent"></span>
+    <span class="mono-tiny text-dim whitespace-nowrap">Scroll down</span>
+  </div>
 
   <!-- THE ZONES -->
   <div class="hero-zones relative flex flex-col h-full min-h-0" style="z-index: var(--z-content);">
@@ -47,7 +39,7 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
       </p>
     </div>
 
-    <!-- intro: C1 text | C2 sphere | C3 portrait -->
+    <!-- intro: C1 text | (C2 cell stays EMPTY by design) | C3 portrait -->
     <div class="zone hero-intro grid flex-1 min-h-0 items-start" data-zone="C" style="column-gap: var(--col-gap); row-gap: 2vh;">
 
       <!-- C1 -->
@@ -57,7 +49,7 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
           <span class="inline-block w-[8px] h-[8px] bg-ember shrink-0" aria-hidden="true"></span>
           <span>{bio.lead}</span>
         </p>
-        <div class="bio-body mt-[2vh] space-y-[max(12px,1.6vh)]">
+        <div class="bio-body mt-[2vh]">
           <p data-split="words">{'I\'m a developer who treats code as a visual — the browser is my canvas.'}</p>
           <p data-split="words">{'Nothing holds my attention like the space where engineering meets '}<em class="italic" style="color: var(--color-violet);">{'graphic art.'}</em></p>
           <p data-split="words">{'If I ever cash out, I open a '}<span style="color: var(--color-lime);">{'<studio-lab/>'}</span>{' where young builders prototype the ideas nobody will fund yet.'}</p>
@@ -65,19 +57,13 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
         <p class="mono-tiny bio-avail" style="color: var(--color-lime);" data-avail data-fade data-delay={0.45}>{bio.available}</p>
       </div>
 
-      <!-- C2 sphere (decorative only) -->
-      <div class="hero-c2 relative self-center justify-self-center pointer-events-none" data-choreo="meta" aria-hidden="true">
-        <span class="block rounded-full" style="width: min(11.5vw, 24vh); height: min(11.5vw, 24vh); border: 1px solid var(--line-now); background: radial-gradient(circle at 38% 32%, rgba(157,241,51,0.16), rgba(7,2,16,0) 62%);"></span>
-        <span class="absolute rounded-full" style="inset: 18%; border: 1px solid var(--line-now); opacity: 0.6;"></span>
-      </div>
-
       <!-- C3 portrait + caption + the tags list under the photo -->
-      <div class="hero-c3 justify-self-end flex flex-col items-end" style="gap: max(12px, 1.2vh);">
+      <div class="hero-c3 justify-self-end flex flex-col items-end" style="gap: max(14px, 1.2vh);">
         <div class="ticks" data-cursor="HELLO" style="width: min(320px, calc(30vh * 0.75));" data-choreo="portrait" data-fade data-delay={0.3}>
           <canvas data-portrait class="block w-full h-auto" style="aspect-ratio: 3 / 4;"></canvas>
           <p class="mono-tiny text-faint mt-2 flex justify-between w-full"><span>PORTRAIT—DITHER</span><span>BAYER 8×8</span></p>
         </div>
-        <ul class="mono-tiny text-dim text-right flex flex-col" style="gap: 12px; list-style: none;" data-fade data-delay={0.5}>
+        <ul class="mono-tiny text-dim text-right flex flex-col hero-tags" style="list-style: none;" data-fade data-delay={0.5}>
           {bio.tags.map((t, i) => (
             <li data-fade data-delay={0.1 + i * 0.08}>— {t}</li>
           ))}
@@ -85,9 +71,14 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
       </div>
     </div>
 
-    <!-- D: the name — TAG sits beside YURI -->
-    <div class="zone" data-zone="D" style="margin-top: 2vh;">
-      <div class="hero-name-row flex items-start" style="gap: 2vw;">
+    <!-- D: name block — tag opens it, BR counterweights on FERREIRA's baseline -->
+    <div class="zone hero-name-block flex flex-col" data-zone="D">
+      <span
+        class="mono-tiny name-tag self-start whitespace-nowrap"
+        data-fade
+        data-delay={0.25}
+      >{site.role.toUpperCase()} — OPEN FOR WORK</span>
+      <div class="hero-name-row flex justify-between" style="align-items: last baseline;">
         <h1
           class="font-heading uppercase"
           style="font-weight: 300; font-size: var(--fs-name); line-height: 0.88; letter-spacing: -0.02em; color: #fff; margin-left: -0.04em; white-space: nowrap;"
@@ -96,31 +87,26 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
           <span data-split="chars" class="block">Yuri</span>
           <span data-split="chars" class="block hero-ferreira">Ferreira</span>
         </h1>
+        <!-- BR: stroked, anchored to the right axis, FERREIRA's baseline -->
         <span
-          class="mono-tiny whitespace-nowrap"
-          style="color: #070210; background: var(--color-lime); padding: 0.45em 0.9em; font-weight: 500; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%); margin-top: 0.4em;"
-          data-fade
-          data-delay={0.25}
-        >{site.role.toUpperCase()} — OPEN FOR WORK</span>
+          class="hero-br font-heading uppercase hidden md:block select-none"
+          style="font-size: min(9vh, 6vw); line-height: 0.88; letter-spacing: -0.02em; font-weight: 300; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.32); white-space: nowrap; pointer-events: none;"
+          data-scramble
+          data-choreo="br"
+          aria-label="BR — Brazil"
+        >BR</span>
       </div>
     </div>
 
-    <!-- foot: phone at the right axis (tick ::before), cue anchored above it -->
-    <div class="zone flex items-end justify-end" data-zone="F" style="position: relative;">
-      <div class="relative" data-cue-anchor>
-        <!-- E: scroll cue — anchored to the phone zone, not the viewport -->
-        <div class="absolute hidden md:flex flex-col items-center gap-1 pointer-events-none" style="bottom: calc(100% + 2.5vh); right: 0;" data-choreo="meta">
-          <span class="mono-tiny text-dim">Scroll down</span>
-          <span class="block w-px h-[2.2rem] bg-gradient-to-b from-ink/40 to-transparent"></span>
-        </div>
-        <div class="phone-row hidden md:flex items-end" style="gap: 14px;" aria-label="Phone">
-          {phoneCols.map((seg, i) => (
-            <span class="flex flex-col items-center gap-1 phone-seg" data-fade data-delay={0.35 + i * 0.06}>
-              {i === 0 && <span class="phone-tick block w-px h-[1.1rem]"></span>}
-              <span class="font-heading font-medium" style="font-size: calc(var(--fs-hud) * 1.6); color: var(--ink-now); letter-spacing: 0.04em; font-variant-numeric: tabular-nums;">{seg}</span>
-            </span>
-          ))}
-        </div>
+    <!-- foot: phone at the right axis (cue lives at section level) -->
+    <div class="zone hero-foot flex items-end justify-end" data-zone="F">
+      <div class="phone-row hidden md:flex items-end" style="gap: 14px;" aria-label="Phone">
+        {phoneCols.map((seg, i) => (
+          <span class="flex flex-col items-center gap-1 phone-seg" data-fade data-delay={0.35 + i * 0.06}>
+            <span class="phone-tick block w-px h-[1.1rem]"></span>
+            <span class="font-heading font-medium" style="font-size: calc(var(--fs-hud) * 1.6); color: var(--ink-now); letter-spacing: 0.04em; font-variant-numeric: tabular-nums;">{seg}</span>
+          </span>
+        ))}
       </div>
     </div>
   </div>
