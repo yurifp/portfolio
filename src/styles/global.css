@@ -456,7 +456,8 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--hud-ink);
+    opacity: 0.75;
     transition: background 200ms ease, box-shadow 200ms ease;
   }
   .sound[aria-checked='true'] .sound__dot {
@@ -655,12 +656,16 @@
 
   /* (lane labels now live INSIDE the rail's 3-row grid — see .progress-rail) */
 
-  /* ---------- THE LIME SCENE (film 12–30%) ---------- */
+  /* ---------- THE LIME SCENE (film 12–30%) ----------
+     Paint tokens are LITERAL (computed once, no runtime color-mix):
+     the var(--lime) chain resolved EMPTY and left cards transparent.
+     fill = lime×0.84, stroke = lime×0.70, line = lime×0.88 (ink-mixed) */
   .lime-stage {
-    --lime-ink: var(--color-void);
-    --lime-card-fill: color-mix(in oklab, var(--lime) 84%, black);
-    --lime-card-stroke: color-mix(in oklab, var(--lime) 68%, black);
-    --lime-line: color-mix(in oklab, var(--lime) 88%, black);
+    --lime-ink: #070210;
+    --lime-card-fill: #7ec129;   /* lime×0.80, lum ratio ~0.80 */
+    --lime-card-stroke: #639a20; /* lime×0.64 */
+    --lime-col-line: #8ad42d;    /* rgb(138,212,45) */
+    isolation: isolate;
   }
   .lime-lines {
     position: absolute;
@@ -671,11 +676,10 @@
     pointer-events: none;
   }
   .lime-line {
-    border-right: 1px solid var(--lime-line);
+    border-right: 1px solid var(--lime-col-line);
     transform: scaleY(0);
     transform-origin: top;
   }
-  .lime-line:last-child { border-right: none; }
 
   .lime-grid {
     position: absolute;
@@ -719,41 +723,38 @@
 
   .lime-label {
     align-self: flex-end;
-    max-width: 78%;
+    max-width: calc(100% - 2 * var(--card-pad));
     text-align: right;
     font-family: var(--font-mono);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.16em;
-    font-size: clamp(12px, 1.05vw, 30px);
+    font-size: clamp(12px, 0.95vw, 26px);
     line-height: 1.25;
     color: var(--lime-ink);
     text-wrap: balance;
   }
   .lime-number {
     align-self: flex-start;
-    font-weight: 400;
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
     font-size: clamp(56px, min(6.4vw, 12.5vh), 180px);
     line-height: 0.9;
+    letter-spacing: -0.02em;
     color: var(--lime-ink);
     display: flex;
     align-items: baseline;
   }
-  .lime-suffix { font-size: inherit; }
+  /* at rest the number reads as one word: tight glyphs, suffix near */
+  .lime-number.lime-settled .odo-digit { width: auto; }
+  .lime-suffix { font-size: inherit; margin-left: 0.04em; }
   .lime-dither {
     align-self: flex-start;
     aspect-ratio: 1;
     width: auto;
   }
-  .lime-marca {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .lime-marca .lime-dither { align-self: center; height: 35%; }
 
-  /* mobile static fallback: 2×4, same order, marca last */
+  /* mobile static fallback: 2×4, all eight cells */
   @media (max-width: 768px) {
     .lime-grid {
       top: auto;
@@ -765,8 +766,7 @@
       grid-auto-rows: minmax(24vh, auto);
       padding: var(--gutter) calc(var(--gutter) + var(--rail-lane)) var(--gutter) var(--gutter);
     }
-    .lime-cell, .lime-marca { grid-area: auto !important; min-height: 22vh; }
-    .lime-marca { order: 99; }
+    .lime-cell { grid-area: auto !important; min-height: 22vh; }
     .lime-lines { display: none; }
     .lime-dither { height: 7vh !important; }
   }

@@ -54,8 +54,8 @@ const stateAt = async () => page.evaluate(() => {
       contentInsideCell: inside,
     };
   });
-  const marca = document.querySelector('[data-lime-marca]');
-  const mCan = marca && marca.querySelector('[data-dither]');
+  const marca = null;
+  const mCan = null;
   const railSlots = [...document.querySelectorAll('.progress-rail .rail-slot, .progress-rail .rail-scroll')].map((s) => {
     const c = getComputedStyle(s);
     return { txt: s.textContent.trim().slice(0, 8), color: c.color, bg: getComputedStyle(document.body).backgroundColor };

@@ -1,0 +1,223 @@
+{
+ "url": "http://localhost:4322/",
+ "selftest": true,
+ "results": {
+  "fill": [
+   {
+    "card": 0,
+    "ratios": [
+     0.992,
+     1.002,
+     1.001
+    ],
+    "ok": false
+   },
+   {
+    "card": 1,
+    "ratios": [
+     0.996,
+     0.996,
+     0.994
+    ],
+    "ok": false
+   },
+   {
+    "card": 2,
+    "ratios": [
+     0.999,
+     0.991,
+     0.998
+    ],
+    "ok": false
+   },
+   {
+    "card": 3,
+    "ratios": [
+     0.998,
+     0.997,
+     0.996
+    ],
+    "ok": false
+   },
+   {
+    "card": 4,
+    "ratios": [
+     0.996,
+     0.996,
+     1.001
+    ],
+    "ok": false
+   },
+   {
+    "card": 5,
+    "ratios": [
+     0.994,
+     0.999,
+     1.001
+    ],
+    "ok": false
+   },
+   {
+    "card": 6,
+    "ratios": [
+     0.996,
+     0.996,
+     0.996
+    ],
+    "ok": false
+   },
+   {
+    "card": 7,
+    "ratios": [
+     0.995,
+     0.996,
+     0.994
+    ],
+    "ok": false
+   }
+  ],
+  "stroke": {
+   "ratios": [
+    0.999,
+    0.999,
+    null,
+    null
+   ],
+   "fillRef": 0.998,
+   "ok": false
+  },
+  "chamfer": {
+   "notchIsBg": true,
+   "midPainted": false,
+   "cornerIsBg": false,
+   "nearCornerPainted": false
+  },
+  "lines": [
+   {
+    "x": 0,
+    "on": 0.994,
+    "off": 0.996,
+    "ok": false
+   },
+   {
+    "x": 0,
+    "on": 0.994,
+    "off": 0.996,
+    "ok": false
+   },
+   {
+    "x": 0,
+    "on": 0.994,
+    "off": 0.996,
+    "ok": false
+   },
+   {
+    "x": 0,
+    "on": 0.994,
+    "off": 0.996,
+    "ok": false
+   },
+   {
+    "x": 0,
+    "on": 0.994,
+    "off": 0.996,
+    "ok": false
+   },
+   {
+    "x": 2479,
+    "on": 0.996,
+    "off": 0.996,
+    "ok": false
+   }
+  ],
+  "text": [
+   {
+    "card": 0,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 1,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 2,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 3,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 4,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 5,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 6,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 7,
+    "dark": 0,
+    "ok": false
+   }
+  ],
+  "geometry": {
+   "colSpread": 0,
+   "minGap": 0
+  },
+  "icons": {
+   "slugs": [
+    "nodedotjs",
+    "typescript",
+    "react",
+    "threedotjs"
+   ],
+   "textDithers": 0
+  }
+ },
+ "failures": [
+  "FILL card0: 0.992,1.002,1.001",
+  "FILL card1: 0.996,0.996,0.994",
+  "FILL card2: 0.999,0.991,0.998",
+  "FILL card3: 0.998,0.997,0.996",
+  "FILL card4: 0.996,0.996,1.001",
+  "FILL card5: 0.994,0.999,1.001",
+  "FILL card6: 0.996,0.996,0.996",
+  "FILL card7: 0.995,0.996,0.994",
+  "STROKE not darker than fill",
+  "CHANFRO: {\"notchIsBg\":true,\"midPainted\":false,\"cornerIsBg\":false,\"nearCornerPainted\":false}",
+  "LINE x=0: on 0.99 off 1.00",
+  "LINE x=0: on 0.99 off 1.00",
+  "LINE x=0: on 0.99 off 1.00",
+  "LINE x=0: on 0.99 off 1.00",
+  "LINE x=0: on 0.99 off 1.00",
+  "LINE x=2479: on 1.00 off 1.00",
+  "TEXT card0: only 0 dark px",
+  "TEXT card1: only 0 dark px",
+  "TEXT card2: only 0 dark px",
+  "TEXT card3: only 0 dark px",
+  "TEXT card4: only 0 dark px",
+  "TEXT card5: only 0 dark px",
+  "TEXT card6: only 0 dark px",
+  "TEXT card7: only 0 dark px",
+  "GAP card0: 0px",
+  "GAP card1: 0px",
+  "GAP card2: 0px",
+  "GAP card3: 0px",
+  "GAP card4: 0px",
+  "GAP card5: 0px",
+  "GAP card6: 0px",
+  "GAP card7: 0px"
+ ]
+}

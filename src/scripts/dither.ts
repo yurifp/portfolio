@@ -14,26 +14,52 @@ export function mountDither(
   source: string,
   opts: { ink: string; weight?: number; max?: number },
 ): DitherHandle {
+  return mountDitherShape(canvas, (ctx, W, H) => {
+    const weight = opts.weight ?? 800;
+    let fs = 90;
+    ctx.font = `${weight} ${fs}px Rajdhani, sans-serif`;
+    const m = ctx.measureText(source);
+    fs = 90 * Math.min((W * 0.86) / m.width, (H * 0.86) / 90);
+    ctx.font = `${weight} ${fs}px Rajdhani, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(source, W / 2, H / 2);
+  }, opts);
+}
+
+/* icon dither: renders a simple-icons SVG path (24×24 viewBox) and
+   samples coverage — real logos, not letters */
+export function mountDitherIcon(
+  canvas: HTMLCanvasElement,
+  svgPath: string,
+  opts: { ink: string },
+): DitherHandle {
+  return mountDitherShape(canvas, (ctx, W, H) => {
+    if (!svgPath) return;
+    const p = new Path2D(svgPath);
+    ctx.translate(W / 2, H / 2);
+    ctx.scale(W / 26, H / 26); /* 24 viewBox + margin */
+    ctx.fill(p);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }, opts);
+}
+
+function mountDitherShape(
+  canvas: HTMLCanvasElement,
+  drawShape: (ctx: CanvasRenderingContext2D, W: number, H: number) => void,
+  opts: { ink: string },
+): DitherHandle {
   const ctx = canvas.getContext('2d');
   if (!ctx) return { draw: () => {} };
   const W = (canvas.width = 240);
   const H = (canvas.height = 240);
-  const weight = opts.weight ?? 800;
 
-  /* source coverage map: text rendered offscreen */
   const off = document.createElement('canvas');
   off.width = W;
   off.height = H;
   const octx = off.getContext('2d')!;
-  const font = (px: number) => `${weight} ${px}px Rajdhani, sans-serif`;
-  octx.font = font(90);
-  const m = octx.measureText(source);
-  const scale = Math.min((W * 0.86) / m.width, (H * 0.86) / 90);
-  octx.font = font(90 * scale);
-  octx.textAlign = 'center';
-  octx.textBaseline = 'middle';
   octx.fillStyle = '#fff';
-  octx.fillText(source, W / 2, H / 2);
+  drawShape(octx, W, H);
   const src = octx.getImageData(0, 0, W, H).data;
 
   const sample = (x: number, y: number, w: number, h: number) => {

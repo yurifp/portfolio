@@ -1,40 +1,35 @@
 ---
 /*
   THE LIME SCENE (film 12–30%).
-  ROLES (one per element — the stuck-clip postmortem):
-    .lime-cell        → grid position ONLY (no visual, no clip)
-    .lime-card        → parallax + exit (GSAP y)
-    .lime-card__reveal→ animated clip-path inset (opening)
-    .lime-card__shape → STATIC chamfer polygon (stroke + fill layers)
-    label / number / icon → animated individually
-  CSS base = the FINAL resting state: if the timeline ever fails,
-  the scene renders composed, never empty.
+  Roles: .lime-cell (grid) · .lime-card (parallax/exit) ·
+  .lime-card__reveal (animated clip) · .lime-card__shape (STATIC
+  chamfer) · content. CSS base = composed resting state.
+  Paint uses LITERAL tokens (the color-mix/var(--lime) chain resolved
+  empty and left every card transparent — postmortem in git history).
+  8 cards: 4 stats + 4 tool icons (simple-icons paths, dithered).
 */
 import { stats, tools } from '../data/site';
+import { siNodedotjs, siTypescript, siReact, siThreedotjs } from 'simple-icons';
 
-const sceneTools = ['Node.js', 'TypeScript', 'React'].map((name) => ({
-  name,
-  monogram: name[0],
-}));
+const ICONS: Record<string, { slug: string; path: string }> = {
+  'Node.js': { slug: 'nodedotjs', path: siNodedotjs.path },
+  TypeScript: { slug: 'typescript', path: siTypescript.path },
+  React: { slug: 'react', path: siReact.path },
+  'Three.js': { slug: 'threedotjs', path: siThreedotjs.path },
+};
 
-type Cell = { col: number; row: number };
-const statCells: Cell[] = [
-  { col: 1, row: 1 },
-  { col: 3, row: 1 },
-  { col: 5, row: 1 },
-  { col: 2, row: 2 },
+/* board order: 4 stats (1,1)(3,1)(5,1)(2,2) then 4 tools (4,2)(1,3)(3,3)(5,3) */
+const statCells = [
+  { col: 1, row: 1 }, { col: 3, row: 1 }, { col: 5, row: 1 }, { col: 2, row: 2 },
 ];
-const toolCells: Cell[] = [
-  { col: 4, row: 2 },
-  { col: 3, row: 3 },
-  { col: 5, row: 3 },
+const toolCells = [
+  { col: 4, row: 2 }, { col: 1, row: 3 }, { col: 3, row: 3 }, { col: 5, row: 3 },
 ];
-
+const sceneTools = Object.entries(ICONS);
 const digits = (v: string) => v.split('');
 const area = (c: number, r: number) => `${r} / ${c} / ${r + 1} / ${c + 1}`;
 ---
-<div class="lime-stage absolute inset-0" style="background: var(--lime);">
-  <!-- 6 column lines, drawn from the grid itself -->
+<div class="lime-stage absolute inset-0" style="background: #9df133;">
   <div class="lime-lines" aria-hidden="true">
     {[1, 2, 3, 4, 5].map(() => <span class="lime-line"></span>)}
   </div>
@@ -64,24 +59,19 @@ const area = (c: number, r: number) => `${r} / ${c} / ${r + 1} / ${c + 1}`;
       </div>
     ))}
 
-    {sceneTools.map((t, i) => (
-      <div class="lime-cell" data-lime-cell style={`grid-area: ${area(toolCells[i].col, toolCells[i].row)};`}>
+    {sceneTools.map(([name, icon]) => (
+      <div class="lime-cell" data-lime-cell style={`grid-area: ${area(toolCells[sceneTools.findIndex(([n]) => n === name)].col, toolCells[sceneTools.findIndex(([n]) => n === name)].row)};`}>
         <div class="lime-card" data-lime-card>
           <div class="lime-card__reveal" data-lime-reveal>
             <div class="lime-card__shape" data-lime-shape>
               <div class="lime-card__fill">
-                <p class="lime-label" data-lime-label>{t.name.toUpperCase()}</p>
-                <canvas class="lime-dither" data-dither={t.monogram} style="height: 9vh;"></canvas>
+                <p class="lime-label" data-lime-label>{name.toUpperCase()}</p>
+                <canvas class="lime-dither" data-dither-icon={icon.slug} data-icon-path={icon.path} style="height: clamp(64px, 22vh, 160px);"></canvas>
               </div>
             </div>
           </div>
         </div>
       </div>
     ))}
-
-    <!-- marca cell: no card, dither monogram centered -->
-    <div class="lime-marca" data-lime-marca style={`grid-area: ${area(1, 3)};`}>
-      <canvas class="lime-dither" data-dither="YF" style="height: 35%;"></canvas>
-    </div>
   </div>
 </div>
