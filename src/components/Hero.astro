@@ -25,13 +25,13 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
   <!-- THE ZONES -->
   <div class="hero-zones relative flex flex-col h-full min-h-0" style="z-index: var(--z-content);">
 
-    <!-- head2: B1 left | B2 right -->
+    <!-- head2: B1 (97'/SOFTWARE) left | B2 (PORTFOLIO) right — INVERTED -->
     <div class="zone zone-b flex items-start justify-between" data-zone="B">
-      <p class="mono-tiny text-dim leading-[1.5]" data-zone-box data-choreo="meta">PORTFOLIO<br />©2026</p>
-      <p class="mono-tiny text-dim text-right leading-[1.5]" data-zone-box data-choreo="meta">
-        <span style="display: inline-block; width: 3ch; font-variant-numeric: tabular-nums; text-align: right;">{site.born}</span><br />
-        <span style="display: inline-block; width: 12ch; text-align: right;">{site.role.toUpperCase()}</span>
+      <p class="mono-tiny text-dim leading-[1.5]" data-zone-box data-choreo="meta">
+        <span style="display: inline-block; width: 3ch; font-variant-numeric: tabular-nums; text-align: left;">{site.born}</span><br />
+        <span style="display: inline-block; width: 12ch; text-align: left;">{site.role.toUpperCase()}</span>
       </p>
+      <p class="mono-tiny text-dim text-right leading-[1.5]" data-zone-box data-choreo="meta">PORTFOLIO<br />©2026</p>
     </div>
 
     <!-- intro: C1 text | (C2 cell stays EMPTY by design) | C3 portrait -->
@@ -52,13 +52,13 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
         <p class="mono-tiny bio-avail" style="color: var(--color-lime);" data-avail data-fade data-delay={0.45}>{bio.available}</p>
       </div>
 
-      <!-- C3 portrait + caption + the tags list under the photo -->
-      <div class="hero-c3 justify-self-end flex flex-col items-end" style="gap: max(14px, 1.2vh);">
+      <!-- C3 portrait + caption + the tags list under the photo (LEFT side) -->
+      <div class="hero-c3 justify-self-start flex flex-col items-start" style="gap: max(14px, 1.2vh);">
         <div class="ticks" data-cursor="HELLO" style="width: min(320px, calc(30vh * 0.75));" data-choreo="portrait" data-fade data-delay={0.3}>
           <canvas data-portrait class="block w-full h-auto" style="aspect-ratio: 3 / 4;"></canvas>
           <p class="mono-tiny text-faint mt-2 flex justify-between w-full"><span>PORTRAIT—DITHER</span><span>BAYER 8×8</span></p>
         </div>
-        <ul class="mono-tiny text-dim text-right flex flex-col hero-tags" style="list-style: none;" data-fade data-delay={0.5}>
+        <ul class="mono-tiny text-dim text-left flex flex-col hero-tags" style="list-style: none;" data-fade data-delay={0.5}>
           {bio.tags.map((t, i) => (
             <li data-fade data-delay={0.1 + i * 0.08}>— {t}</li>
           ))}

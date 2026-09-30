@@ -358,16 +358,17 @@
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
-  .hero-c1 { grid-column: 1 / 5; }
-  /* C2 (cols 5-8) stays EMPTY by design — no sphere anymore */
-  .hero-c3 { grid-column: 9 / 13; }
+  /* bio block anchored RIGHT, text still left-aligned */
+  .hero-c1 { grid-column: 9 / 13; justify-self: end; }
+  /* C2 (cols 5-8) stays EMPTY by design */
+  .hero-c3 { grid-column: 1 / 5; justify-self: start; }
   @media (min-width: 1700px) {
-    .hero-c1 { grid-column: 1 / 4; }
-    .hero-c3 { grid-column: 10 / 13; }
+    .hero-c1 { grid-column: 10 / 13; justify-self: end; }
+    .hero-c3 { grid-column: 1 / 4; justify-self: start; }
   }
   @media (max-width: 900px) {
-    .hero-c1 { grid-column: 1 / 13; }
-    .hero-c3 { grid-column: 1 / 13; align-items: flex-start; }
+    .hero-c1 { grid-column: 1 / 13; justify-self: start; }
+    .hero-c3 { grid-column: 1 / 13; align-items: flex-start; justify-self: start; }
   }
 
   /* name block: tag opens it (left axis), BR counterweights right */
