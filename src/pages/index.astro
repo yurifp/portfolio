@@ -3,17 +3,21 @@ export const prerender = true;
 
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import LedScene from '../components/LedScene.astro';
 import LimeScene from '../components/LimeScene.astro';
 import Snapshots from '../components/Snapshots.astro';
 import WorkedAt from '../components/WorkedAt.astro';
 import Footer from '../components/Footer.astro';
+import { TOTAL_VH, sceneStart, sceneLen } from '../scripts/scenes';
 ---
 <Base>
   <!-- THE FLIPBOOK: the track wraps the sticky stage — the crank is
-       the track's own scroll distance -->
-  <div class="flip-track" data-flip-track>
+       the track's own scroll distance. Height derives from the scene
+       table (scenes.ts), never hardcoded. -->
+  <div class="flip-track" data-flip-track style={`--track-vh: ${TOTAL_VH};`}>
     <div class="flip-stage" data-flip-stage>
       <div data-flip-frame="hero"><Hero /></div>
+      <div data-flip-frame="led"><LedScene /></div>
       <div data-flip-frame="lime"><LimeScene /></div>
       <div data-flip-frame="snap"><Snapshots /></div>
       <div data-flip-frame="work"><WorkedAt /></div>
@@ -25,7 +29,9 @@ import Footer from '../components/Footer.astro';
 <script>
   import { mountPortrait } from '../scripts/portrait';
   import { mountLEDField } from '../scripts/led-field';
+  import { mountLedWall } from '../scripts/led-wall';
   import { initFlipbook } from '../scripts/flipbook';
+  import { sceneStart, sceneLen } from '../scripts/scenes';
 
   const portrait = document.querySelector<HTMLCanvasElement>('[data-portrait]');
   if (portrait) mountPortrait(portrait, { imageUrl: '/images/portrait.jpg' });
@@ -44,15 +50,32 @@ import Footer from '../components/Footer.astro';
   /* LED field replaces the constellation — square dither cells */
   const ledHost = document.querySelector<HTMLElement>('[data-led-host]');
   const led = ledHost ? mountLEDField(ledHost) : null;
+
+  /* LED wall — the matrix page between hero and lime. Ignition starts
+     at 1 (static/no-film default); the film scrubs it down at p=0. */
+  const wallCanvas = document.querySelector<HTMLCanvasElement>('[data-led-wall]');
+  if (wallCanvas) mountLedWall(wallCanvas);
+
   if (led) {
-    /* dissolve 9-12% driven by the film's progress */
+    /* dissolve at old-global 0.09–0.12 = hero-local 0.75–1.0: feed the
+     field a VIRTUAL legacy progress (local × hero's old band end), so
+     its internal thresholds land exactly where they always did */
+    const hs = sceneStart('hero');
+    const hl = sceneLen('hero');
+    const HERO_LEGACY_END = 0.12;
     const probe = () => {
       const p = (window as unknown as { __flipbook?: { progress: () => number } }).__flipbook;
-      if (p) led.setProgress(p.progress());
+      if (p) {
+        const local = Math.min(1, Math.max(0, (p.progress() - hs) / hl));
+        led.setProgress(local * HERO_LEGACY_END);
+      }
     };
     addEventListener('scroll', probe, { passive: true });
     setTimeout(probe, 100);
   }
 
   initFlipbook();
+  /* force one pass of every scroll-driven updater (film bands, wave
+     ignition) so a mid-page load composes correctly without a nudge */
+  dispatchEvent(new Event('scroll'));
 </script>

@@ -5,25 +5,48 @@
   advances the film. Nothing here runs on a timer: every beat is a
   position on the timeline (scrub), so stopping mid-scroll holds a
   mid-animation frame and scrolling back rewinds the film exactly.
-  Frames: hero → marquee → stats → snap (lime) → worked → foot.
+  Frames: hero → led wall → stats → snap (lime) → worked → foot.
+
+  Every position derives from the SCENE TABLE (scenes.ts) — legacy
+  storyboard numbers are mapped through legacy() so each scene keeps
+  its exact px/vh duration; scenes only shift along the track.
 
   Forbidden by design: IntersectionObserver, setTimeout, CSS entry
   transitions. Only transform/opacity (plus the accordion's scrubbed
-  grid var and the odometer's scrubbed translateY).
+  grid var and the odometer's scrubbed translateY). The LED wall's
+  ignition wave is scrubbed here too — pure function of progress, so
+  it reverses exactly with the scroll.
 */
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { splitChars, splitWords } from './main';
 import { mountDither, mountDitherIcon, type DitherHandle } from './dither';
+import { legacy, pos, sceneLen, LEGACY_MAP, type SceneId } from './scenes';
+import { activeWall } from './led-wall';
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* old storyboard number → new global position (per scene) */
+const H = legacy('hero'), L = legacy('lime'), S = legacy('snap'), W = legacy('work'), F = legacy('foot');
+/* old duration → new duration, same px/vh rhythm */
+const dOf = (id: SceneId, d: number) => d * (sceneLen(id) / (LEGACY_MAP[id][1] - LEGACY_MAP[id][0]));
+const hD = (d: number) => dOf('hero', d);
+const lD = (d: number) => dOf('lime', d);
+const sD = (d: number) => dOf('snap', d);
+const wD = (d: number) => dOf('work', d);
+const fD = (d: number) => dOf('foot', d);
+
+/* ignition wave window: starts while the hero content fades, the crest
+   lands deep inside the LED scene (local 0.3) */
+const WAVE_START = pos('hero', 0.55);
+const WAVE_END = pos('led', 0.3);
 
 export function initFlipbook() {
   const stage = document.querySelector<HTMLElement>('[data-flip-stage]');
   const track = document.querySelector<HTMLElement>('[data-flip-track]');
   if (!stage || !track) return;
 
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce').matches;
   const mobile = matchMedia('(max-width: 700px)').matches;
 
   if (reduced || mobile) {
@@ -44,6 +67,7 @@ export function initFlipbook() {
   const frames = [...stage.querySelectorAll<HTMLElement>('[data-flip-frame]')];
   const frame = (name: string) => stage.querySelector<HTMLElement>(`[data-flip-frame="${name}"]`)!;
   const heroFrame = frame('hero');
+  const ledFrame = frame('led');
   const limeFrame = frame('lime');
   const snapFrame = frame('snap');
   const workFrame = frame('work');
@@ -64,11 +88,6 @@ export function initFlipbook() {
   const workHeadChars = charsOf('[data-flip-frame="work"] h2[data-split="chars"]');
   const footCtaChars = charsOf('[data-flip-frame="foot"] a[data-split="chars"]');
 
-  /* odometers — digits roll by scroll position */
-  /* (old whole-page odometers left with Stats — lime cards own theirs) */
-  /* (the old whole-page odometer system left with Stats — the lime
-     scene owns its per-card odometers below) */
-
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
     scrollTrigger: {
@@ -82,19 +101,31 @@ export function initFlipbook() {
       onUpdate(self) {
         filmScroll.progress = self.progress;
         const p = self.progress;
-        /* lime owns 12–30; snap (also lime) owns 30–72 */
-        document.body.dataset.theme = p > 0.132 && p < 0.72 ? 'lime' : 'void';
-        /* HUD ink scrub: light→ink as the lime wipe covers (13.0–13.5),
-           back to light at snap exit (71.5–73) */
+        /* lime owns its band; snap (also lime) through its own */
+        document.body.dataset.theme = p > L(0.132) && p < S(0.72) ? 'lime' : 'void';
+        /* HUD ink scrub: light→ink as the lime wipe covers, back to
+           light at snap exit — all scene-derived */
         const ramp = (x: number, a: number, b: number) => Math.min(1, Math.max(0, (x - a) / (b - a)));
-        const mixT = ramp(p, 0.13, 0.135) * (1 - ramp(p, 0.715, 0.73));
+        const mixT = ramp(p, L(0.13), L(0.135)) * (1 - ramp(p, S(0.715), S(0.73)));
         const r = Math.round(245 + (7 - 245) * mixT);
         const g = Math.round(240 + (2 - 240) * mixT);
         const b = Math.round(235 + (16 - 235) * mixT);
         document.documentElement.style.setProperty('--hud-ink', `rgb(${r},${g},${b})`);
         /* only the live frame takes pointer events */
-        const live = p < 0.118 ? 'hero' : p >= 0.13 && p < 0.295 ? 'lime' : p >= 0.3 && p < 0.725 ? 'snap' : p > 0.93 ? 'foot' : '';
+        const live = p < H(0.118) ? 'hero'
+          : p >= H(0.118) && p < L(0.13) ? 'led'
+          : p >= L(0.13) && p < L(0.295) ? 'lime'
+          : p >= S(0.3) && p < S(0.725) ? 'snap'
+          : p > F(0.93) ? 'foot' : '';
         frames.forEach((f) => f.classList.toggle('is-live', f.dataset.flipFrame === live));
+        /* the ignition wave — scrubbed, perfectly reversible. The wall
+           stays live until the lime wipe has fully taken over (old
+           global 0.15 = wipe end + fade tail) */
+        const wall = activeWall();
+        if (wall) {
+          wall.setIgnite(ramp(p, WAVE_START, WAVE_END));
+          wall.setActive(p >= WAVE_START - sceneLen('hero') * 0.05 && p <= L(0.15));
+        }
       },
     },
   });
@@ -102,19 +133,27 @@ export function initFlipbook() {
   /* ============ HERO — visible at 0, exits in place ============ */
   gsap.set(heroFrame, { autoAlpha: 1 });
   if (heroNameChars.length) {
-    tl.to(heroNameChars, { yPercent: -130, stagger: 0.02, duration: 0.05 }, 0.05);
+    tl.to(heroNameChars, { yPercent: -130, stagger: hD(0.02), duration: hD(0.05) }, H(0.05));
   }
   tl.to('[data-flip-frame="hero"] [data-choreo="bio"] p, [data-flip-frame="hero"] [data-choreo="bio"] .mono-tiny',
-    { yPercent: -120, opacity: 0, stagger: 0.012, duration: 0.05 }, 0.04)
-    .to('[data-choreo="portrait"]', { yPercent: -26, scale: 0.92, opacity: 0, duration: 0.05 }, 0.05)
-    .to('[data-choreo="br"]', { yPercent: -40, opacity: 0, duration: 0.05 }, 0.045)
-    .to('#about [data-choreo="meta"]', { opacity: 0, duration: 0.03 }, 0.04)
+    { yPercent: -120, opacity: 0, stagger: hD(0.012), duration: hD(0.05) }, H(0.04))
+    .to('[data-choreo="portrait"]', { yPercent: -26, scale: 0.92, opacity: 0, duration: hD(0.05) }, H(0.05))
+    .to('[data-choreo="br"]', { yPercent: -40, opacity: 0, duration: hD(0.05) }, H(0.045))
+    .to('#about [data-choreo="meta"]', { opacity: 0, duration: hD(0.03) }, H(0.04))
     .to('[data-flip-frame="hero"] [data-fade], [data-flip-frame="hero"] [data-avail]',
-      { opacity: 0, y: -18, stagger: 0.006, duration: 0.04 }, 0.05)
-    /* hero must be FULLY gone before 12.0% (was ending at 14%) */
-    .to(heroFrame, { autoAlpha: 0, duration: 0.03 }, 0.088);
+      { opacity: 0, y: -18, stagger: hD(0.006), duration: hD(0.04) }, H(0.05))
+    /* hero must be FULLY gone before its scene ends (was ending at 14%) */
+    .to(heroFrame, { autoAlpha: 0, duration: hD(0.03) }, H(0.088));
 
-  /* ============ THE LIME SCENE (12–30%) ============
+  /* ============ LED WALL — the wave develops the matrix ============ */
+  gsap.set(ledFrame, { autoAlpha: 0 });
+  tl.set(ledFrame, { autoAlpha: 1 }, WAVE_START);
+  /* the hero recedes subtly (parallax) while the wave ignites behind it */
+  tl.to(heroFrame, { scale: 0.985, duration: pos('hero', 0.9) - pos('hero', 0.5) }, pos('hero', 0.5));
+  /* the lime wipe takes over; then the wall hands back the GPU */
+  tl.to(ledFrame, { autoAlpha: 0, duration: lD(0.03) }, L(0.12));
+
+  /* ============ THE LIME SCENE ============
      Fail-loud + one-role-per-element (postmortem: the old build left
      cards stuck at the opening clip because a CSS-baked initial state
      was never undone — opacity hit 1 while clip-path stayed at
@@ -122,8 +161,8 @@ export function initFlipbook() {
      FINAL composed state; every tween is an explicit fromTo with
      unit-consistent strings; selectors resolve through qs() which
      THROWS on count mismatch; the whole scene lives in its own
-     try/catch — if it fails, every other scene keeps working and the
-     scene simply renders composed. */
+     try/catch — if it fails, every other scene keeps working and
+     the scene simply renders composed. */
   try {
     const qs = (scope: ParentNode, selector: string, expected: number): HTMLElement[] => {
       const found = [...scope.querySelectorAll<HTMLElement>(selector)];
@@ -161,24 +200,23 @@ export function initFlipbook() {
     };
     limeOdos.forEach((_, i) => applyLimeOdo(i, 0));
 
-    /* 12.0–13.5 wipe in from the bottom (unit-consistent inset) */
-    tl.set(limeFrame, { autoAlpha: 1 }, 0.12)
+    /* wipe in from the bottom (unit-consistent inset) */
+    tl.set(limeFrame, { autoAlpha: 1 }, L(0.12))
       .fromTo(limeFrame,
         { clipPath: 'inset(100% 0% 0% 0%)' },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.015 }, 0.12);
+        { clipPath: 'inset(0% 0% 0% 0%)', duration: lD(0.015) }, L(0.12));
 
-    /* 13.5–14.5 column lines draw top→bottom, staggered (7 lines,
-       tighter stagger so the tail overlaps card 1 — no dead zone) */
+    /* column lines draw top→bottom, staggered (7 lines, tighter
+       stagger so the tail overlaps card 1 — no dead zone) */
     limeLines.forEach((line, i) => {
-      tl.fromTo(line, { scaleY: 0 }, { scaleY: 1, duration: 0.006 }, 0.135 + i * 0.0008);
+      tl.fromTo(line, { scaleY: 0 }, { scaleY: 1, duration: lD(0.006) }, L(0.135 + i * 0.0008));
     });
 
-    /* 14.0–27.4: eight entry windows, one per card, in board order
-       (4 stats then 4 tools; starts 14.0 — no dead zone) */
-    const windowDur = 0.02;
-    const step = 0.0084;
+    /* eight entry windows, one per card, in board order (4 stats then
+       4 tools; starts right after the lines — no dead zone) */
+    const windowDur = lD(0.02);
     limeCards.forEach((unit, cardIdx) => {
-      const at = 0.142 + cardIdx * step;
+      const at = L(0.142 + cardIdx * 0.0084);
 
       /* 0–0.35 open: the REVEAL layer clip left→right (% units) */
       tl.fromTo(limeReveals[cardIdx],
@@ -210,20 +248,19 @@ export function initFlipbook() {
       }
     });
 
-    /* 27.4–29.0 micro-parallax alternate by column (never static);
-       scaled down with the cards (was ±8px at 5×3) */
+    /* micro-parallax alternate by column (never static) */
     const parallaxPx = Math.max(4, Math.min(8, innerWidth * 0.003));
     limeCards.forEach((card, i) => {
       const col = i % 2 === 0 ? 1 : -1;
-      tl.fromTo(card, { y: col * parallaxPx }, { y: col * -parallaxPx, duration: 0.016 }, 0.274);
+      tl.fromTo(card, { y: col * parallaxPx }, { y: col * -parallaxPx, duration: lD(0.016) }, L(0.274));
     });
 
-    /* 29.0–30.0 exit: cards up, wipe retracts up (stagger by column) */
+    /* exit: cards up, wipe retracts up (stagger by column) */
     limeCards.forEach((card, i) => {
-      tl.to(card, { yPercent: -40, duration: 0.008 }, 0.29 + (i % 7) * 0.0015);
+      tl.to(card, { yPercent: -40, duration: lD(0.008) }, L(0.29 + (i % 7) * 0.0015));
     });
-    tl.to(limeFrame, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.01 }, 0.29)
-      .to(limeFrame, { autoAlpha: 0, duration: 0.001 }, 0.299);
+    tl.to(limeFrame, { clipPath: 'inset(0% 0% 100% 0%)', duration: lD(0.01) }, L(0.29))
+      .to(limeFrame, { autoAlpha: 0, duration: lD(0.001) }, L(0.299));
 
     /* settle: dither first frame + fonts can change layout */
     requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -233,92 +270,92 @@ export function initFlipbook() {
     console.error(msg);
     (window.__pageErrors = window.__pageErrors || []).push(msg);
     /* CSS base is the composed state — the scene still shows */
-    tl.set(limeFrame, { autoAlpha: 1 }, 0.12)
-      .to(limeFrame, { autoAlpha: 0, duration: 0.01 }, 0.29);
+    tl.set(limeFrame, { autoAlpha: 1 }, L(0.12))
+      .to(limeFrame, { autoAlpha: 0, duration: lD(0.01) }, L(0.29));
   }
 
   /* ============ SNAP — the lime flipbook of cards ============ */
   const cards = [...snapFrame.querySelectorAll<HTMLElement>('[data-snap-card]')];
   const connectors = [...snapFrame.querySelectorAll<SVGLineElement>('[data-connector]')];
-  /* snap appears under the lime wipe at 0.285 — its content must be
-     HIDDEN from that instant until each element's entry window.
-     fromTo tweens positioned later don't apply their "from" before
-     the playhead reaches them, leaving natural CSS = visible */
-  tl.set(snapFrame, { autoAlpha: 1 }, 0.285);
+  /* snap appears under the lime wipe — its content must be HIDDEN from
+     that instant until each element's entry window. fromTo tweens
+     positioned later don't apply their "from" before the playhead
+     reaches them, leaving natural CSS = visible */
+  tl.set(snapFrame, { autoAlpha: 1 }, S(0.285));
   cards.forEach((card) => {
-    tl.set(card, { opacity: 0, scale: 0.72, x: 0, y: 110 }, 0.285);
+    tl.set(card, { opacity: 0, scale: 0.72, x: 0, y: 110 }, S(0.285));
     card.querySelectorAll('[data-card-meta]').forEach((m) => {
-      tl.set(m, { opacity: 0, y: 22 }, 0.285);
+      tl.set(m, { opacity: 0, y: 22 }, S(0.285));
     });
   });
   connectors.forEach((line) => {
-    tl.set(line, { strokeDashoffset: 1 }, 0.285);
+    tl.set(line, { strokeDashoffset: 1 }, S(0.285));
   });
-  tl.set('[data-snap-label]', { opacity: 0 }, 0.285);
-  tl.set('[data-snap-viewall]', { yPercent: 130 }, 0.285);
+  tl.set('[data-snap-label]', { opacity: 0 }, S(0.285));
+  tl.set('[data-snap-viewall]', { yPercent: 130 }, S(0.285));
   if (snapHeadChars.length) {
-    tl.set(snapHeadChars, { yPercent: 120 }, 0.285);
+    tl.set(snapHeadChars, { yPercent: 120 }, S(0.285));
   }
-  tl.fromTo('[data-snap-label]', { opacity: 0 }, { opacity: 1, stagger: 0.012, duration: 0.025 }, 0.305);
+  tl.fromTo('[data-snap-label]', { opacity: 0 }, { opacity: 1, stagger: sD(0.012), duration: sD(0.025) }, S(0.305));
   if (snapHeadChars.length) {
-    tl.fromTo(snapHeadChars, { yPercent: 120 }, { yPercent: 0, stagger: 0.012, duration: 0.045 }, 0.31);
+    tl.fromTo(snapHeadChars, { yPercent: 120 }, { yPercent: 0, stagger: sD(0.012), duration: sD(0.045) }, S(0.31));
   }
-  tl.fromTo('[data-snap-viewall]', { yPercent: 130 }, { yPercent: 0, duration: 0.03 }, 0.345);
+  tl.fromTo('[data-snap-viewall]', { yPercent: 130 }, { yPercent: 0, duration: sD(0.03) }, S(0.345));
 
-  const beat = 0.0365;
+  const beat = 0.0365; /* old global units */
   cards.forEach((card, i) => {
-    const at = 0.355 + i * beat;
+    const at = S(0.355 + i * beat);
     const side = i % 2 === 0 ? -1 : 1;
     tl.fromTo(
       card,
       { x: side * (90 + (i % 3) * 40), y: 110, rotation: side * 5, opacity: 0, scale: 0.72 },
-      { x: 0, y: 0, rotation: 0, opacity: 1, scale: 1, duration: 0.05 },
+      { x: 0, y: 0, rotation: 0, opacity: 1, scale: 1, duration: sD(0.05) },
       at,
     );
     tl.fromTo(
       card.querySelectorAll('[data-card-meta]'),
       { y: 22, opacity: 0 },
-      { y: 0, opacity: 1, stagger: 0.01, duration: 0.02 },
-      at + 0.028,
+      { y: 0, opacity: 1, stagger: sD(0.01), duration: sD(0.02) },
+      S(0.355 + i * beat + 0.028),
     );
   });
   connectors.forEach((line, i) => {
-    tl.fromTo(line, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.022 }, 0.355 + (i + 1) * beat + 0.02);
+    tl.fromTo(line, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: sD(0.022) }, S(0.355 + (i + 1) * beat + 0.02));
   });
-  tl.fromTo(snapFrame, { scale: 0.988 }, { scale: 1, duration: 0.04 }, 0.665)
-    .to(snapFrame, { autoAlpha: 0, duration: 0.035 }, 0.70);
+  tl.fromTo(snapFrame, { scale: 0.988 }, { scale: 1, duration: sD(0.04) }, S(0.665))
+    .to(snapFrame, { autoAlpha: 0, duration: sD(0.035) }, S(0.70));
 
   /* ============ WORKED AT — accordion opens by crank ============ */
   const rows = [...workFrame.querySelectorAll<HTMLElement>('.wa-item')];
   const workLead = workFrame.querySelector<HTMLElement>('section p');
-  tl.set(workFrame, { autoAlpha: 1 }, 0.735);
+  tl.set(workFrame, { autoAlpha: 1 }, W(0.735));
   if (workLead) {
-    tl.fromTo(workLead, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.025 }, 0.735);
+    tl.fromTo(workLead, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: wD(0.025) }, W(0.735));
   }
   if (workHeadChars.length) {
-    tl.fromTo(workHeadChars, { yPercent: 120 }, { yPercent: 0, stagger: 0.008, duration: 0.035 }, 0.74);
+    tl.fromTo(workHeadChars, { yPercent: 120 }, { yPercent: 0, stagger: wD(0.008), duration: wD(0.035) }, W(0.74));
   }
   rows.forEach((row, i) => {
-    tl.fromTo(row, { x: -44, opacity: 0 }, { x: 0, opacity: 1, duration: 0.03 }, 0.765 + i * 0.012);
+    tl.fromTo(row, { x: -44, opacity: 0 }, { x: 0, opacity: 1, duration: wD(0.03) }, W(0.765 + i * 0.012));
     /* panel unfolds + description rises, driven by position */
-    tl.to(row, { '--wa-rows': '1fr', duration: 0.024 }, 0.8 + i * 0.028);
+    tl.to(row, { '--wa-rows': '1fr', duration: wD(0.024) }, W(0.8 + i * 0.028));
     tl.fromTo(row.querySelector('.wa-panel p'),
-      { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.02 }, 0.808 + i * 0.028);
+      { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: wD(0.02) }, W(0.808 + i * 0.028));
     const plus = row.querySelector('.wa-plus');
-    if (plus) tl.fromTo(plus, { rotate: 0 }, { rotate: 45, duration: 0.02 }, 0.8 + i * 0.028);
+    if (plus) tl.fromTo(plus, { rotate: 0 }, { rotate: 45, duration: wD(0.02) }, W(0.8 + i * 0.028));
   });
-  tl.to(workFrame, { autoAlpha: 0, yPercent: -6, duration: 0.04 }, 0.898);
+  tl.to(workFrame, { autoAlpha: 0, yPercent: -6, duration: wD(0.04) }, W(0.898));
 
   /* ============ FOOTER — the last pages ============ */
-  tl.set(footFrame, { autoAlpha: 1 }, 0.935)
+  tl.set(footFrame, { autoAlpha: 1 }, F(0.935))
     .fromTo('[data-flip-frame="foot"] > footer > div > .mono-tiny',
-      { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.025 }, 0.935);
+      { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: fD(0.025) }, F(0.935));
   if (footCtaChars.length) {
-    tl.fromTo(footCtaChars, { yPercent: 120 }, { yPercent: 0, stagger: 0.0025, duration: 0.028 }, 0.938);
+    tl.fromTo(footCtaChars, { yPercent: 120 }, { yPercent: 0, stagger: fD(0.0025), duration: fD(0.028) }, F(0.938));
   }
   tl.fromTo('[data-flip-frame="foot"] [data-fade]',
-    { y: 26, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.004, duration: 0.022 }, 0.948)
-    .fromTo('[data-flip-frame="foot"] .hairline-h', { scaleX: 0 }, { scaleX: 1, duration: 0.028, transformOrigin: 'left' }, 0.95);
+    { y: 26, opacity: 0 }, { y: 0, opacity: 1, stagger: fD(0.004), duration: fD(0.022) }, F(0.948))
+    .fromTo('[data-flip-frame="foot"] .hairline-h', { scaleX: 0 }, { scaleX: 1, duration: fD(0.028), transformOrigin: 'left' }, F(0.95));
 
   /* anchor: the film is EXACTLY 1.0 long — scroll progress maps
      1:1 to timeline positions, bands land where the storyboard says */

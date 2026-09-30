@@ -291,7 +291,7 @@
   /* ---------- THE FLIPBOOK STAGE ---------- */
   .flip-track {
     position: relative;
-    height: 1100vh;
+    height: calc(var(--track-vh, 1100) * 1vh); /* set from the scene table */
   }
   .flip-stage {
     position: sticky;
@@ -307,6 +307,32 @@
     pointer-events: none;
   }
   [data-flip-frame].is-live { pointer-events: auto; }
+
+  /* ---------- LED WALL (scene between hero and lime) ----------
+     Transparent background: the canvas paints the void itself and
+     alpha-fades with the ignition wave, so the hero shows through
+     until the wave passes. Content layer sits above the canvas,
+     below the fixed chrome (z tokens only). */
+  .led-wall {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+  }
+  .led-wall canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: var(--z-ghost);
+    pointer-events: none;
+  }
+  .led-wall-content {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-content);
+    pointer-events: none;
+  }
   /* frames fill the stage; each frame's own section centers */
   [data-flip-frame] > section,
   [data-flip-frame] > footer,
