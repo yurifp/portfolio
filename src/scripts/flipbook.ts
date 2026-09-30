@@ -118,12 +118,15 @@ export function initFlipbook() {
           : p >= S(0.3) && p < S(0.725) ? 'snap'
           : p > F(0.93) ? 'foot' : '';
         frames.forEach((f) => f.classList.toggle('is-live', f.dataset.flipFrame === live));
-        /* the ignition wave — scrubbed, perfectly reversible. The wall
-           stays live until the lime wipe has fully taken over (old
-           global 0.15 = wipe end + fade tail) */
+        /* the ignition wave + the lime sweep — scrubbed, perfectly
+           reversible. The sweep (L 0.12→0.135) replaces the old
+           straight-edge lime wipe: the wall paints a cell-quantized
+           bottom-up front ending in EXACT flat lime, then fades over
+           the real lime frame (same color — seamless) */
         const wall = activeWall();
         if (wall) {
           wall.setIgnite(ramp(p, WAVE_START, WAVE_END));
+          wall.setSweep(ramp(p, L(0.12), L(0.135)));
           wall.setActive(p >= WAVE_START - sceneLen('hero') * 0.05 && p <= L(0.15));
         }
       },
@@ -150,8 +153,9 @@ export function initFlipbook() {
   tl.set(ledFrame, { autoAlpha: 1 }, WAVE_START);
   /* the hero recedes subtly (parallax) while the wave ignites behind it */
   tl.to(heroFrame, { scale: 0.985, duration: pos('hero', 0.9) - pos('hero', 0.5) }, pos('hero', 0.5));
-  /* the lime wipe takes over; then the wall hands back the GPU */
-  tl.to(ledFrame, { autoAlpha: 0, duration: lD(0.03) }, L(0.12));
+  /* the lime sweep ends in flat lime; only then may the wall fade —
+     fading mid-sweep would reveal full lime behind the rain region */
+  tl.to(ledFrame, { autoAlpha: 0, duration: lD(0.005) }, L(0.135));
 
   /* ============ THE LIME SCENE ============
      Fail-loud + one-role-per-element (postmortem: the old build left
@@ -200,11 +204,10 @@ export function initFlipbook() {
     };
     limeOdos.forEach((_, i) => applyLimeOdo(i, 0));
 
-    /* wipe in from the bottom (unit-consistent inset) */
-    tl.set(limeFrame, { autoAlpha: 1 }, L(0.12))
-      .fromTo(limeFrame,
-        { clipPath: 'inset(100% 0% 0% 0%)' },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: lD(0.015) }, L(0.12));
+    /* entrance: the WALL's cell-quantized sweep paints the takeover
+       (L 0.12→0.135) — the frame only needs to be present underneath,
+       in the same flat lime, for the seamless handoff */
+    tl.set(limeFrame, { autoAlpha: 1 }, L(0.12));
 
     /* column lines draw top→bottom, staggered (7 lines, tighter
        stagger so the tail overlaps card 1 — no dead zone) */
