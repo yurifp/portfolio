@@ -193,6 +193,17 @@
     border-right: 1px solid var(--ink-now);
   }
 
+  /* during a hold: no text selection / image drag inside the page;
+     outside the hold, selection works normally */
+  .is-holding {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .is-holding img,
+  .is-holding canvas {
+    -webkit-user-drag: none;
+  }
+
   /* film grain over everything */
   .noise-layer {
     position: fixed;
