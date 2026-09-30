@@ -240,7 +240,25 @@ export function initFlipbook() {
   /* ============ SNAP — the lime flipbook of cards ============ */
   const cards = [...snapFrame.querySelectorAll<HTMLElement>('[data-snap-card]')];
   const connectors = [...snapFrame.querySelectorAll<SVGLineElement>('[data-connector]')];
+  /* snap appears under the lime wipe at 0.285 — its content must be
+     HIDDEN from that instant until each element's entry window.
+     fromTo tweens positioned later don't apply their "from" before
+     the playhead reaches them, leaving natural CSS = visible */
   tl.set(snapFrame, { autoAlpha: 1 }, 0.285);
+  cards.forEach((card) => {
+    tl.set(card, { opacity: 0, scale: 0.72, x: 0, y: 110 }, 0.285);
+    card.querySelectorAll('[data-card-meta]').forEach((m) => {
+      tl.set(m, { opacity: 0, y: 22 }, 0.285);
+    });
+  });
+  connectors.forEach((line) => {
+    tl.set(line, { strokeDashoffset: 1 }, 0.285);
+  });
+  tl.set('[data-snap-label]', { opacity: 0 }, 0.285);
+  tl.set('[data-snap-viewall]', { yPercent: 130 }, 0.285);
+  if (snapHeadChars.length) {
+    tl.set(snapHeadChars, { yPercent: 120 }, 0.285);
+  }
   tl.fromTo('[data-snap-label]', { opacity: 0 }, { opacity: 1, stagger: 0.012, duration: 0.025 }, 0.305);
   if (snapHeadChars.length) {
     tl.fromTo(snapHeadChars, { yPercent: 120 }, { yPercent: 0, stagger: 0.012, duration: 0.045 }, 0.31);
