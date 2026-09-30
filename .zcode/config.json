@@ -1,0 +1,14 @@
+{
+  "mcp": {
+    "servers": {
+      "yfp": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-memory"
+        ]
+      }
+    }
+  }
+}

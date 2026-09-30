@@ -645,7 +645,7 @@
   /* short viewports: the sacrifice ladder (spec §5) — paragraph first,
      then the nav-band offset and paddings give back height */
   .zone-b { margin-top: calc(var(--gutter) + 3.4em); }
-  .hero-intro { padding-top: 2vh; }
+  .hero-intro { padding-top: 2vh; overflow: clip; }
   .bio-avail { margin-top: 3vh; }
   @media (max-height: 740px) {
     .bio-body { font-size: 14px; }
