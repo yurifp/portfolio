@@ -54,8 +54,8 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
 
       <!-- C3 portrait + caption + the tags list under the photo (LEFT side) -->
       <div class="hero-c3 justify-self-start flex flex-col items-start" style="gap: max(14px, 1.2vh);">
-        <div class="ticks" data-cursor="HELLO" style="width: min(280px, calc(24vh * 0.75));" data-choreo="portrait" data-fade data-delay={0.3}>
-          <canvas data-portrait class="block w-full h-auto" style="aspect-ratio: 3 / 4;"></canvas>
+        <div class="ticks" data-cursor="HELLO" data-choreo="portrait" data-fade data-delay={0.3}>
+          <canvas data-portrait class="block" style="aspect-ratio: 3 / 4;"></canvas>
           <p class="mono-tiny text-faint mt-2 flex justify-between w-full"><span>PORTRAIT—DITHER</span><span>BAYER 8×8</span></p>
         </div>
         <ul class="mono-tiny text-dim text-left flex flex-col hero-tags" style="list-style: none;" data-fade data-delay={0.5}>

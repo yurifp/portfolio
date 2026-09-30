@@ -362,6 +362,16 @@
   .hero-c1 { grid-column: 9 / 13; justify-self: end; }
   /* C2 (cols 5-8) stays EMPTY by design */
   .hero-c3 { grid-column: 1 / 5; justify-self: start; }
+  /* ONE row, always: sparse auto-placement drops C3 (cols 1-5) to a
+     second row BELOW the zone because C1 (cols 9-13) comes first in
+     the DOM — the portrait was born outside the intro and got clipped */
+  @media (min-width: 901px) {
+    .hero-intro { grid-template-rows: minmax(0, 1fr); }
+    .hero-c1 { grid-row: 1; }
+    /* padding-bottom: real slack against font-metric drift, so caption
+       + tags never kiss the zone's overflow:clip edge */
+    .hero-c3 { grid-row: 1; align-self: stretch; min-height: 0; padding-bottom: 2vh; }
+  }
   @media (min-width: 1700px) {
     .hero-c1 { grid-column: 10 / 13; justify-self: end; }
     .hero-c3 { grid-column: 1 / 4; justify-self: start; }
@@ -647,9 +657,32 @@
   .zone-b { margin-top: calc(var(--gutter) + 3.4em); }
   .hero-intro { padding-top: 2vh; overflow: clip; }
   .bio-avail { margin-top: 3vh; }
+  /* portrait stack: photo flexes to whatever height the intro zone has
+     left after caption + tags — top-anchored, never clipped, capped at
+     the original design size so tall screens don't blow it up */
+  .hero-c3 .ticks {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: fit-content;
+    max-width: 100%;
+  }
+  /* align-self: flex-start is load-bearing — without it the canvas
+     STRETCHES to the ticks width (caption-driven), which makes the
+     cross size definite, kills aspect-ratio, and squashes the 320×420
+     buffer into a landscape box */
+  .hero-c3 .ticks canvas {
+    align-self: flex-start;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: auto;
+    max-height: calc(30vh * 0.75);
+  }
+  /* HUD caption: one line, always — wrapping steals photo height */
+  .hero-c3 .ticks p { white-space: nowrap; }
   @media (max-height: 740px) {
     .bio-body { font-size: 14px; }
-    .hero-c3 .ticks { width: min(320px, calc(26vh * 0.75)); }
     .zone-b { margin-top: calc(var(--gutter) + 2.6em); }
     .hero-intro { padding-top: 1vh; }
     .bio-avail { margin-top: 2vh; }
