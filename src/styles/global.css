@@ -672,12 +672,17 @@
      STRETCHES to the ticks width (caption-driven), which makes the
      cross size definite, kills aspect-ratio, and squashes the 320×420
      buffer into a landscape box */
-  .hero-c3 .ticks canvas {
+  .hero-c3 .ticks-photo {
     align-self: flex-start;
+    aspect-ratio: 3 / 4; /* the single ratio source (matches the source jpg) */
     flex: 1 1 auto;
     min-height: 0;
-    width: auto;
-    max-height: calc(30vh * 0.75);
+    max-height: calc(39vh * 0.75);
+  }
+  .hero-c3 .ticks-photo canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
   /* HUD caption: one line, always — wrapping steals photo height */
   .hero-c3 .ticks p { white-space: nowrap; }

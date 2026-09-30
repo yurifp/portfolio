@@ -30,6 +30,17 @@ import Footer from '../components/Footer.astro';
   const portrait = document.querySelector<HTMLCanvasElement>('[data-portrait]');
   if (portrait) mountPortrait(portrait, { imageUrl: '/images/portrait.jpg' });
 
+  /* the frame (.ticks) must hug the RENDERED photo width. CSS intrinsic
+     sizing derives it from max-height (the cap), not the flexed height,
+     so the corner marks sit loose — mirror the real width instead.
+     No cycle: the frame's width never feeds back into the photo height */
+  const photoBox = portrait?.closest('.ticks-photo');
+  const frame = portrait?.closest('.ticks');
+  if (photoBox && frame && 'ResizeObserver' in window) {
+    const hug = () => { frame.style.width = photoBox.getBoundingClientRect().width + 'px'; };
+    new ResizeObserver(hug).observe(photoBox);
+  }
+
   /* LED field replaces the constellation — square dither cells */
   const ledHost = document.querySelector<HTMLElement>('[data-led-host]');
   const led = ledHost ? mountLEDField(ledHost) : null;
