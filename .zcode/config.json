@@ -8,6 +8,13 @@
           "-y",
           "@modelcontextprotocol/server-memory"
         ]
+      },
+      "graphify": {
+        "type": "sse",
+        "url": "https://api.graphify.com/mcp",
+        "headers": {
+          "Authorization": "Bearer ${GRAPHIFY_TOKEN}"
+        }
       }
     }
   }
