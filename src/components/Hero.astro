@@ -1,20 +1,15 @@
 ---
 import { site, bio } from '../data/site';
-import ConstellationGrid from './ui/constellation-grid';
 
 /* contact split across the column grid, reference-style */
 const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
 ---
 <!--
-  HERO = ONE GRID OF ZONES (docs/hero-layout.md). Frame-1 polish:
-  no sphere, no floating red dots, tag opens the name block, BR is a
-  stroked counterweight on FERREIRA's baseline, cue centered at 50vw.
+  HERO = ONE GRID OF ZONES. Background = LED FIELD (mountLEDField
+  in index.astro): square dither cells that light under the mouse.
+  No circles, no repulsion, no constellation.
 -->
-<section class="hero-grid relative h-full min-h-0 flex flex-col" id="about">
-  <!-- WebGL signal field -->
-  <div class="absolute inset-0 pointer-events-none" style="z-index: var(--z-ghost);" aria-hidden="true">
-    <ConstellationGrid client:load density={36} />
-  </div>
+<section class="hero-grid relative h-full min-h-0 flex flex-col" id="about" data-led-host>
 
   <!-- guides: same 12-col grid, borders ON the column edges (25%/50%) -->
   <div class="hero-guides absolute inset-0 pointer-events-none hidden md:grid" style="z-index: var(--z-ghost);" aria-hidden="true" data-choreo="meta">
@@ -22,7 +17,7 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
   </div>
 
   <!-- scroll cue — child of the SECTION so 50vw means the viewport -->
-  <div class="hero-cue absolute flex flex-col items-center gap-1 pointer-events-none" data-choreo="meta">
+  <div class="hero-cue absolute flex flex-col items-center gap-1 pointer-events-none" data-choreo="meta" data-led-safe>
     <span class="block w-px h-[2.2rem] bg-gradient-to-b from-ink/40 to-transparent"></span>
     <span class="mono-tiny text-dim whitespace-nowrap">Scroll down</span>
   </div>
@@ -31,7 +26,7 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
   <div class="hero-zones relative flex flex-col h-full min-h-0" style="z-index: var(--z-content);">
 
     <!-- head2: B1 left | B2 right -->
-    <div class="zone zone-b flex items-start justify-between" data-zone="B">
+    <div class="zone zone-b flex items-start justify-between" data-zone="B" data-led-safe>
       <p class="mono-tiny text-dim leading-[1.5]" data-zone-box data-choreo="meta">PORTFOLIO<br />©2026</p>
       <p class="mono-tiny text-dim text-right leading-[1.5]" data-zone-box data-choreo="meta">
         <span style="display: inline-block; width: 3ch; font-variant-numeric: tabular-nums; text-align: right;">{site.born}</span><br />
@@ -43,7 +38,7 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
     <div class="zone hero-intro grid flex-1 min-h-0 items-start" data-zone="C" style="column-gap: var(--col-gap); row-gap: 2vh;">
 
       <!-- C1 -->
-      <div class="hero-c1" data-choreo="bio">
+      <div class="hero-c1" data-choreo="bio" data-led-safe>
         <!-- red square = inline bullet of FROM, same line -->
         <p class="mono-tiny flex items-center" style="color: var(--color-lime); gap: 12px;" data-fade data-delay={0.15}>
           <span class="inline-block w-[8px] h-[8px] bg-ember shrink-0" aria-hidden="true"></span>
@@ -72,7 +67,7 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
     </div>
 
     <!-- D: name block — tag opens it, BR counterweights on FERREIRA's baseline -->
-    <div class="zone hero-name-block flex flex-col" data-zone="D">
+    <div class="zone hero-name-block flex flex-col" data-zone="D" data-led-safe>
       <span
         class="mono-tiny name-tag self-start whitespace-nowrap"
         data-fade

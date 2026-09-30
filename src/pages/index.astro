@@ -24,10 +24,24 @@ import Footer from '../components/Footer.astro';
 
 <script>
   import { mountPortrait } from '../scripts/portrait';
+  import { mountLEDField } from '../scripts/led-field';
   import { initFlipbook } from '../scripts/flipbook';
 
   const portrait = document.querySelector<HTMLCanvasElement>('[data-portrait]');
   if (portrait) mountPortrait(portrait, { imageUrl: '/images/portrait.jpg' });
+
+  /* LED field replaces the constellation — square dither cells */
+  const ledHost = document.querySelector<HTMLElement>('[data-led-host]');
+  const led = ledHost ? mountLEDField(ledHost) : null;
+  if (led) {
+    /* dissolve 9-12% driven by the film's progress */
+    const probe = () => {
+      const p = (window as unknown as { __flipbook?: { progress: () => number } }).__flipbook;
+      if (p) led.setProgress(p.progress());
+    };
+    addEventListener('scroll', probe, { passive: true });
+    setTimeout(probe, 100);
+  }
 
   initFlipbook();
 </script>
