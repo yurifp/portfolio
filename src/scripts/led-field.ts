@@ -14,6 +14,9 @@
   multiplies heat. At 12% everything is off, canvas hidden, rAF dead.
 */
 
+/* ---------- scale: ONE number to tune the whole comet ---------- */
+const LED_SCALE = 0.5; /* halves brush radius AND trail lifetime */
+
 /* ---------- Bayer 8×8 (same matrix as the portrait) ---------- */
 const BAYER = [
   [0, 32, 8, 40, 2, 34, 10, 42],
@@ -52,7 +55,6 @@ let host: HTMLElement | null = null;
 let cols = 0, rows = 0, cell = 4;
 let heat: Float32Array = new Float32Array(0);
 let baseDensity: Float32Array = new Float32Array(0);
-let safeRects: Array<{ x0: number; y0: number; x1: number; y1: number }> = [];
 let raf = 0;
 let lastFrame = 0;
 let lastMouse = { x: -9999, y: -9999 };
@@ -60,9 +62,10 @@ let torchOn = false;
 let dissolve = 0; /* 0 = fully visible, 1 = fully dissolved */
 let disposed = false;
 let reduced = false;
+let flood = false;
 
 /* colors (resolved once) */
-const COLS = { bg: [7, 2, 16], bit: [35, 28, 52], on: [157, 241, 51], onDim: [63, 116, 20] };
+const COLS = { bg: [7, 2, 16], bit: [35, 28, 52], on: [157, 241, 51] };
 
 /* probe */
 (window as unknown as { __led?: Record<string, unknown> }).__led = {
@@ -71,7 +74,6 @@ const COLS = { bg: [7, 2, 16], bit: [35, 28, 52], on: [157, 241, 51], onDim: [63
   get rows() { return rows; },
   litCount: () => { let n = 0; for (let i = 0; i < heat.length; i++) if (heat[i] > 0.03) n++; return n; },
   heatAt: (x: number, y: number) => heat[Math.floor(y / cell) * cols + Math.floor(x / cell)] ?? 0,
-  safeAt: (x: number, y: number) => safeRects.some((r) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1),
   baseHash: () => { let h = 0; for (let i = 0; i < baseDensity.length; i++) h = (h * 31 + baseDensity[i] * 255) | 0; return h; },
 };
 
@@ -103,21 +105,6 @@ function rebuild() {
   }
   paintBase();
   paintLight();
-  refreshSafeRects();
-}
-
-function refreshSafeRects() {
-  if (!host) return;
-  safeRects = [...host.querySelectorAll<HTMLElement>('[data-led-safe]')].map((el) => {
-    const hr = host!.getBoundingClientRect();
-    const er = el.getBoundingClientRect();
-    return {
-      x0: Math.max(0, Math.floor((er.left - hr.left - 6) / cell)),
-      y0: Math.max(0, Math.floor((er.top - hr.top - 6) / cell)),
-      x1: Math.min(cols - 1, Math.ceil((er.right - hr.left + 6) / cell)),
-      y1: Math.min(rows - 1, Math.ceil((er.bottom - hr.top + 6) / cell)),
-    };
-  });
 }
 
 /* ---------- BASE painting (static dither) ---------- */
@@ -131,8 +118,7 @@ function paintBase() {
   for (let j = 0; j < rows; j++) {
     for (let i = 0; i < cols; i++) {
       const idx = j * cols + i;
-      const inSafe = safeRects.some((r) => i >= r.x0 && i <= r.x1 && j >= r.y0 && j <= r.y1);
-      const base = baseDensity[idx] * (inSafe ? 0.5 : 1) * dens;
+      const base = baseDensity[idx] * dens;
       const on = base > BAYER[j & 7][i & 7];
       const p = idx * 4;
       if (on) { d[p] = COLS.bit[0]; d[p + 1] = COLS.bit[1]; d[p + 2] = COLS.bit[2]; }
@@ -160,9 +146,7 @@ function paintLight() {
         const L = Math.pow(Math.min(1, h), 0.85);
         const lit = L > BAYER[j & 7][i & 7];
         if (lit) {
-          const safe = safeRects.some((r) => i >= r.x0 && i <= r.x1 && j >= r.y0 && j <= r.y1);
-          const c = safe ? COLS.onDim : COLS.on;
-          d[p] = c[0]; d[p + 1] = c[1]; d[p + 2] = c[2];
+          d[p] = COLS.on[0]; d[p + 1] = COLS.on[1]; d[p + 2] = COLS.on[2];
         } else {
           d[p] = COLS.bg[0]; d[p + 1] = COLS.bg[1]; d[p + 2] = COLS.bg[2];
         }
@@ -180,7 +164,7 @@ function stamp(cx: number, cy: number) {
   if (!host) return;
   const hr = host.getBoundingClientRect();
   const lx = cx - hr.left, ly = cy - hr.top;
-  const R = Math.max(56, Math.min(140, Math.min(hr.width, hr.height) * 0.10));
+  const R = Math.max(56, Math.min(140, Math.min(hr.width, hr.height) * 0.10)) * LED_SCALE;
   const r = Math.ceil(R / cell);
   const ci = Math.round(lx / cell), cj = Math.round(ly / cell);
   for (let j = cj - r; j <= cj + r; j++) {
@@ -199,7 +183,7 @@ function stamp(cx: number, cy: number) {
 function stampSegment(x0: number, y0: number, x1: number, y1: number) {
   const dist = Math.hypot(x1 - x0, y1 - y0);
   const hr = host!.getBoundingClientRect();
-  const R = Math.max(56, Math.min(140, Math.min(hr.width, hr.height) * 0.10));
+  const R = Math.max(56, Math.min(140, Math.min(hr.width, hr.height) * 0.10)) * LED_SCALE;
   const steps = Math.max(1, Math.ceil(dist / (R * 0.2)));
   for (let s = 0; s <= steps; s++) {
     stamp(x0 + (x1 - x0) * (s / steps), y0 + (y1 - y0) * (s / steps));
@@ -219,7 +203,7 @@ function tick(now: number) {
   }
 
   /* decay */
-  const tau = reduced ? 0.12 : 0.38;
+  const tau = (reduced ? 0.12 : 0.38) * LED_SCALE;
   const decay = Math.exp(-dt / tau);
   let hasHeat = false;
   for (let i = 0; i < heat.length; i++) {
@@ -281,11 +265,13 @@ export function mountLEDField(container: HTMLElement) {
   disposed = false;
   reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* resolve ?led=mint */
+  /* resolve ?led=mint and ?led=flood */
   const url = new URL(location.href);
   if (url.searchParams.get('led') === 'mint') {
     COLS.on = [158, 255, 201];
-    COLS.onDim = [63, 122, 76];
+  }
+  if (url.searchParams.get('led') === 'flood') {
+    flood = true;
   }
 
   /* create canvases */
@@ -309,10 +295,15 @@ export function mountLEDField(container: HTMLElement) {
   }
 
   rebuild();
+  /* ?led=flood: H=0.6 everywhere, no decay, no torch — uniformity proof */
+  if (flood) {
+    heat.fill(0.6);
+    paintLight();
+  }
   addEventListener('pointermove', onMove, { passive: true });
   document.addEventListener('mouseleave', onLeave);
   addEventListener('resize', rebuild);
-  document.fonts?.ready.then(() => { refreshSafeRects(); paintBase(); });
+  document.fonts?.ready.then(() => { paintBase(); });
 
   /* ?led=demo: deterministic gesture */
   if (url.searchParams.get('led') === 'demo') {
