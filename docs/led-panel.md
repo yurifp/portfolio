@@ -253,3 +253,59 @@ onda com chuva viva; console limpo. Evidências: `evidence/rain-*`.
   sprite — cantos arredondados saíram com o motor WebGL.
 - **Grade como linhas finas escuras**: é a fresta de 1 px na cor exata do
   fundo (spec). Nenhum tier caiu (o motor 2D não tem tiers; frame p95 ~3 ms).
+
+---
+
+## 3. Motor de CAMPO de LEDs (reescrita arquitetural)
+
+Substitui o procedural por coluna (§2, removido sem código morto). A placa,
+paleta, bloom, transições e tiers seguem idênticos.
+
+### Estado por LED
+Typed arrays (E, Gin, G, shim, gain/atkT/decT por hash do índice). A cada
+frame: entrada = soma suave `1−Π(1−c)` dos diretores; ataque rápido
+(τ≈12ms±20%); decaimento de fósforo não-linear (τ 0.2s no alto, ~2× mais
+lento no baixo → brasas); spill 5% para os 8 vizinhos; ganho ±8%;
+glints Poisson independentes (0.02/s, τ 120ms); shimmer random-walk
+MULTIPLICATIVO ±4%. Substeps ≤33ms ⇒ 10/60/144 fps idênticos (medido 0.6%).
+
+### Diretores (interface comum: escrevem em Gin, coordenadas contínuas de LED)
+- **RainDirector**: gotas livres (pool SoA 1500, x/y contínuos, NADA por
+  coluna) — kernel anisotrópico gaussiano σx + cabeça quente + cauda
+  exponencial + antecipação fraca; 3 camadas (6-9/10-16/18-28 LED/s,
+  brilho 0.45/0.95/1.15, σx 0.45/0.6/0.9, ±15% v); ease-in nos primeiros
+  20% da altura; vento curl-noise ±1.2 LED/s com rajadas (9s); nascimentos
+  por ruído azul 1D (mapa de resfriamento, offset sub-coluna completo);
+  fusão (<1 LED, mesma camada, a rápida absorve) e divisão rara; saída pela
+  borda e o rastro apaga sozinho no campo.
+- **CometDirector**: 1 cometa por 5-9 s (85% da altura, 34 LED/s, núcleo
+  quente), nunca dois juntos; desligado em reduced-motion.
+- **ExposureController**: malha fechada na luminância de EXIBIÇÃO média
+  (nível/11) → alvo 0.27 com τ≈3s, ajustando a taxa de nascimento (0.5-2.2×).
+- Futuros (interface pronta, NÃO implementados): cursor, texto/logo, imagem.
+
+A onda de ignição e a varredura lime seguem na camada de render (paint),
+lendo `level[]` — visualmente idênticas. A máscara de UI e tiers do motor
+WebGL não existem desde a paleta fechada (reportado). O acoplamento ao
+scroll (≤+35%, τ 400ms) agora multiplica a INTEGRAÇÃO (posições
+incrementais — mudança de velocidade nunca pula).
+
+### Tempo e robustez
+`t += dt·mult` com dt real (cap 250ms anti-freeze; substeps 33ms);
+`?fps=N` coalesce frames para testes; pausa fora da viewport preserva o
+estado (t0 resetado ao retomar); aquecimento rápido de 8s em fatias de 50ms
+(a cena nasce chovendo em todas as alturas); reduced: 30% da velocidade,
+sem cometas/fusão/acoplamento. `?tune=1`: painel leve de sliders + copy JSON.
+
+### Verificação (`scripts/field-verify.mjs`, headed, **13/13**)
+χ² nascimentos 13.5 (crit 16.9) — nada preso a coluna · 0 retângulos
+uniformes 5×10 · aspecto por gota 4.36:1 · 0 retrocessos/saltos em 55k
+amostras por frame · estabilidade p95 9.7%/frame · luminância 0.269
+[0.23-0.30] com picos 3.1% · sim/real 60 vs 10fps = 0.6% · aquecimento com
+gotas nas 4 bandas · 60s sem repetição · p95 frame 2.0-2.1ms (sim
+1.4-1.5ms) DPR 1 e 2 · console limpo. Evidências: `evidence/field-*`.
+
+**Desvios reportados**: células apagadas ~1% (alvo 35-45%) — incompatível
+fisicamente com a banda de luminância 0.22-0.32 sob chuva contínua; o
+equilíbrio se move com UMA constante (EXPOSURE_TARGET). Amostragem por
+gota no teste de aspecto (cortinas legítimas fundem componentes conectados).
