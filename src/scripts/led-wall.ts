@@ -1,74 +1,95 @@
 /*
-  LED PANEL — the board, rebuilt as a literal LED plate.
+  LED PANEL — the board, driven by ONE energy field.
 
-  Every cols×rows cell EXISTS and is drawn every frame with the color
-  of its level (0-6). One level per cell: final = max(base, drop).
-  No sprites, no halo, no blur, no per-cell luck: the tone is a pure
-  function of a drifting value-noise field, drops are discrete cell
-  state (head advances 1 cell every p ticks), and the frame is a pure
-  function of (seed, driver) — reload or re-route lands on the same
-  board.
+  The approved plate stays (integer grid, solid cells, gap, closed
+  palette, scroll layers). What changed is HOW cells light:
 
-  Rendering is Canvas2D at device resolution: integer cellDev, integer
-  fillRects (run-length batched per row), imageSmoothingEnabled=false,
-  no filter/shadowBlur/globalAlpha/blend. Gap = exact background color.
+    E_total = 1 - (1 - E_amb)(1 - E_rain)      soft sum, one buffer
+    E_amb   = blobs (today's field, capped) + κ·ρ   (blobs catch light)
+    E_rain  = closed-form persistence per drop: E = peak·exp(-(t-t_pass)/τ)
+    level   = round(11 · E^(1/γ))              single LUT, γ = 1.6
+    + cell bloom: raise to max(level, 0.30·bestOrth≥6, 0.18·bestDiag≥6)
 
-  Scroll layers preserved: the ignition wave (hero -> board) draws only
-  cells behind the front; the lime sweep (board -> verde) paints flat
-  #9df133 rows with a cell-quantized front — both scrubbed, both
-  reversible, same windows as before.
+  Rain: 3 depth classes (far/mid/near = 0.6×/1.0×/1.7× speed), drops
+  born ABOVE the top edge and dying only BELOW the bottom — never in a
+  visible cell. Trail length is speed × τ (fast drops leave longer
+  visible tails). Birth rate per column ∝ 0.3 + 0.7·colMean(A0): rain
+  concentrates under the brighter blobs, no column runs dry. Everything
+  is a pure function of (seed, driver) — same driver, same board, any
+  route. 12-level OKLCH ramp stored literal.
 
-  Debug: ?panel=base|drops|grid|ramp|nogap, ?ramp=lime.
-  Probe: window.__panel = { cols, rows, cell, gap, ramp, levels(),
-  drops(), drawCount(), hash(), hashAt(t), tick() }.
+  Debug: ?panel=base|drops|grid|ramp|nogap · ?bloom=0 · ?depth=0 ·
+  ?feed=0 · ?ramp=lime. Probe: window.__panel (read-only).
 */
 
 /* ---------- seed & driver ---------- */
 const SEED = 0x9e37;
-const TICK_MS = 33.3;            /* discrete step; catch-up capped below */
+const TICK_MS = 33.3;
 const MAX_CATCHUP = 5;
 
-/* ---------- grid (today's values, integer device px) ---------- */
-const COLUMNS_PER_WIDTH = 17;    /* ~110 columns at 1878px — today's */
+/* ---------- grid (unchanged from the approved board) ---------- */
+const COLUMNS_PER_WIDTH = 17;
 const COLUMNS_MIN = 36;
 const COLUMNS_MAX = 120;
 
-/* ---------- base field (today's character) ---------- */
-const FIELD_SCALE = 0.22;        /* noise frequency in cells⁻¹ (≈4.5-cell features) */
-const FIELD_DRIFT = 0.9;         /* cells/s downward */
+/* ---------- ambient (today's blobs, preserved) ---------- */
+const FIELD_SCALE = 0.22;
+const FIELD_DRIFT = 0.9;
 const OCTAVES = 3;
-const OCTAVE_GAINS = [0.62, 0.24, 0.14]; /* low-freq dominant: neighbor deltas stay small */
-/* thresholds quantize I∈[0,1] to levels 0-5; calibrated for ~60% lit */
+const OCTAVE_GAINS = [0.62, 0.24, 0.14];
 const THRESH = [0.455, 0.555, 0.645, 0.725, 0.80];
-const HYST = 0.03;               /* hysteresis band against border flicker */
+const HYST = 0.03;
+const AMB_CAP = 0.40;            /* E ceiling for the noise part */
+/* old base level k -> 12-scale anchor (preserves ?panel=base ±5pp) */
+const MAP12 = [0, 2, 4, 7, 9, 11];
 
-/* ---------- drops (today's density/speed/trail) ---------- */
-const DUTY = 0.34;               /* fraction of columns holding a live thread */
-const P_CHOICES = [2, 3, 4, 6];  /* ticks per cell step */
-const P_WEIGHTS = [0.72, 0.18, 0.06, 0.04]; /* heavy on p=2: closest to today's 16 cells/s */
-const TRAIL_MIN = 10;            /* cells */
-const TRAIL_MAX = 24;
-const MIN_GAP_CELLS = 4;         /* between two drops of the same column */
+/* ---------- rain: 3 depth classes ---------- */
+const CLASSES = [
+  { id: 'far',  vMul: 0.6, peak: 0.52 },   /* head level ≤ 7  */
+  { id: 'mid',  vMul: 1.0, peak: 0.75 },   /* head level 8-9  */
+  { id: 'near', vMul: 1.7, peak: 1.0 },    /* head level 11   */
+];
+/* weights compensate alive-time so the VISIBLE share lands at 45/35/20 */
+const CLASS_WEIGHTS = [0.21, 0.42, 0.37];
+const BASE_SPEED = 0.432;        /* cells/tick — today's average */
+/* τ per class: visible trail (level ≥ 1) measures far 3-6 · mid 6-10 ·
+   near 10-16 cells (= v·τ·ln(peak/E_lvl1), E_lvl1 ≈ 0.036) */
+const TAU_TICKS = [6.5, 6.2, 5.3];
+const TRAIL_EPS = 0.08;          /* fade threshold for scheduling */
+const RAIN_DUTY = 0.62;          /* live fraction incl. fade tail (≈55% visible) */
+const RATE_FLOOR = 0.35;         /* min birth rate / mean (hard guarantee) */
+const SAME_COL_GAP = 8;          /* cells between one tail and the next head */
+const COUPLE_GAIN = 8;           /* amplifies col-mean contrast (noise averages thin vertically) */
+
+/* ---------- feedback (blobs catch the rain) ---------- */
+const KAPPA = 0.50;              /* E lift at ρ = 1 */
+const RHO_BOX_X = 3;             /* ± columns */
+const RHO_BOX_Y = 4;             /* ± rows */
+const RHO_NORM = 12;             /* box-sum scale for ρ ∈ [0,1] */
+
+/* ---------- LUT ---------- */
+const GAMMA = 1.6;
+const N_LEVELS = 12;             /* 0 off · 1-10 body · 11 head */
+
+/* ---------- bloom by cells ---------- */
+const BLOOM_ORTH = 0.30;
+const BLOOM_DIAG = 0.20;         /* spec said 0.18 — but floor(0.18·11)=1 < the "diagonal ≥ 2" criterion */
+const BLOOM_MIN = 6;             /* only bright neighbours spread */
 
 /* ---------- scroll layers (unchanged windows) ---------- */
-const WAVE_JITTER = 3;           /* cells of per-column front irregularity */
+const WAVE_JITTER = 3;
 const SWEEP_JITTER = 4;
 
-/* ---------- palette: computed once, stored literal (OKLCH, H 142.8) ----------
-   0 off · 1-5 body (dark→light) · 6 head. Ladder: L 0.11→0.90, chroma
-   capped to gamut per level. off = 1.16:1 against the void. */
-const RAMP_GREEN = ['#050f06', '#023902', '#036105', '#048c07', '#04ba0a', '#02ea0e', '#b8ffb2'];
-const RAMP_LIME = ['#081301', '#1e3502', '#365b02', '#518402', '#6daf01', '#8bdc12', '#c9ff9a'];
-const COLOR_BG = '#070210';      /* the hero's void token — exact gap color */
-const COLOR_LIME = '#9df133';    /* the lime scene's exact backdrop */
+/* ---------- palette: 12 levels, OKLCH H 142.8, computed once ---------- */
+const RAMP_GREEN = ['#020602', '#020f02', '#011e01', '#023502', '#034e04', '#036806', '#038409', '#02a00b', '#00be0e', '#12dc1b', '#72f16d', '#c9fbc4'];
+const RAMP_LIME = ['#081301', '#122401', '#1d3502', '#2b4b02', '#3a6202', '#4a7a02', '#5c9204', '#6fa906', '#84c109', '#9cd90f', '#bbe03f', '#dcffa8'];
+const COLOR_BG = '#070210';
+const COLOR_LIME = '#9df133';
 
 /* ---------- gap ---------- */
-const GAP_RATIO = 0.06;          /* of cellDev, min 1 device px */
+const GAP_RATIO = 0.06;
 
-/* ---------- reduced motion ---------- */
-const REDUCED_TICK_SCALE = 0;    /* frame frozen: pure static board */
-
-/* deterministic PRNG (mulberry32) + hashes */
+/* deterministic PRNG (mulberry32) + lattice hash */
 function mulberry32(a: number) {
   return function () {
     a |= 0; a = (a + 0x6d2b79f5) | 0;
@@ -82,7 +103,6 @@ function hash2(x: number, y: number): number {
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
-/* 3-octave value noise — the field I(x, y, t) */
 function field(ix: number, iy: number, tSec: number): number {
   const dy = tSec * FIELD_DRIFT;
   let f = 0, fx = ix * FIELD_SCALE, fy = (iy + dy) * FIELD_SCALE;
@@ -94,37 +114,41 @@ function field(ix: number, iy: number, tSec: number): number {
     f += OCTAVE_GAINS[o] * (a + (b2 - a) * u + (c - a) * v + (a - b2 - c + d) * u * v);
     fx *= 2.13; fy *= 2.13;
   }
-  return f / 0.985; /* normalize to [0,1] */
+  return f / 0.985;
 }
-
-/* quantize with hysteresis around the previous level */
 function quantize(I: number, prev: number): number {
-  /* candidate without hysteresis */
   let lv = 0;
   while (lv < 5 && I > THRESH[lv]) lv++;
-  /* hysteresis: resist leaving prev by HYST */
   if (lv > prev && I < THRESH[prev] + HYST && prev < 5) lv = prev;
   else if (lv < prev && I > THRESH[Math.max(0, prev - 1)] - HYST) lv = prev;
   return lv;
 }
+/* LUT: E -> level 0-11 */
+const lutLevel = (E: number) => Math.min(11, Math.max(0, Math.round(11 * Math.pow(Math.max(0, E), 1 / GAMMA))));
 
-/* one column's drop schedule — deterministic per (seed, col) */
-interface Drop {
-  id: number; col: number; head: number; trail: number; p: number; startTick: number;
-}
-function columnPlan(col: number, rows: number) {
-  const rnd = mulberry32(SEED ^ Math.imul(col + 1, 2654435761));
-  let w = rnd();
-  let pi = 0, acc = P_WEIGHTS[0];
-  while (w > acc && pi < P_CHOICES.length - 1) { pi++; acc += P_WEIGHTS[pi]; }
-  const p = P_CHOICES[pi];
-  const trail = TRAIL_MIN + Math.floor(rnd() * (TRAIL_MAX - TRAIL_MIN + 1));
-  /* cycle: (rows+trail) active ticks-worth, then idle to satisfy DUTY */
-  const activeSteps = rows + trail;
-  const idleSteps = Math.max(MIN_GAP_CELLS, Math.round(activeSteps * (1 / DUTY - 1)));
-  const cycle = (activeSteps + idleSteps) * p;
-  const phase = Math.floor(rnd() * cycle);
-  return { p, trail, cycle, phase };
+/* per-column rain schedule — STATIC: rate coupling uses the column's
+   vertical A0 mean at tick 0 (deterministic, no runtime rebuilds) */
+interface RainDrop { col: number; cls: number; tBirth: number; head: number; v: number; peak: number; }
+function columnSchedule(col: number, rows: number, wNorm: number) {
+  const rnd = mulberry32(SEED ^ Math.imul(col + 7, 2246822519));
+  let t = Math.floor(rnd() * 400); /* staggered phase */
+  const births: number[] = [];
+  const clss: number[] = [];
+  let meanGap = -1;
+  for (let k = 0; k < 4096; k++) {
+    let w = rnd(), cls = 0, acc = CLASS_WEIGHTS[0];
+    while (w > acc && cls < 2) { cls++; acc += CLASS_WEIGHTS[cls]; }
+    const cl = CLASSES[cls];
+    const v = cl.vMul * BASE_SPEED;
+    const trailVis = v * TAU_TICKS[cls] * Math.log(cl.peak / TRAIL_EPS);
+    const travel = (rows + 1 + trailVis + SAME_COL_GAP) / v;
+    const baseGap = travel / RAIN_DUTY;
+    if (meanGap < 0) meanGap = baseGap;
+    const gap = Math.min(Math.max(baseGap / wNorm, travel), 2.5 * meanGap); /* floor: no dry column */
+    births.push(t); clss.push(cls);
+    t += Math.max(1, Math.round(gap * (0.85 + 0.3 * rnd())));
+  }
+  return { births, clss };
 }
 
 export interface LedWallHandle {
@@ -144,8 +168,13 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   const params = new URL(location.href).searchParams;
   const mode = params.get('panel') || '';
   const useLimeRamp = params.get('ramp') === 'lime';
+  const bloomOn = params.get('bloom') !== '0';
+  const feedOn = params.get('feed') !== '0';
+  const depthOn = params.get('depth') !== '0';
+  const freezeT = params.get('t'); /* test-only: freeze the driver at tick N */
+
   const RAMP = (useLimeRamp ? RAMP_LIME : RAMP_GREEN).map((h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
-  const BG = [7, 2, 16]; /* #070210 */
+  const BG = [7, 2, 16];
   const LIME = [parseInt(COLOR_LIME.slice(1, 3), 16), parseInt(COLOR_LIME.slice(3, 5), 16), parseInt(COLOR_LIME.slice(5, 7), 16)];
 
   const ctx = canvas.getContext('2d', { alpha: true })!;
@@ -154,15 +183,26 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   let disposed = false, raf = 0;
   let drawCount = 0;
 
-  /* grid — integer device cells anchored top-left */
   let cssW = 1, cssH = 1, cellDev = 17, gapDev = 1, cols = 0, rows = 0;
-  let level = new Uint8Array(0);      /* the board (base ∪ drops) */
-  let scratchA = new Uint8Array(0);   /* mode-pass buffer */
+  /* the ONE display pipeline */
+  let level = new Uint8Array(0);        /* final bloomed levels */
+  let quant = new Uint8Array(0);        /* post-LUT, pre-bloom */
+  let baseLv = new Uint8Array(0);       /* today's blob pipeline (0-5) */
+  let Eamb = new Float32Array(0);       /* ambient energy */
+  let Erain = new Float32Array(0);      /* rain energy */
+  let Etot = new Float32Array(0);
+  let rhoBuf = new Float32Array(0);
+  let rhoTmp = new Float32Array(0);
+  let rainMask = new Uint8Array(0);
+  let colA0 = new Float32Array(0);      /* vertical mean of raw field */
+  let scratch = new Uint8Array(0);
   const countTab = new Uint32Array(6);
-  let plan: { p: number; trail: number; cycle: number; phase: number }[] = [];
+  type Sched = { births: number[]; clss: number[] };
+  let sched: Sched[] = [];
   let t0 = performance.now();
   let tickCount = 0;
   let tickAcc = 0;
+  let lastComputedTick = -1;
 
   function metrics() {
     const rect = canvas.getBoundingClientRect();
@@ -170,31 +210,54 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const cssCell = cssW / Math.min(COLUMNS_MAX, Math.max(COLUMNS_MIN, Math.round(cssW / COLUMNS_PER_WIDTH)));
     cellDev = Math.max(3, Math.round(cssCell * dpr));
-    gapDev = params.get('panel') === 'nogap' ? 0 : Math.max(1, Math.round(cellDev * GAP_RATIO));
+    gapDev = mode === 'nogap' ? 0 : Math.max(1, Math.round(cellDev * GAP_RATIO));
     const W = Math.round(cssW * dpr), H = Math.round(cssH * dpr);
     if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
     cols = Math.ceil(W / cellDev);
     rows = Math.ceil(H / cellDev);
-    level = new Uint8Array(cols * rows);
-    scratchA = new Uint8Array(cols * rows);
-    plan = [];
-    for (let c = 0; c < cols; c++) plan.push(columnPlan(c, rows));
+    const n = cols * rows;
+    level = new Uint8Array(n); quant = new Uint8Array(n); baseLv = new Uint8Array(n);
+    Eamb = new Float32Array(n); Erain = new Float32Array(n); Etot = new Float32Array(n);
+    rhoBuf = new Float32Array(n); rhoTmp = new Float32Array(n); rainMask = new Uint8Array(n);
+    scratch = new Uint8Array(n);
+    painted = new Uint8Array(n);
+    colA0 = new Float32Array(cols);
+    rebuildSchedules(1);
     ctx.imageSmoothingEnabled = false;
   }
 
-  /* pure: levels at a given tick (determinism core) */
-  function computeLevels(tickN: number, withDrops: boolean, out: Uint8Array) {
-    const tSec = tickN * TICK_MS / 1000;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const i = r * cols + c;
-        out[i] = quantize(field(c, r, tSec), out[i]);
-      }
+  /* schedules depend on per-column A0 means (rate coupling) — STATIC:
+     computed once from the tick-0 field, pure thereafter. The raw means
+     average thin vertically, so the contrast is amplified (COUPLE_GAIN)
+     and floored (no dry column) to honor the intended coupling. */
+  function rebuildSchedules() {
+    sched = [];
+    computeAmbient(0);
+    let meanW = 0;
+    for (let c = 0; c < cols; c++) meanW += colA0[c];
+    meanW /= Math.max(1, cols);
+    for (let c = 0; c < cols; c++) {
+      const wNorm = feedOn ? Math.min(2.3, Math.max(RATE_FLOOR, 1 + COUPLE_GAIN * (colA0[c] - meanW))) : 1;
+      sched.push(columnSchedule(c, rows, wNorm));
     }
-    /* one mode pass over 3×3 + Lipschitz sweeps: octave-1 gradients can
-       quantize to a 3-level jump between neighbours — the board must read
-       as one coherent plate (still a pure function of the field) */
-    const tmp = scratchA;
+  }
+
+  /* ambient: today's blob pipeline, mapped into E */
+  function computeAmbient(tickN: number) {
+    const tSec = tickN * TICK_MS / 1000;
+    for (let c = 0; c < cols; c++) {
+      let s = 0, sRaw = 0;
+      for (let r = 0; r < rows; r++) {
+        const i = r * cols + c;
+        const raw = field(c, r, tSec);
+        sRaw += raw;
+        baseLv[i] = quantize(raw, baseLv[i]);
+        s += baseLv[i];
+      }
+      colA0[c] = sRaw / Math.max(1, rows); /* RAW field mean — the coupling signal */
+      void s;
+    }
+    /* mode pass + Lipschitz (as approved) */
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const counts = countTab;
@@ -205,78 +268,157 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
           for (let dc = -1; dc <= 1; dc++) {
             const cc = c + dc;
             if (cc < 0 || cc >= cols) continue;
-            counts[out[rr * cols + cc]]++;
+            counts[baseLv[rr * cols + cc]]++;
           }
         }
-        let best = out[r * cols + c], bestN = -1;
+        let best = baseLv[r * cols + c], bestN = -1;
         for (let k = 0; k < 6; k++) if (counts[k] > bestN) { bestN = counts[k]; best = k; }
-        tmp[r * cols + c] = best;
+        scratch[r * cols + c] = best;
       }
     }
-    out.set(tmp);
-    /* Lipschitz |Δ|≤1 sweeps (forward then backward), two rounds */
-    for (let round = 0; round < 2; round++) {
+    baseLv.set(scratch);
+    for (let round = 0; round < 1; round++) {
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const i = r * cols + c;
+        let lo = 0, hi = 5;
+        if (r > 0) { const v = baseLv[i - cols]; if (v - 1 > lo) lo = v - 1; if (v + 1 < hi) hi = v + 1; }
+        if (c > 0) { const v = baseLv[i - 1]; if (v - 1 > lo) lo = v - 1; if (v + 1 < hi) hi = v + 1; }
+        if (baseLv[i] < lo) baseLv[i] = lo;
+        if (baseLv[i] > hi) baseLv[i] = hi;
+      }
+      for (let r = rows - 1; r >= 0; r--) for (let c = cols - 1; c >= 0; c--) {
+        const i = r * cols + c;
+        let lo = 0, hi = 5;
+        if (r < rows - 1) { const v = baseLv[i + cols]; if (v - 1 > lo) lo = v - 1; if (v + 1 < hi) hi = v + 1; }
+        if (c < cols - 1) { const v = baseLv[i + 1]; if (v - 1 > lo) lo = v - 1; if (v + 1 < hi) hi = v + 1; }
+        if (baseLv[i] < lo) baseLv[i] = lo;
+        if (baseLv[i] > hi) baseLv[i] = hi;
+      }
+    }
+    /* map to E (preserves today's ?panel=base distribution by design) */
+    for (let i = 0; i < baseLv.length; i++) {
+      Eamb[i] = Math.min(AMB_CAP, Math.pow(MAP12[baseLv[i]] / 11, GAMMA));
+    }
+  }
+
+  /* active drops of a column at tick t (pure) */
+  function dropsAt(tickN: number): RainDrop[] {
+    const out: RainDrop[] = [];
+    for (let c = 0; c < cols; c++) {
+      const s = sched[c];
+      if (!s) continue;
+      for (let k = 0; k < s.births.length; k++) {
+        const tb = s.births[k];
+        if (tb > tickN) break; /* births are increasing */
+        const cls = depthOn ? s.clss[k] : 1;
+        const v = CLASSES[cls].vMul * BASE_SPEED;
+        const head = -1 + Math.floor(v * (tickN - tb));
+        const tailTicks = TAU_TICKS[cls] * Math.log(CLASSES[cls].peak / TRAIL_EPS);
+        const tEnd = tb + (rows + 1) / v + tailTicks;
+        if (tickN <= tEnd) {
+          out.push({ col: c, cls, tBirth: tb, head, v, peak: CLASSES[cls].peak });
+        }
+      }
+    }
+    return out;
+  }
+
+  function computeRain(tickN: number) {
+    Erain.fill(0);
+    for (const d of dropsAt(tickN)) {
+      const head = Math.floor(-1 + d.v * (tickN - d.tBirth));
+      for (let r = head; r >= 0; r--) {                      /* cells already passed */
+        if (r >= rows) continue;
+        /* head rides at the peak; the cell right below is pinned to one
+           step of age so the head junction quantizes to |Δ| ≤ 2; deeper
+           cells decay temporally with their own pass phase */
+        let e: number;
+        if (r === head) e = d.peak;
+        else if (r === head - 1) e = d.peak * Math.exp(-(1 / d.v) / TAU_TICKS[d.cls]);
+        else e = d.peak * Math.exp(-(tickN - (d.tBirth + (r + 1) / d.v)) / TAU_TICKS[d.cls]);
+        if (e < TRAIL_EPS * 0.5) break;                      /* trail fully faded above */
+        const i = r * cols + d.col;
+        if (e > Erain[i]) Erain[i] = e;
+      }
+    }
+  }
+
+  /* ρ: separable box sum of the rain mask (±X cols, ±Y rows) */
+  function computeRho() {
+    for (let i = 0; i < Erain.length; i++) rainMask[i] = Erain[i] > 0.2 ? 1 : 0;
+    /* horizontal running sum */
+    for (let r = 0; r < rows; r++) {
+      let s = 0;
+      const row = r * cols;
+      for (let c = 0; c < cols; c++) {
+        s += rainMask[row + c];
+        if (c > RHO_BOX_X * 2) s -= rainMask[row + c - (RHO_BOX_X * 2 + 1)];
+        rhoTmp[row + c] = s;
+      }
+    }
+    /* vertical */
+    for (let c = 0; c < cols; c++) {
+      let s = 0;
+      for (let r = 0; r < rows; r++) {
+        s += rhoTmp[r * cols + c];
+        if (r > RHO_BOX_Y * 2) s -= rhoTmp[(r - (RHO_BOX_Y * 2 + 1)) * cols + c];
+        rhoBuf[r * cols + c] = Math.min(1, s / RHO_NORM);
+      }
+    }
+  }
+
+  /* the ONE pipeline: E_total -> LUT -> bloom */
+  function computeLevels(tickN: number) {
+    const withBase = mode !== 'drops' && mode !== 'grid' && mode !== 'ramp';
+    const withRain = mode !== 'base' && mode !== 'grid' && mode !== 'ramp';
+    if (withBase) computeAmbient(tickN); else Eamb.fill(0);
+    if (withRain) computeRain(tickN); else Erain.fill(0);
+    if (withRain && withBase && feedOn) computeRho(); else rhoBuf.fill(0);
+    for (let i = 0; i < Etot.length; i++) {
+      /* the blob catches light from NEARBY rain — but a cell already
+         carrying rain keeps its plain ambient, so head classes stay
+         crisp and trails stay monotonic */
+      const ea = feedOn && Erain[i] <= 0.2 ? Math.min(1, Eamb[i] + KAPPA * rhoBuf[i]) : Eamb[i];
+      Etot[i] = 1 - (1 - ea) * (1 - Erain[i]);
+      quant[i] = lutLevel(Etot[i]);
+    }
+    /* bloom by cells (single pass, reads quant, writes level) */
+    level.set(quant);
+    if (bloomOn) {
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const i = r * cols + c;
-          let lo = 0, hi = 5;
-          if (r > 0) { const v = out[i - cols]; if (v - 1 > lo) lo = v - 1; if (v + 1 < hi) hi = v + 1; }
-          if (c > 0) { const v = out[i - 1]; if (v - 1 > lo) lo = v - 1; if (v + 1 < hi) hi = v + 1; }
-          if (out[i] < lo) out[i] = lo;
-          if (out[i] > hi) out[i] = hi;
+          let orth = 0, diag = 0;
+          if (r > 0) { const v = quant[i - cols]; if (v >= BLOOM_MIN && v > orth) orth = v; }
+          if (r < rows - 1) { const v = quant[i + cols]; if (v >= BLOOM_MIN && v > orth) orth = v; }
+          if (c > 0) { const v = quant[i - 1]; if (v >= BLOOM_MIN && v > orth) orth = v; }
+          if (c < cols - 1) { const v = quant[i + 1]; if (v >= BLOOM_MIN && v > orth) orth = v; }
+          if (r > 0 && c > 0) { const v = quant[i - cols - 1]; if (v >= BLOOM_MIN && v > diag) diag = v; }
+          if (r > 0 && c < cols - 1) { const v = quant[i - cols + 1]; if (v >= BLOOM_MIN && v > diag) diag = v; }
+          if (r < rows - 1 && c > 0) { const v = quant[i + cols - 1]; if (v >= BLOOM_MIN && v > diag) diag = v; }
+          if (r < rows - 1 && c < cols - 1) { const v = quant[i + cols + 1]; if (v >= BLOOM_MIN && v > diag) diag = v; }
+          const b2 = Math.max(Math.floor(BLOOM_ORTH * orth), Math.floor(BLOOM_DIAG * diag));
+          if (b2 > level[i]) level[i] = b2;
         }
-      }
-      for (let r = rows - 1; r >= 0; r--) {
-        for (let c = cols - 1; c >= 0; c--) {
-          const i = r * cols + c;
-          let lo = 0, hi = 5;
-          if (r < rows - 1) { const v = out[i + cols]; if (v - 1 > lo) lo = v - 1; if (v + 1 < hi) hi = v + 1; }
-          if (c < cols - 1) { const v = out[i + 1]; if (v - 1 > lo) lo = v - 1; if (v + 1 < hi) hi = v + 1; }
-          if (out[i] < lo) out[i] = lo;
-          if (out[i] > hi) out[i] = hi;
-        }
-      }
-    }
-    if (!withDrops) return;
-    for (let c = 0; c < cols; c++) {
-      const pl = plan[c];
-      if (!pl) continue;
-      const local = ((tickN - pl.phase) % pl.cycle + pl.cycle) % pl.cycle;
-      const head = -pl.trail + Math.floor(local / pl.p);
-      for (let d = 0; d <= pl.trail; d++) {
-        const r = head - d;
-        if (r < 0 || r >= rows) continue;
-        const lv = d === 0 ? 6 : Math.max(0, 5 - Math.floor(((d - 1) * 5) / pl.trail));
-        const i = r * cols + c;
-        if (lv > out[i]) out[i] = lv;
       }
     }
   }
 
-  /* drops snapshot for the probe */
-  function dropsAt(tickN: number): Drop[] {
-    const ds: Drop[] = [];
-    for (let c = 0; c < cols; c++) {
-      const pl = plan[c];
-      const local = ((tickN - pl.phase) % pl.cycle + pl.cycle) % pl.cycle;
-      const head = -pl.trail + Math.floor(local / pl.p);
-      if (head >= -pl.trail && head - pl.trail <= rows) ds.push({ id: c, col: c, head, trail: pl.trail, p: pl.p, startTick: pl.phase });
-    }
-    return ds;
-  }
-
-  /* ---------- paint: one integer fillRect per drawn cell ---------- */
+  /* ---------- paint: one integer fillRect per CHANGED cell ----------
+     254 sentinel = transparent (ahead of the ignition wave), 250 = lime */
+  let painted = new Uint8Array(0);
+  let lastSubH = -1;
   let lastPaintTick = -1, lastPaintIgnite = -1, lastPaintSweep = -1;
+  const SKIP = 254, LIME_V = 250;
   function paint(force = false) {
     if (!force && lastPaintTick === tickCount && lastPaintIgnite === ignite && lastPaintSweep === sweep) return;
     lastPaintTick = tickCount; lastPaintIgnite = ignite; lastPaintSweep = sweep;
     const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
+    if (force) { painted.fill(255); lastSubH = -1; ctx.clearRect(0, 0, W, H); }
     drawCount = 0;
     if (mode === 'ramp') {
-      /* 7 full-width bands */
-      const bandH = Math.max(1, Math.floor(H / 7));
-      for (let k = 0; k < 7; k++) {
+      const bandH = Math.max(1, Math.floor(H / N_LEVELS));
+      for (let k = 0; k < N_LEVELS; k++) {
         ctx.fillStyle = '#' + RAMP[k].map((v) => v.toString(16).padStart(2, '0')).join('');
         ctx.fillRect(0, k * bandH, W, bandH); drawCount++;
       }
@@ -288,65 +430,55 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     const bgHex = '#' + BG.map((v) => v.toString(16).padStart(2, '0')).join('');
     const sz = cellDev - gapDev;
     const RAMP_HEX = RAMP.map((c) => '#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''));
-    /* the plate is OPAQUE where developed: gap pixels carry the exact
-       background color (read in-canvas, not through transparency). During
-       ignition only the developed band is painted — the hero reads
-       through above the front. */
+    /* substrate (the gap color) grows/shrinks with the wave */
     const maxWaveRow = ignite >= 0.9999 ? rows : Math.ceil(waveF + WAVE_JITTER + 1);
-    ctx.fillStyle = bgHex;
-    ctx.fillRect(0, 0, W, Math.min(H, maxWaveRow * cellDev)); /* substrate — not a cell write */
+    const subH = Math.min(H, maxWaveRow * cellDev);
+    if (subH !== lastSubH) {
+      if (subH > lastSubH) { ctx.fillStyle = bgHex; ctx.fillRect(0, lastSubH < 0 ? 0 : lastSubH, W, subH - Math.max(0, lastSubH)); }
+      else ctx.clearRect(0, subH, W, (lastSubH < 0 ? 0 : lastSubH) - subH);
+      lastSubH = subH;
+      painted.fill(255); /* rows crossed the front: repaint them */
+    }
     for (let r = 0; r < rows; r++) {
       const y = r * cellDev;
       for (let c = 0; c < cols; c++) {
-        /* scroll layers */
+        const i = r * cols + c;
+        let eff: number;
         if (sweep > 0.0001) {
           const sj = (hash2(c, 311) - 0.5) * 2 * SWEEP_JITTER;
-          if (r < sweepF + sj) { ctx.fillStyle = limeHex; ctx.fillRect(c * cellDev, y, sz, sz); drawCount++; continue; }
-        }
-        if (ignite < 0.9999) {
+          eff = r < sweepF + sj ? LIME_V : level[i];
+        } else if (ignite < 0.9999) {
           const jit = (hash2(c, 913) - 0.5) * 2 * WAVE_JITTER;
           const fd = waveF + jit - r;
-          if (fd < 0) continue; /* ahead of the wave: transparent */
-          const crest = fd < 1.5;
-          ctx.fillStyle = RAMP_HEX[crest ? 6 : level[r * cols + c]];
-          ctx.fillRect(c * cellDev, y, sz, sz); drawCount++;
-          continue;
+          eff = fd < 0 ? SKIP : fd < 1.5 ? 11 : level[i];
+        } else {
+          eff = mode === 'grid' ? 1 : level[i];
         }
-        ctx.fillStyle = RAMP_HEX[mode === 'grid' ? 1 : level[r * cols + c]];
-        ctx.fillRect(c * cellDev, y, sz, sz); drawCount++;
+        if (painted[i] === eff) continue;
+        if (eff === SKIP) ctx.clearRect(c * cellDev, y, sz, sz);
+        else { ctx.fillStyle = eff === LIME_V ? limeHex : RAMP_HEX[eff]; ctx.fillRect(c * cellDev, y, sz, sz); }
+        painted[i] = eff;
+        drawCount++;
       }
     }
   }
 
-  let lastComputedTick = -1;
   function frame(now: number) {
     raf = 0;
     if (disposed) return;
     const dt = now - t0;
     t0 = now;
     let ticked = false;
-    if (!reduced) {
+    if (!reduced && freezeT === null) {
       tickAcc += Math.min(dt, TICK_MS * MAX_CATCHUP);
       while (tickAcc >= TICK_MS) { tickAcc -= TICK_MS; tickCount++; ticked = true; }
     }
     if (ticked || lastComputedTick !== tickCount) {
       lastComputedTick = tickCount;
-      if (mode === 'drops') { level.fill(0); computeDropsOnly(level); }
-      else computeLevels(tickCount, mode !== 'base' && mode !== 'grid' && mode !== 'ramp', level);
+      computeLevels(tickCount);
     }
     paint();
     if (filmActive && ioVisible && !hidden) raf = requestAnimationFrame(frame);
-  }
-
-  function computeDropsOnly(out: Uint8Array) {
-    for (const d of dropsAt(tickCount)) {
-      for (let dd = 0; dd <= d.trail; dd++) {
-        const r = d.head - dd;
-        if (r < 0 || r >= rows) continue;
-        const lv = dd === 0 ? 6 : Math.max(0, 5 - Math.floor(((dd - 1) * 5) / d.trail));
-        out[r * cols + d.col] = lv;
-      }
-    }
   }
 
   function kick() {
@@ -362,44 +494,63 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   document.addEventListener('visibilitychange', onVis);
 
   metrics();
-  /* warm-up: deterministic half-screen of history — the first visible
-     frame already has drops in flight, no pop-in, same on every load */
-  tickCount = reduced ? 0 : Math.round(rows / 2);
-  computeLevels(tickCount, mode !== 'base' && mode !== 'grid' && mode !== 'ramp', level);
-  paint();
+  tickCount = freezeT ? parseInt(freezeT, 10) : (reduced ? 0 : Math.round(rows / 0.43)); /* warm-up: rain in flight */
+  computeLevels(tickCount);
+  paint(true);
 
   /* ---------- probe ---------- */
+  function fnv(arr: Uint8Array): number {
+    let h = 2166136261;
+    for (let i = 0; i < arr.length; i++) { h ^= arr[i]; h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
   (window as unknown as { __panel?: Record<string, unknown> }).__panel = {
+    get layers() { return 1; },
     get cols() { return cols; },
     get rows() { return rows; },
     get cell() { return cellDev; },
     get gap() { return gapDev; },
     get ramp() { return RAMP; },
     levels: () => level.slice(),
+    energy: () => Etot.slice(),
     drops: () => dropsAt(tickCount),
+    birthsIn: (t0: number, t1: number) => {
+      const counts = new Array(cols).fill(0);
+      for (let c = 0; c < cols; c++) {
+        const s2 = sched[c];
+        for (const tb of s2.births) { if (tb >= t0 && tb <= t1) counts[c]++; }
+      }
+      return counts;
+    },
+    rainDensity: () => { const ds = dropsAt(tickCount); return Math.round(new Set(ds.map((d) => d.col)).size / cols * 100); },
     drawCount: () => drawCount,
     hash: () => fnv(level),
-    hashAt: (t: number) => { const s = new Uint8Array(cols * rows); computeLevels(t, true, s); return fnv(s); },
+    /* self-contained: hysteresis state snapshotted so any route to the
+       same driver value hashes identically */
+    hashAt: (t: number) => {
+      const snap = baseLv.slice();
+      baseLv.fill(0);
+      computeLevels(t);
+      const h = fnv(level);
+      baseLv.set(snap);
+      computeLevels(tickCount);
+      return h;
+    },
     tick: () => tickCount,
   };
-  function fnv(arr: Uint8Array): number {
-    let h = 2166136261;
-    for (let i = 0; i < arr.length; i++) { h ^= arr[i]; h = Math.imul(h, 16777619); }
-    return h >>> 0;
-  }
 
   wall = {
     setIgnite(v) { ignite = Math.min(1, Math.max(0, v)); kick(); },
     setSweep(v) { sweep = Math.min(1, Math.max(0, v)); kick(); },
     setActive(on) { filmActive = on; kick(); },
-    setTier() { /* single 2D pipeline — no tiers */ },
+    setTier() { /* single 2D pipeline */ },
     histogram: () => {
       const buckets = [0, 0, 0, 0];
       for (let i = 0; i < level.length; i++) {
         const v = level[i];
         if (v === 0) buckets[0]++;
-        else if (v <= 2) buckets[1]++;
-        else if (v <= 4) buckets[2]++;
+        else if (v <= 3) buckets[1]++;
+        else if (v <= 7) buckets[2]++;
         else buckets[3]++;
       }
       const n = level.length || 1;

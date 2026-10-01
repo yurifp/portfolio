@@ -1,7 +1,90 @@
-# LED Panel — a placa de LEDs (motor reconstruído)
+# LED Panel — a placa de LEDs
 
-> Cena entre a hero e a tela verde. Commit: `panel: LED board rebuild`.
-> Motor: `src/scripts/led-wall.ts` (Canvas2D discreto). Suíte: `scripts/ledpanel-accept.mjs` (17/17).
+> Cena entre a hero e a tela verde. Commits: `panel: LED board rebuild` (placa)
+> e `panel: single energy field, rain depth, cell bloom` (modelo vigente).
+> Motor: `src/scripts/led-wall.ts`. Suítes: `ledpanel-accept.mjs` (17/17, round
+> anterior) e `ledpanel-check.mjs` (**18/18 ×3**, round atual).
+
+## 0. Modelo vigente — um campo de energia
+
+A placa aprovada permanece (grade inteira, célula sólida, fresta na cor do
+fundo, paleta fechada, janelas de scroll). O que mudou é COMO a célula acende:
+
+```
+E_total = 1 − (1 − E_amb)(1 − E_rain)     soma suave: UM buffer, UMA passada
+E_amb   = manchas (pipeline de hoje, teto 0.40) + κ·ρ   (a mancha pega a luz)
+E_rain  = pico·exp(−(t − t_passagem)/τ)   persistência física por gota
+level   = round(11 · E^(1/γ)), γ = 1.6    LUT única (12 níveis)
+bloom   = max(level, ⌊0.30·melhor ortogonal≥6⌋, ⌊0.20·melhor diagonal≥6⌋)
+```
+
+- **A mancha reage**: ρ = densidade local de chuva (máscara E_rain>0.2, caixa
+  ±3 col × ±4 lin, soma separável), κ = 0.50. O feed só se aplica onde a célula
+  NÃO carrega chuva — cabeças nítidas, rastros monotônicos. Medido: +0.65
+  nível no conjunto de manchas a ≤3 colunas de gota ativa.
+- **Chuva com profundidade** (3 classes): v = 0.6×/1.0×/1.7× de 0.432 c/tick,
+  pico E = 0.52/0.75/1.00 (cabeças 7/9/11), τ = 6.5/6.2/5.3 ticks → rastro
+  visível medido 4.4/8.1/12.8 células (∝ velocidade). Pesos de nascimento
+  [0.21, 0.42, 0.37] compensam o tempo de vida → presença VISÍVEL 45/35/20.
+- **Nasce acima (head < 0), morre abaixo** — zero eventos em célula visível
+  (log da suíte). Mesma coluna: ≥8 células de folga. Densidade 51-56% das
+  colunas com gota (alvo 45-60%).
+- **Acoplamento**: taxa de nascimento ∝ média vertical de A0 da coluna,
+  amplificada ×8 (a média vertical do ruído é estreita por construção) com
+  piso 0.35× — nenhuma coluna seca. Pearson = 0.74, min/média = 0.39.
+- **Função pura de (seed, driver)**: `hashAt(tick)` idêntico por qualquer
+  rota; repintura só de células que mudaram; p95 de JS 2.7-3.7 ms a 2576×1300.
+
+### Rampa (12 níveis, OKLCH H 142.5-142.8, literal)
+
+| k | hex | k | hex |
+|---|---|---|---|
+| 0 | `#020602` | 6 | `#038409` |
+| 1 | `#020f02` | 7 | `#02a00b` |
+| 2 | `#011e01` | 8 | `#00be0e` |
+| 3 | `#023502` | 9 | `#12dc1b` |
+| 4 | `#034e04` | 10 | `#72f16d` |
+| 5 | `#036806` | 11 | `#c9fbc4` (cabeça, L_OK 0.939) |
+
+ΔE_OK consecutivo 0.042-0.143 (≥ 0.02), luminância monotônica. `?ramp=lime`
+gera o equivalente a partir do `--lime` do site.
+
+### Parâmetros finais (topo de led-wall.ts)
+
+`SEED 0x9e37` · `TICK_MS 33.3` · `COLUMNS_PER_WIDTH 17` (36-120) ·
+`FIELD_SCALE 0.22` · `FIELD_DRIFT 0.9` · `OCTAVE_GAINS [.62,.24,.14]` ·
+`THRESH [.455,.555,.645,.725,.80]` · `HYST .03` · `AMB_CAP .40` ·
+`MAP12 [0,2,4,7,9,11]` · `CLASSES v .6/1/1.7 · peak .52/.75/1.0` ·
+`CLASS_WEIGHTS [.21,.42,.37]` · `BASE_SPEED .432` · `TAU_TICKS [6.5,6.2,5.3]` ·
+`RAIN_DUTY .62` · `RATE_FLOOR .35` · `COUPLE_GAIN 8` · `SAME_COL_GAP 8` ·
+`KAPPA .50` · `RHO_BOX ±3×±4` · `RHO_NORM 12` · `GAMMA 1.6` ·
+`BLOOM_ORTH .30` · `BLOOM_DIAG .20` · `BLOOM_MIN 6` · `GAP_RATIO .06`.
+
+### Debug e sonda
+
+`?panel=base|drops|grid|ramp|nogap` · `?bloom=0` · `?depth=0` · `?feed=0` ·
+`?ramp=lime` · `?t=N` (congela o driver; só teste).
+`window.__panel = { layers, cols, rows, cell, gap, ramp, levels(), energy(),
+drops(), birthsIn(t0,t1), rainDensity(), drawCount(), hash(), hashAt(t), tick() }`.
+
+### Preservação medida
+
+`?panel=base`: bandas 40.6/30.5/20.1/8.7 vs hoje (mapeado 7→12)
+40.5/29.9/20.4/9.2 — ±0.5 pp; cobertura 59% vs 59.5%. Célula, grade, fresta,
+matiz e janelas idênticos ao aprovado. Suíte atual: **18/18 ×3 rodadas**;
+no commit anterior falha em 1/3/7/8/9/13 (teste do teste).
+
+### Observações (só reporte)
+
+1. **Contraste do HUD/trilho**: tinta `#f5f0eb` sobre a cabeça `#c9fbc4` =
+   1.03:1 (nivel10 1.28:1 · nivel9 1.64:1 · lime 1.23:1). Sem máscara por
+   regra da paleta fechada.
+2. **Ponto branco no canto superior esquerdo do print (21%)**: o cursor
+   customizado do chrome (`main.ts`, dot persistente) — não é célula (a
+   célula (0,0) fica sob o logo, x≥31).
+3. **Verde vs lime**: H 142.7° C 0.274 vs `--lime` H 131.4° C 0.224.
+
+---
 
 ## 1. Auditoria do motor anterior (WebGL2, commit 205e115)
 
