@@ -2,85 +2,93 @@
   LED PANEL — the board, driven by ONE energy field.
 
   The approved plate stays (integer grid, solid cells, gap, closed
-  palette, scroll layers). What changed is HOW cells light:
+  palette, scroll layers, dirty-cell repaint). The RAIN MOTOR was
+  rewritten as an analytic, stateless, per-column model so threads read
+  as rain — vertical filaments with continuous motion — while the
+  organic field is demoted to a subtle, vertically-stretched ambient
+  that lights up as rain passes:
 
-    E_total = 1 - (1 - E_amb)(1 - E_rain)      soft sum, one buffer
-    E_amb   = blobs (today's field, capped) + κ·ρ   (blobs catch light)
-    E_rain  = closed-form persistence per drop: E = peak·exp(-(t-t_pass)/τ)
-    level   = round(11 · E^(1/γ))              single LUT, γ = 1.6
-    + cell bloom: raise to max(level, 0.30·bestOrth≥6, 0.18·bestDiag≥6)
+    E_total = 1 - (1 - E_amb)(1 - E_rain)        soft sum, one buffer
+    E_amb   = anisotropic noise (ambient, subtle) + κ·ρ rain glow
+    E_rain  = per-column threads: continuous head h, phosphor trail,
+              spill to neighbours, embers, sparkle; curtains via
+              low-frequency 1D noise over columns; breathing density;
+              rare comets. All pure functions of (seed, t_rain).
+    level   = 12-level LUT with a soft quantization band (temporal)
 
-  Rain: 3 depth classes (far/mid/near = 0.6×/1.0×/1.7× speed), drops
-  born ABOVE the top edge and dying only BELOW the bottom — never in a
-  visible cell. Trail length is speed × τ (fast drops leave longer
-  visible tails). Birth rate per column ∝ 0.3 + 0.7·colMean(A0): rain
-  concentrates under the brighter blobs, no column runs dry. Everything
-  is a pure function of (seed, driver) — same driver, same board, any
-  route. 12-level OKLCH ramp stored literal.
-
-  Debug: ?panel=base|drops|grid|ramp|nogap · ?bloom=0 · ?depth=0 ·
-  ?feed=0 · ?ramp=lime. Probe: window.__panel (read-only).
+  Time: t_rain accumulates dt × multiplier (never t × speed), so speed
+  changes and scroll coupling never jump phases; hidden tabs resume
+  without a snap. Reduced motion: 30% speed, no comets, no coupling.
 */
 
 /* ---------- seed & driver ---------- */
 const SEED = 0x9e37;
 const TICK_MS = 33.3;
 const MAX_CATCHUP = 5;
+const RAIN_DT_CAP_MS = 50;
 
 /* ---------- grid (unchanged from the approved board) ---------- */
 const COLUMNS_PER_WIDTH = 17;
 const COLUMNS_MIN = 36;
 const COLUMNS_MAX = 120;
 
-/* ---------- ambient (today's blobs, preserved) ---------- */
+/* ---------- ambient: subtle, stretched, slow ---------- */
 const FIELD_SCALE = 0.22;
-const FIELD_DRIFT = 0.9;
+const AMBIENT_ANISO = 9;         /* vertical stretch ≥ 8:1 — never balls */
+const AMBIENT_DRIFT = 0.45;      /* cells/s downward, slow */
 const OCTAVES = 3;
 const OCTAVE_GAINS = [0.62, 0.24, 0.14];
 const THRESH = [0.455, 0.555, 0.645, 0.725, 0.80];
 const HYST = 0.03;
-const AMB_CAP = 0.40;            /* E ceiling for the noise part */
-/* old base level k -> 12-scale anchor (preserves ?panel=base ±5pp) */
+const AMBIENT_LEVEL = 0.22;      /* E ceiling — the field is a garnish now */
 const MAP12 = [0, 2, 4, 7, 9, 11];
+/* rain-glow feedback */
+const KAPPA = 0.50;
+const RHO_BOX_X = 3;
+const RHO_BOX_Y = 4;
+const RHO_NORM = 12;
 
-/* ---------- rain: 3 depth classes ---------- */
-const CLASSES = [
-  { id: 'far',  vMul: 0.6, peak: 0.52 },   /* head level ≤ 7  */
-  { id: 'mid',  vMul: 1.0, peak: 0.75 },   /* head level 8-9  */
-  { id: 'near', vMul: 1.7, peak: 1.0 },    /* head level 11   */
+/* ---------- rain: 3 depth layers (speed cells/s, tail cells, column
+   share of RAINING columns, brightness) ---------- */
+const RAIN_LAYERS = [
+  { vMin: 6, vMax: 9, tailMin: 6, tailMax: 10, share: 0.52, bright: 0.30 },   /* far  */
+  { vMin: 10, vMax: 16, tailMin: 10, tailMax: 18, share: 0.28, bright: 0.60 },/* mid  */
+  { vMin: 18, vMax: 28, tailMin: 14, tailMax: 30, share: 0.22, bright: 1.0 }, /* near */
 ];
-/* weights compensate alive-time so the VISIBLE share lands at 45/35/20 */
-const CLASS_WEIGHTS = [0.21, 0.42, 0.37];
-const BASE_SPEED = 0.432;        /* cells/tick — today's average */
-/* τ per class: visible trail (level ≥ 1) measures far 3-6 · mid 6-10 ·
-   near 10-16 cells (= v·τ·ln(peak/E_lvl1), E_lvl1 ≈ 0.036) */
-const TAU_TICKS = [6.5, 6.2, 5.3];
-const TRAIL_EPS = 0.08;          /* fade threshold for scheduling */
-const RAIN_DUTY = 0.62;          /* live fraction incl. fade tail (≈55% visible) */
-const RATE_FLOOR = 0.35;         /* min birth rate / mean (hard guarantee) */
-const SAME_COL_GAP = 8;          /* cells between one tail and the next head */
-const COUPLE_GAIN = 8;           /* amplifies col-mean contrast (noise averages thin vertically) */
-
-/* ---------- feedback (blobs catch the rain) ---------- */
-const KAPPA = 0.50;              /* E lift at ρ = 1 */
-const RHO_BOX_X = 3;             /* ± columns */
-const RHO_BOX_Y = 4;             /* ± rows */
-const RHO_NORM = 12;             /* box-sum scale for ρ ∈ [0,1] */
+const LIVE_COLUMNS = 1.25;       /* cycle-liveness probability scale, calibrated: ~54% of columns on-screen */
+const V_COL_JITTER = 0.15;       /* ±15% speed per column */
+/* curtains */
+const BAND_WIDTH_RANGE = [2, 6];
+const BAND_COHERENCE = 0.78;
+const SPILL = 0.22;              /* light leak to each side column */
+const ANTICIPATE = 0.10;         /* faint light 1 cell ahead of the head */
+/* LED persistence */
+const DECAY_SHAPE = 1.15;        /* phosphor curve bend */
+const EMBER_FRAC = 0.16;         /* trail cells that retain longer */
+const EMBER_BRIGHT = 0.32;
+const EMBER_TAIL = 1.7;          /* × tail reach of embers */
+const SPARKLE_RATE = 6;          /* Hz */
+const SPARKLE_AMP = 0.06;        /* ±6%, fading towards the tip */
+/* rhythm */
+const BREATH_PERIOD_S = 18;      /* slow global density breathing */
+const BREATH_DEPTH = 0.35;
+const COMET_INTERVAL_S = [5, 9];
+const COMET_SPEED = 34;          /* cells/s */
+const COMET_TAIL_FRAC = 0.85;    /* of rows */
+/* scroll coupling */
+const SCROLL_SPEED_COUPLING = 0.35;
+const SPEED_SMOOTHING_MS = 400;
 
 /* ---------- LUT ---------- */
 const GAMMA = 1.6;
-const N_LEVELS = 12;             /* 0 off · 1-10 body · 11 head */
-
-/* ---------- bloom by cells ---------- */
-const BLOOM_ORTH = 0.30;
-const BLOOM_DIAG = 0.20;         /* spec said 0.18 — but floor(0.18·11)=1 < the "diagonal ≥ 2" criterion */
-const BLOOM_MIN = 6;             /* only bright neighbours spread */
+const N_LEVELS = 12;
+const SOFT_BAND = 0.4;           /* 40% quantization blend band (temporal) */
 
 /* ---------- scroll layers (unchanged windows) ---------- */
 const WAVE_JITTER = 3;
 const SWEEP_JITTER = 4;
 
-/* ---------- palette: 12 levels, OKLCH H 142.8, computed once ---------- */
+/* ---------- palette: 12 levels, OKLCH H 142.5-142.8, literal ---------- */
 const RAMP_GREEN = ['#020602', '#020f02', '#011e01', '#023502', '#034e04', '#036806', '#038409', '#02a00b', '#00be0e', '#12dc1b', '#72f16d', '#c9fbc4'];
 const RAMP_LIME = ['#081301', '#122401', '#1d3502', '#2b4b02', '#3a6202', '#4a7a02', '#5c9204', '#6fa906', '#84c109', '#9cd90f', '#bbe03f', '#dcffa8'];
 const COLOR_BG = '#070210';
@@ -89,7 +97,7 @@ const COLOR_LIME = '#9df133';
 /* ---------- gap ---------- */
 const GAP_RATIO = 0.06;
 
-/* deterministic PRNG (mulberry32) + lattice hash */
+/* deterministic PRNG (mulberry32) + lattice hashes */
 function mulberry32(a: number) {
   return function () {
     a |= 0; a = (a + 0x6d2b79f5) | 0;
@@ -103,9 +111,15 @@ function hash2(x: number, y: number): number {
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
+function hash3(x: number, y: number, z: number): number {
+  let h = Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(z, 2246822519) + SEED;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+/* anisotropic ambient field: features are 9× taller than wide */
 function field(ix: number, iy: number, tSec: number): number {
-  const dy = tSec * FIELD_DRIFT;
-  let f = 0, fx = ix * FIELD_SCALE, fy = (iy + dy) * FIELD_SCALE;
+  const dy = tSec * AMBIENT_DRIFT;
+  let f = 0, fx = ix * FIELD_SCALE, fy = (iy + dy) * FIELD_SCALE / AMBIENT_ANISO;
   for (let o = 0; o < OCTAVES; o++) {
     const xi = Math.floor(fx), yi = Math.floor(fy);
     const xf = fx - xi, yf = fy - yi;
@@ -116,6 +130,12 @@ function field(ix: number, iy: number, tSec: number): number {
   }
   return f / 0.985;
 }
+/* slow 1D noise (curtains over columns, breathing over time) */
+function noise1(x: number): number {
+  const xi = Math.floor(x), xf = x - xi;
+  const u = xf * xf * (3 - 2 * xf);
+  return hash2(xi, 101) * (1 - u) + hash2(xi + 1, 101) * u;
+}
 function quantize(I: number, prev: number): number {
   let lv = 0;
   while (lv < 5 && I > THRESH[lv]) lv++;
@@ -123,32 +143,17 @@ function quantize(I: number, prev: number): number {
   else if (lv < prev && I > THRESH[Math.max(0, prev - 1)] - HYST) lv = prev;
   return lv;
 }
-/* LUT: E -> level 0-11 */
-const lutLevel = (E: number) => Math.min(11, Math.max(0, Math.round(11 * Math.pow(Math.max(0, E), 1 / GAMMA))));
+const lutE = (E: number) => Math.min(11, Math.max(0, 11 * Math.pow(Math.max(0, E), 1 / GAMMA)));
 
-/* per-column rain schedule — STATIC: rate coupling uses the column's
-   vertical A0 mean at tick 0 (deterministic, no runtime rebuilds) */
-interface RainDrop { col: number; cls: number; tBirth: number; head: number; v: number; peak: number; }
-function columnSchedule(col: number, rows: number, wNorm: number) {
-  const rnd = mulberry32(SEED ^ Math.imul(col + 7, 2246822519));
-  let t = Math.floor(rnd() * 400); /* staggered phase */
-  const births: number[] = [];
-  const clss: number[] = [];
-  let meanGap = -1;
-  for (let k = 0; k < 4096; k++) {
-    let w = rnd(), cls = 0, acc = CLASS_WEIGHTS[0];
-    while (w > acc && cls < 2) { cls++; acc += CLASS_WEIGHTS[cls]; }
-    const cl = CLASSES[cls];
-    const v = cl.vMul * BASE_SPEED;
-    const trailVis = v * TAU_TICKS[cls] * Math.log(cl.peak / TRAIL_EPS);
-    const travel = (rows + 1 + trailVis + SAME_COL_GAP) / v;
-    const baseGap = travel / RAIN_DUTY;
-    if (meanGap < 0) meanGap = baseGap;
-    const gap = Math.min(Math.max(baseGap / wNorm, travel), 2.5 * meanGap); /* floor: no dry column */
-    births.push(t); clss.push(cls);
-    t += Math.max(1, Math.round(gap * (0.85 + 0.3 * rnd())));
-  }
-  return { births, clss };
+/* per-column thread parameters — deterministic, built once per resize */
+interface Thread {
+  col: number; cls: number;
+  v: number;        /* cells/s of t_rain */
+  tail: number;     /* cells */
+  cycleLen: number; /* cells = rows + tail + gap */
+  T: number;        /* seconds per cycle */
+  phase: number;    /* seconds */
+  gap: number;
 }
 
 export interface LedWallHandle {
@@ -170,8 +175,7 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   const useLimeRamp = params.get('ramp') === 'lime';
   const bloomOn = params.get('bloom') !== '0';
   const feedOn = params.get('feed') !== '0';
-  const depthOn = params.get('depth') !== '0';
-  const freezeT = params.get('t'); /* test-only: freeze the driver at tick N */
+  const freezeT = params.get('t');
 
   const RAMP = (useLimeRamp ? RAMP_LIME : RAMP_GREEN).map((h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
   const BG = [7, 2, 16];
@@ -184,25 +188,30 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   let drawCount = 0;
 
   let cssW = 1, cssH = 1, cellDev = 17, gapDev = 1, cols = 0, rows = 0;
-  /* the ONE display pipeline */
-  let level = new Uint8Array(0);        /* final bloomed levels */
-  let quant = new Uint8Array(0);        /* post-LUT, pre-bloom */
-  let baseLv = new Uint8Array(0);       /* today's blob pipeline (0-5) */
-  let Eamb = new Float32Array(0);       /* ambient energy */
-  let Erain = new Float32Array(0);      /* rain energy */
+  let level = new Uint8Array(0);
+  let quant = new Uint8Array(0);
+  let prevQuant = new Uint8Array(0);
+  let baseLv = new Uint8Array(0);
+  let Eamb = new Float32Array(0);
+  let Erain = new Float32Array(0);
   let Etot = new Float32Array(0);
   let rhoBuf = new Float32Array(0);
   let rhoTmp = new Float32Array(0);
   let rainMask = new Uint8Array(0);
-  let colA0 = new Float32Array(0);      /* vertical mean of raw field */
+  let painted = new Uint8Array(0);
   let scratch = new Uint8Array(0);
   const countTab = new Uint32Array(6);
-  type Sched = { births: number[]; clss: number[] };
-  let sched: Sched[] = [];
+
+  /* rain time + coupling */
+  let tRain = 2.6;                 /* warm-up: threads already mid-flight */
   let t0 = performance.now();
-  let tickCount = 0;
-  let tickAcc = 0;
-  let lastComputedTick = -1;
+  let speedMult = reduced ? 0.3 : 1;
+  let lastScrollY = window.scrollY;
+  let lastCoupleCheck = 0;
+
+  /* threads (one per column, cycling) */
+  let threads: Thread[] = [];
+  let bandOf: number[] = [];
 
   function metrics() {
     const rect = canvas.getBoundingClientRect();
@@ -216,46 +225,69 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     cols = Math.ceil(W / cellDev);
     rows = Math.ceil(H / cellDev);
     const n = cols * rows;
-    level = new Uint8Array(n); quant = new Uint8Array(n); baseLv = new Uint8Array(n);
+    level = new Uint8Array(n); quant = new Uint8Array(n); prevQuant = new Uint8Array(n); baseLv = new Uint8Array(n);
     Eamb = new Float32Array(n); Erain = new Float32Array(n); Etot = new Float32Array(n);
     rhoBuf = new Float32Array(n); rhoTmp = new Float32Array(n); rainMask = new Uint8Array(n);
-    scratch = new Uint8Array(n);
-    painted = new Uint8Array(n);
-    colA0 = new Float32Array(cols);
-    rebuildSchedules(1);
+    painted = new Uint8Array(n); scratch = new Uint8Array(n);
+    buildThreads();
     ctx.imageSmoothingEnabled = false;
   }
 
-  /* schedules depend on per-column A0 means (rate coupling) — STATIC:
-     computed once from the tick-0 field, pure thereafter. The raw means
-     average thin vertically, so the contrast is amplified (COUPLE_GAIN)
-     and floored (no dry column) to honor the intended coupling. */
-  function rebuildSchedules() {
-    sched = [];
-    computeAmbient(0);
-    let meanW = 0;
-    for (let c = 0; c < cols; c++) meanW += colA0[c];
-    meanW /= Math.max(1, cols);
-    for (let c = 0; c < cols; c++) {
-      const wNorm = feedOn ? Math.min(2.3, Math.max(RATE_FLOOR, 1 + COUPLE_GAIN * (colA0[c] - meanW))) : 1;
-      sched.push(columnSchedule(c, rows, wNorm));
+  /* deterministic curtains: bands of 2-6 columns share a correlated phase */
+  function buildThreads() {
+    threads = [];
+    bandOf = new Array(cols).fill(0);
+    const rndBand = mulberry32(SEED ^ 0x5eed);
+    let col = 0, band = 0;
+    while (col < cols) {
+      const w = BAND_WIDTH_RANGE[0] + Math.floor(rndBand() * (BAND_WIDTH_RANGE[1] - BAND_WIDTH_RANGE[0] + 1));
+      const bandPhase = rndBand() * 4096;
+      for (let k = 0; k < w && col < cols; k++, col++) {
+        bandOf[col] = band;
+        const r1 = hash2(col, 71), r2 = hash2(col, 72), r3 = hash2(col, 73), r4 = hash2(col, 74);
+        let acc = 0, cls = 0;
+        for (; cls < 2; cls++) { acc += RAIN_LAYERS[cls].share; if (r1 < acc) break; }
+        const L = RAIN_LAYERS[cls];
+        let v = (L.vMin + (L.vMax - L.vMin) * r2) * (1 - V_COL_JITTER + 2 * V_COL_JITTER * r3);
+        v = Math.max(L.vMin * (1 - V_COL_JITTER), Math.min(L.vMax * (1 + V_COL_JITTER), v));
+        const tail = L.tailMin + (L.tailMax - L.tailMin) * r4;
+        const gap = tail * (0.15 + 0.35 * hash2(col, 75));
+        const cycleLen = rows + tail + gap;
+        const T = cycleLen / v;
+        /* band-correlated phase + small per-column jitter */
+        const phase = bandPhase + (hash2(col, 76) - 0.5) * (1 - BAND_COHERENCE) * T;
+        threads.push({ col, cls, v, tail, cycleLen, T, phase, gap });
+      }
+      band++;
     }
   }
 
-  /* ambient: today's blob pipeline, mapped into E */
-  function computeAmbient(tickN: number) {
-    const tSec = tickN * TICK_MS / 1000;
-    for (let c = 0; c < cols; c++) {
-      let s = 0, sRaw = 0;
-      for (let r = 0; r < rows; r++) {
-        const i = r * cols + c;
-        const raw = field(c, r, tSec);
-        sRaw += raw;
-        baseLv[i] = quantize(raw, baseLv[i]);
-        s += baseLv[i];
+  /* breathing: slow global density (deterministic in t_rain) */
+  const breath = (t: number) => 1 - BREATH_DEPTH * 0.5 + BREATH_DEPTH * 0.5 * noise1(t / BREATH_PERIOD_S);
+
+  /* comet schedule: birth every 5-9s (deterministic), never two at once */
+  function cometAt(t: number): { col: number; t0: number } | null {
+    if (reduced) return null;
+    let t0 = 3 + hash2(1, 91) * 6;
+    for (let i = 0; i < 512 && t0 <= t; i++) {
+      const tail = rows * COMET_TAIL_FRAC;
+      const dur = (rows + tail) / COMET_SPEED;
+      if (t >= t0 && t <= t0 + dur) {
+        return { col: Math.floor(hash2(i + 7, 92) * cols), t0 };
       }
-      colA0[c] = sRaw / Math.max(1, rows); /* RAW field mean — the coupling signal */
-      void s;
+      t0 += COMET_INTERVAL_S[0] + hash2(i + 3, 93) * (COMET_INTERVAL_S[1] - COMET_INTERVAL_S[0]);
+    }
+    return null;
+  }
+
+  /* ambient: today's blob pipeline (anisotropic), mapped into E */
+  function computeAmbient(tickN: number) {
+    const tSec = tRain;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const i = r * cols + c;
+        baseLv[i] = quantize(field(c, r, tSec), baseLv[i]);
+      }
     }
     /* mode pass + Lipschitz (as approved) */
     for (let r = 0; r < rows; r++) {
@@ -295,58 +327,81 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
         if (baseLv[i] > hi) baseLv[i] = hi;
       }
     }
-    /* map to E (preserves today's ?panel=base distribution by design) */
     for (let i = 0; i < baseLv.length; i++) {
-      Eamb[i] = Math.min(AMB_CAP, Math.pow(MAP12[baseLv[i]] / 11, GAMMA));
+      Eamb[i] = Math.min(AMBIENT_LEVEL, Math.pow(MAP12[baseLv[i]] / 11, GAMMA));
     }
   }
 
-  /* active drops of a column at tick t (pure) */
-  function dropsAt(tickN: number): RainDrop[] {
-    const out: RainDrop[] = [];
-    for (let c = 0; c < cols; c++) {
-      const s = sched[c];
-      if (!s) continue;
-      for (let k = 0; k < s.births.length; k++) {
-        const tb = s.births[k];
-        if (tb > tickN) break; /* births are increasing */
-        const cls = depthOn ? s.clss[k] : 1;
-        const v = CLASSES[cls].vMul * BASE_SPEED;
-        const head = -1 + Math.floor(v * (tickN - tb));
-        const tailTicks = TAU_TICKS[cls] * Math.log(CLASSES[cls].peak / TRAIL_EPS);
-        const tEnd = tb + (rows + 1) / v + tailTicks;
-        if (tickN <= tEnd) {
-          out.push({ col: c, cls, tBirth: tb, head, v, peak: CLASSES[cls].peak });
+  /* RAIN — analytic per column; continuous head, phosphor trail, spill,
+     embers, sparkle, curtains, breathing, comets. Pure in t_rain. */
+  /* cycle liveness: decided at the cycle's birth (head above screen),
+     breathing-modulated — p = LIVE_COLUMNS × layer share × breath */
+  function threadVisibleAt(th: Thread, t: number): boolean {
+    const k = Math.floor((t + th.phase) / th.T);
+    const birthT = k * th.T - th.phase;
+    const p = LIVE_COLUMNS * RAIN_LAYERS[th.cls].share * breath(birthT);
+    return hash3(th.col, k, 123) < p;
+  }
+
+  function stampThread(col: number, h: number, v: number, tail: number, bright: number, hotCore: boolean, t: number) {
+    const top = Math.max(0, Math.floor(h - tail * EMBER_TAIL));
+    const bot = Math.min(rows - 1, Math.floor(h) + 1);
+    const sparkleSlot = Math.floor(t * SPARKLE_RATE);
+    for (let r = bot; r >= top; r--) {
+      const d = h - r; /* continuous distance behind the head (≥0), or <0 ahead */
+      let e = 0;
+      if (d >= 0 && d <= tail) {
+        const u = d / tail;
+        e = bright * Math.pow(1 - u, DECAY_SHAPE) * Math.exp(-u * 0.8);
+        if (d < 1) {
+          /* the head cell: sharp attack; only the near layer burns hot */
+          e = hotCore ? 1.0 : bright;
+        }
+        /* sparkle: ±SPARKLE_AMP, decaying probability towards the tip */
+        const sp = hash3(col, r, sparkleSlot);
+        if (sp < 0.5) e *= 1 + SPARKLE_AMP * 2 * (sp / 0.5 - 0.5) * (1 - u);
+      } else if (d < 0 && d >= -1) {
+        e = bright * ANTICIPATE; /* faint anticipation ahead of the head */
+      } else if (d > tail && d <= tail * EMBER_TAIL) {
+        /* embers: sparse cells that retain a little longer */
+        if (hash2(col, r * 31 + 7) < EMBER_FRAC) e = bright * EMBER_BRIGHT * Math.pow(1 - (d - tail) / (tail * (EMBER_TAIL - 1) + 0.001), 2);
+      }
+      if (e <= 0.004) continue;
+      const i = r * cols + col;
+      if (e > Erain[i]) Erain[i] = e;
+      /* spill: the thread's light gives 2-3 columns of body */
+      if (d >= -1 && d <= tail) {
+        for (const dc of [-1, 1]) {
+          const cc = col + dc;
+          if (cc < 0 || cc >= cols) continue;
+          const j = r * cols + cc;
+          const es = e * SPILL;
+          if (es > Erain[j]) Erain[j] = es;
         }
       }
     }
-    return out;
   }
 
-  function computeRain(tickN: number) {
+  function computeRain(t: number) {
     Erain.fill(0);
-    for (const d of dropsAt(tickN)) {
-      const head = Math.floor(-1 + d.v * (tickN - d.tBirth));
-      for (let r = head; r >= 0; r--) {                      /* cells already passed */
-        if (r >= rows) continue;
-        /* head rides at the peak; the cell right below is pinned to one
-           step of age so the head junction quantizes to |Δ| ≤ 2; deeper
-           cells decay temporally with their own pass phase */
-        let e: number;
-        if (r === head) e = d.peak;
-        else if (r === head - 1) e = d.peak * Math.exp(-(1 / d.v) / TAU_TICKS[d.cls]);
-        else e = d.peak * Math.exp(-(tickN - (d.tBirth + (r + 1) / d.v)) / TAU_TICKS[d.cls]);
-        if (e < TRAIL_EPS * 0.5) break;                      /* trail fully faded above */
-        const i = r * cols + d.col;
-        if (e > Erain[i]) Erain[i] = e;
-      }
+    for (const th of threads) {
+      if (!threadVisibleAt(th, t)) continue;
+      const h = ((t + th.phase) % th.T + th.T) % th.T / th.T * th.cycleLen - th.tail;
+      if (h < -th.tail * EMBER_TAIL || h > rows + 2) continue;
+      stampThread(th.col, h, th.v, th.tail, RAIN_LAYERS[th.cls].bright, th.cls === 2, t);
+    }
+    const comet = cometAt(t);
+    if (comet) {
+      const tail = rows * COMET_TAIL_FRAC;
+      const dur = (rows + tail) / COMET_SPEED;
+      const h = (t - comet.t0) / dur * (rows + tail) - tail;
+      if (h >= -tail && h <= rows + 2) stampThread(comet.col, h, COMET_SPEED, tail, 1.0, true, t);
     }
   }
 
-  /* ρ: separable box sum of the rain mask (±X cols, ±Y rows) */
+  /* ρ: separable box sum of the rain mask */
   function computeRho() {
     for (let i = 0; i < Erain.length; i++) rainMask[i] = Erain[i] > 0.2 ? 1 : 0;
-    /* horizontal running sum */
     for (let r = 0; r < rows; r++) {
       let s = 0;
       const row = r * cols;
@@ -356,7 +411,6 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
         rhoTmp[row + c] = s;
       }
     }
-    /* vertical */
     for (let c = 0; c < cols; c++) {
       let s = 0;
       for (let r = 0; r < rows; r++) {
@@ -367,52 +421,57 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     }
   }
 
-  /* the ONE pipeline: E_total -> LUT -> bloom */
-  function computeLevels(tickN: number) {
+  /* the ONE pipeline: E_total -> soft-quantized LUT -> bloom */
+  function computeLevels() {
     const withBase = mode !== 'drops' && mode !== 'grid' && mode !== 'ramp';
     const withRain = mode !== 'base' && mode !== 'grid' && mode !== 'ramp';
-    if (withBase) computeAmbient(tickN); else Eamb.fill(0);
-    if (withRain) computeRain(tickN); else Erain.fill(0);
+    if (withBase && ambientDirty) { computeAmbient(0); ambientDirty = false; }
+    if (!withBase) Eamb.fill(0);
+    if (withRain) computeRain(tRain); else Erain.fill(0);
     if (withRain && withBase && feedOn) computeRho(); else rhoBuf.fill(0);
     for (let i = 0; i < Etot.length; i++) {
-      /* the blob catches light from NEARBY rain — but a cell already
-         carrying rain keeps its plain ambient, so head classes stay
-         crisp and trails stay monotonic */
       const ea = feedOn && Erain[i] <= 0.2 ? Math.min(1, Eamb[i] + KAPPA * rhoBuf[i]) : Eamb[i];
       Etot[i] = 1 - (1 - ea) * (1 - Erain[i]);
-      quant[i] = lutLevel(Etot[i]);
+      /* soft quantization: inside the 40% blend band, hold the previous
+         level (temporal hysteresis — bands never march) */
+      const v = lutE(Etot[i]);
+      const k = Math.floor(v);
+      const f = v - k;
+      let lv: number;
+      if (f > SOFT_BAND / 2 && f < 1 - SOFT_BAND / 2 && prevQuant[i] >= k && prevQuant[i] <= k + 1) lv = prevQuant[i];
+      else lv = f >= 0.5 ? k + 1 : k;
+      quant[i] = Math.min(11, lv);
+      prevQuant[i] = quant[i];
     }
-    /* bloom by cells (single pass, reads quant, writes level) */
     level.set(quant);
     if (bloomOn) {
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const i = r * cols + c;
           let orth = 0, diag = 0;
-          if (r > 0) { const v = quant[i - cols]; if (v >= BLOOM_MIN && v > orth) orth = v; }
-          if (r < rows - 1) { const v = quant[i + cols]; if (v >= BLOOM_MIN && v > orth) orth = v; }
-          if (c > 0) { const v = quant[i - 1]; if (v >= BLOOM_MIN && v > orth) orth = v; }
-          if (c < cols - 1) { const v = quant[i + 1]; if (v >= BLOOM_MIN && v > orth) orth = v; }
-          if (r > 0 && c > 0) { const v = quant[i - cols - 1]; if (v >= BLOOM_MIN && v > diag) diag = v; }
-          if (r > 0 && c < cols - 1) { const v = quant[i - cols + 1]; if (v >= BLOOM_MIN && v > diag) diag = v; }
-          if (r < rows - 1 && c > 0) { const v = quant[i + cols - 1]; if (v >= BLOOM_MIN && v > diag) diag = v; }
-          if (r < rows - 1 && c < cols - 1) { const v = quant[i + cols + 1]; if (v >= BLOOM_MIN && v > diag) diag = v; }
-          const b2 = Math.max(Math.floor(BLOOM_ORTH * orth), Math.floor(BLOOM_DIAG * diag));
+          if (r > 0) { const v = quant[i - cols]; if (v >= 6 && v > orth) orth = v; }
+          if (r < rows - 1) { const v = quant[i + cols]; if (v >= 6 && v > orth) orth = v; }
+          if (c > 0) { const v = quant[i - 1]; if (v >= 6 && v > orth) orth = v; }
+          if (c < cols - 1) { const v = quant[i + 1]; if (v >= 6 && v > orth) orth = v; }
+          if (r > 0 && c > 0) { const v = quant[i - cols - 1]; if (v >= 6 && v > diag) diag = v; }
+          if (r > 0 && c < cols - 1) { const v = quant[i - cols + 1]; if (v >= 6 && v > diag) diag = v; }
+          if (r < rows - 1 && c > 0) { const v = quant[i + cols - 1]; if (v >= 6 && v > diag) diag = v; }
+          if (r < rows - 1 && c < cols - 1) { const v = quant[i + cols + 1]; if (v >= 6 && v > diag) diag = v; }
+          const b2 = Math.max(Math.floor(0.30 * orth), Math.floor(0.20 * diag));
           if (b2 > level[i]) level[i] = b2;
         }
       }
     }
   }
 
-  /* ---------- paint: one integer fillRect per CHANGED cell ----------
-     254 sentinel = transparent (ahead of the ignition wave), 250 = lime */
-  let painted = new Uint8Array(0);
+  /* ---------- paint: one integer fillRect per CHANGED cell ---------- */
   let lastSubH = -1;
-  let lastPaintTick = -1, lastPaintIgnite = -1, lastPaintSweep = -1;
+  let lastPaintKey = '';
   const SKIP = 254, LIME_V = 250;
   function paint(force = false) {
-    if (!force && lastPaintTick === tickCount && lastPaintIgnite === ignite && lastPaintSweep === sweep) return;
-    lastPaintTick = tickCount; lastPaintIgnite = ignite; lastPaintSweep = sweep;
+    const key = tRain + '|' + ignite + '|' + sweep;
+    if (!force && key === lastPaintKey) return;
+    lastPaintKey = key;
     const W = canvas.width, H = canvas.height;
     if (force) { painted.fill(255); lastSubH = -1; ctx.clearRect(0, 0, W, H); }
     drawCount = 0;
@@ -430,14 +489,13 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     const bgHex = '#' + BG.map((v) => v.toString(16).padStart(2, '0')).join('');
     const sz = cellDev - gapDev;
     const RAMP_HEX = RAMP.map((c) => '#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''));
-    /* substrate (the gap color) grows/shrinks with the wave */
     const maxWaveRow = ignite >= 0.9999 ? rows : Math.ceil(waveF + WAVE_JITTER + 1);
     const subH = Math.min(H, maxWaveRow * cellDev);
     if (subH !== lastSubH) {
       if (subH > lastSubH) { ctx.fillStyle = bgHex; ctx.fillRect(0, lastSubH < 0 ? 0 : lastSubH, W, subH - Math.max(0, lastSubH)); }
       else ctx.clearRect(0, subH, W, (lastSubH < 0 ? 0 : lastSubH) - subH);
       lastSubH = subH;
-      painted.fill(255); /* rows crossed the front: repaint them */
+      painted.fill(255);
     }
     for (let r = 0; r < rows; r++) {
       const y = r * cellDev;
@@ -463,22 +521,45 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     }
   }
 
+  let lastComputedKey = '';
+  let lastAmbientAt = -1;
   function frame(now: number) {
     raf = 0;
     if (disposed) return;
-    const dt = now - t0;
+    const dt = Math.min(now - t0, RAIN_DT_CAP_MS);
     t0 = now;
-    let ticked = false;
     if (!reduced && freezeT === null) {
-      tickAcc += Math.min(dt, TICK_MS * MAX_CATCHUP);
-      while (tickAcc >= TICK_MS) { tickAcc -= TICK_MS; tickCount++; ticked = true; }
-    }
-    if (ticked || lastComputedTick !== tickCount) {
-      lastComputedTick = tickCount;
-      computeLevels(tickCount);
+      /* smoothed speed multiplier: scroll coupling, max +35%, τ = 400ms */
+      const target = coupleTarget();
+      speedMult += (target - speedMult) * (1 - Math.exp(-dt / SPEED_SMOOTHING_MS));
+      tRain += (dt / 1000) * speedMult;
+      /* the ambient field changes slowly — refresh it at tick rate; the
+         rain runs every frame for continuous motion */
+      if (tRain - lastAmbientAt > TICK_MS / 1000 || lastAmbientAt < 0) {
+        lastAmbientAt = tRain;
+        ambientDirty = true;
+      }
+      computeLevels();
+      lastComputedKey = '';
     }
     paint();
     if (filmActive && ioVisible && !hidden) raf = requestAnimationFrame(frame);
+  }
+  let ambientDirty = true;
+
+  /* scroll-velocity target for the speed multiplier */
+  let coupleVel = 0;
+  function coupleTarget(): number {
+    if (reduced) return 0.3;
+    const now = performance.now();
+    if (now - lastCoupleCheck > 80) {
+      const y = window.scrollY;
+      const v = Math.abs(y - lastScrollY) / Math.max(1, now - lastCoupleCheck);
+      lastScrollY = y;
+      lastCoupleCheck = now;
+      coupleVel = v;
+    }
+    return 1 + SCROLL_SPEED_COUPLING * Math.min(1, coupleVel / 1.5);
   }
 
   function kick() {
@@ -490,12 +571,12 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   io.observe(canvas);
   const ro = new ResizeObserver(() => { metrics(); paint(true); });
   ro.observe(canvas);
-  const onVis = () => { hidden = document.hidden; kick(); };
+  const onVis = () => { hidden = document.hidden; t0 = performance.now(); kick(); };
   document.addEventListener('visibilitychange', onVis);
 
   metrics();
-  tickCount = freezeT ? parseInt(freezeT, 10) : (reduced ? 0 : Math.round(rows / 0.43)); /* warm-up: rain in flight */
-  computeLevels(tickCount);
+  if (freezeT) tRain = parseFloat(freezeT);
+  computeLevels();
   paint(true);
 
   /* ---------- probe ---------- */
@@ -503,6 +584,22 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     let h = 2166136261;
     for (let i = 0; i < arr.length; i++) { h ^= arr[i]; h = Math.imul(h, 16777619); }
     return h >>> 0;
+  }
+  function dropsNow(): Array<Record<string, number>> {
+    const out: Array<Record<string, number>> = [];
+    for (const th of threads) {
+      if (!threadVisibleAt(th, tRain)) continue;
+      const h = ((tRain + th.phase) % th.T + th.T) % th.T / th.T * th.cycleLen - th.tail;
+      out.push({ col: th.col, cls: th.cls, head: +h.toFixed(2), v: th.v, tail: th.tail, bright: RAIN_LAYERS[th.cls].bright });
+    }
+    const comet = cometAt(tRain);
+    if (comet) {
+      const tail = rows * COMET_TAIL_FRAC;
+      const dur = (rows + tail) / COMET_SPEED;
+      const h = (tRain - comet.t0) / dur * (rows + tail) - tail;
+      out.push({ col: comet.col, cls: 3, head: +h.toFixed(2), v: COMET_SPEED, tail, bright: 1 });
+    }
+    return out;
   }
   (window as unknown as { __panel?: Record<string, unknown> }).__panel = {
     get layers() { return 1; },
@@ -513,30 +610,21 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     get ramp() { return RAMP; },
     levels: () => level.slice(),
     energy: () => Etot.slice(),
-    drops: () => dropsAt(tickCount),
-    birthsIn: (t0: number, t1: number) => {
-      const counts = new Array(cols).fill(0);
-      for (let c = 0; c < cols; c++) {
-        const s2 = sched[c];
-        for (const tb of s2.births) { if (tb >= t0 && tb <= t1) counts[c]++; }
-      }
-      return counts;
-    },
-    rainDensity: () => { const ds = dropsAt(tickCount); return Math.round(new Set(ds.map((d) => d.col)).size / cols * 100); },
+    drops: () => dropsNow(),
+    rainDensity: () => Math.round(new Set(dropsNow().map((d) => d.col)).size / cols * 100),
     drawCount: () => drawCount,
     hash: () => fnv(level),
-    /* self-contained: hysteresis state snapshotted so any route to the
-       same driver value hashes identically */
     hashAt: (t: number) => {
-      const snap = baseLv.slice();
-      baseLv.fill(0);
-      computeLevels(t);
+      const snapT = tRain, snapB = baseLv.slice(), snapQ = prevQuant.slice();
+      tRain = t; baseLv.fill(0); prevQuant.fill(255);
+      computeLevels();
       const h = fnv(level);
-      baseLv.set(snap);
-      computeLevels(tickCount);
+      tRain = snapT; baseLv.set(snapB); prevQuant.set(snapQ);
+      computeLevels();
       return h;
     },
-    tick: () => tickCount,
+    tick: () => tRain,
+    get speedMult() { return +speedMult.toFixed(3); },
   };
 
   wall = {

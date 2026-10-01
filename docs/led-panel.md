@@ -203,3 +203,53 @@ hash(), hashAt(t), tick() }` — somente leitura.
 no commit anterior (teste do teste ✓). Evidências: `evidence/panel-*`.
 Mobile 390: placa 1×1 — página estática ≤700 px continua em branco
 (**preexistente**, documentado desde a Task A).
+
+---
+
+## 2. Motor da chuva (reescrito — "fios, não bolas")
+
+O campo único permanece; o que mudou é a CHUVA (e o ambiente foi rebaixado):
+
+- **Ambiente sutil e anisotrópico**: `AMBIENT_LEVEL 0.22` (era 0.40) e ruído
+  amostrado com frequência vertical ÷`AMBIENT_ANISO 9` (feições ≥8:1 mais
+  altas que largas, deriva 0.45 c/s) — nunca mais bolas: aspecto mediano dos
+  componentes 0.75:1 → 2.95:1. Continua acendendo na passagem (κ·ρ).
+- **Fios analíticos por coluna** (função pura de t_chuva): fase por coluna =
+  fase da cortina (banda de 2-6 colunas, `BAND_COHERENCE 0.78`) + jitter;
+  ciclo T = (rows+cauda+folga)/v; **cabeça contínua** `h = frac((t+fase)/T)·ciclo −
+  cauda`; brilho por célula da distância contínua d = h − linha (sem
+  arredondar) — movimento suave em qualquer frame rate. Antecipação fraca
+  (0.10) 1 célula à frente.
+- **3 camadas** (c/s · cauda · brilho · share do ciclo): longe 6-9 · 6-10 ·
+  0.30 · 0.52 · ~25% das colunas; meio 10-16 · 10-18 · 0.60 · 0.28; perto
+  18-28 · 14-30 · 1.0 (núcleo quente nível 11) · 0.22. ±15% de v por coluna.
+  `LIVE_COLUMNS 1.25` (calibrado: ~50-51% das colunas em voo).
+- **Spill** 0.22 para 1 coluna de cada lado (corpo de 2-3 colunas).
+- **Persistência LED**: cabeça pino no pico; rastro `bright·(1−u)^1.15·e^(−0.8u)`;
+  **brasas** (16% das células retêm 0.32 até 1.7× a cauda); **sparkle** ±6% a
+  6 Hz com probabilidade decrescente para a ponta; quantização com banda
+  suave de 40% (histerese temporal — bandas não marcham).
+- **Ritmo**: respiração da densidade (ruído 1D, período 18 s, profundidade
+  35%); **cometas** (nascimento a cada 5-9 s, altura 85% das rows, 34 c/s,
+  núcleo quente, nunca dois juntos; desligados em reduced-motion).
+- **Tempo**: `t_chuva += dt·mult` (dt ≤ 50 ms), nunca t×v; mult suavizado
+  (τ 400 ms) com **acoplamento ao scroll** até +35% (`SCROLL_SPEED_COUPLING`);
+  aba oculta retoma sem salto. Reduced: mult 0.3, sem cometas/acoplamento.
+- **Integração**: chuva já viva na onda de ignição (warm-up 2.6 s); varredura
+  lime inalterada; pintura suja mantida.
+
+Verificação (`scripts/rain-verify.mjs`, **12/12**): densidade 50-51%;
+monotonia das cabeças (0 retrocessos); aspecto das estruturas móveis ≥3:1;
+brilho p95 ≤25%/frame fora do ataque; continuidade sob roda (pior avanço
+≤2.5 células/frame); 60 s sem janela de 3 s repetida; p95 JS DPR1/DPR2;
+onda com chuva viva; console limpo. Evidências: `evidence/rain-*`.
+
+### Checagem rápida (bloom/cantos/grade) — look intencional
+
+- **Sem halo suave**: o bloom do motor atual é POR CÉLULAS (degrau de níveis
+  em vizinhas, spec do round "board") — não existe blur/glow de pixel desde a
+  paleta fechada (regra dos ≤14 tons, round aprovado).
+- **Cantos quadrados**: o round "board" especificou fillRect inteiro sem
+  sprite — cantos arredondados saíram com o motor WebGL.
+- **Grade como linhas finas escuras**: é a fresta de 1 px na cor exata do
+  fundo (spec). Nenhum tier caiu (o motor 2D não tem tiers; frame p95 ~3 ms).
