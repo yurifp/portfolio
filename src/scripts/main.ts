@@ -27,6 +27,11 @@ const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* ------------------------------------------------------------------ */
 let lenis: Lenis | null = null;
 
+/* scroll lock for the game windows host (focus mode) — the flipbook
+   progress freezes exactly where it was; unlock restores it */
+export function lockScroll() { lenis?.stop(); }
+export function unlockScroll() { lenis?.start(); }
+
 function initLenis() {
   if (prefersReduced) return;
   /* flipbook crank: lerp smoothing (0.1) — the wheel charges inertia,
