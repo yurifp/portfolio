@@ -1,0 +1,45 @@
+---
+import { WINDOWS } from '../data/windows';
+---
+<!--
+  GAME WINDOWS — three boxes over the LED panel (led scene).
+  DOM skeleton; geometry, scrub and content live in windows-shell.ts +
+  game-host.ts. Config: src/data/windows.ts.
+-->
+<div class="game-windows" data-windows>
+  {WINDOWS.map((w) => (
+    <div class="game-win is-hidden" data-win={w.id} data-role={w.role} role="group" aria-label={w.title} tabindex="0">
+      <div class="win-body">
+      <div class="win-titlebar">
+        <span class="win-handle" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
+        <span class="win-status" aria-hidden="true" />
+        <span class="win-title" data-win-title />
+        <span class="win-state">
+          <span class="win-label" data-win-label />
+          <span class="win-level" aria-hidden="true"><i /><i /><i /><i /><i /></span>
+          <button class="win-expand" data-win-expand aria-label="Expand window" tabindex="-1" />
+        </span>
+      </div>
+      <div class="win-screen" data-win-screen>
+        {w.role === 'game' && <div class="win-splash" data-splash>
+          <div class="t"><b>SHAFT RUNNER</b><span>CLICK TO PLAY</span></div>
+        </div>}
+        {w.role === 'terminal' && <div class="term-lines" data-term />}
+        {w.role === 'telemetry' && <div style="display:flex;flex-direction:column;gap:6px;width:100%;height:100%;padding:8px 10px;">
+          <canvas data-hist aria-hidden="true" style="width:100%;flex:1;" />
+          <canvas data-frames aria-hidden="true" style="width:100%;flex:1;" />
+        </div>}
+      </div>
+      {w.role === 'game' && (
+        <div class="win-footer" data-footer>
+          <span><span class="keycap">←→</span> MOVE</span>
+          <span><span class="keycap">SPACE</span> FIRE</span>
+          <span><span class="keycap">X</span> BOMB</span>
+          <span><span class="keycap">P</span> AUTOPILOT</span>
+          <span><span class="keycap">ESC</span> PAUSE</span>
+        </div>
+      )}
+      </div>
+    </div>
+  ))}
+</div>

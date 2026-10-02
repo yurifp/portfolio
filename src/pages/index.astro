@@ -4,6 +4,7 @@ export const prerender = true;
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import LedScene from '../components/LedScene.astro';
+import Windows from '../components/Windows.astro';
 import LimeScene from '../components/LimeScene.astro';
 import Snapshots from '../components/Snapshots.astro';
 import WorkedAt from '../components/WorkedAt.astro';
@@ -17,7 +18,10 @@ import { TOTAL_VH, sceneStart, sceneLen } from '../scripts/scenes';
   <div class="flip-track" data-flip-track style={`--track-vh: ${TOTAL_VH};`}>
     <div class="flip-stage" data-flip-stage>
       <div data-flip-frame="hero"><Hero /></div>
-      <div data-flip-frame="led"><LedScene /></div>
+      <div data-flip-frame="led">
+        <LedScene />
+        <Windows />
+      </div>
       <div data-flip-frame="lime"><LimeScene /></div>
       <div data-flip-frame="snap"><Snapshots /></div>
       <div data-flip-frame="work"><WorkedAt /></div>
@@ -32,6 +36,8 @@ import { TOTAL_VH, sceneStart, sceneLen } from '../scripts/scenes';
   import { mountLedWall } from '../scripts/led-wall';
   import { initFlipbook } from '../scripts/flipbook';
   import { sceneStart, sceneLen } from '../scripts/scenes';
+  import { mountWindows, initWindowsScrub } from '../scripts/windows-shell';
+  import { mountGameHost } from '../scripts/game-host';
 
   const portrait = document.querySelector<HTMLCanvasElement>('[data-portrait]');
   if (portrait) mountPortrait(portrait, { imageUrl: '/images/portrait.jpg' });
@@ -55,6 +61,15 @@ import { TOTAL_VH, sceneStart, sceneLen } from '../scripts/scenes';
      at 1 (static/no-film default); the film scrubs it down at p=0. */
   const wallCanvas = document.querySelector<HTMLCanvasElement>('[data-led-wall]');
   if (wallCanvas) mountLedWall(wallCanvas);
+
+  /* game windows over the panel + the host (focus, capture, stub) */
+  const winRoot = document.querySelector<HTMLElement>('[data-windows]');
+  if (winRoot) {
+    mountWindows(winRoot);
+    const w1 = winRoot.querySelector<HTMLElement>('[data-win="w1"]');
+    if (w1) mountGameHost(w1);
+    initWindowsScrub();
+  }
 
   if (led) {
     /* dissolve at old-global 0.09–0.12 = hero-local 0.75–1.0: feed the

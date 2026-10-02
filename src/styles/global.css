@@ -333,6 +333,233 @@
     z-index: var(--z-content);
     pointer-events: none;
   }
+
+  /* ---------- GAME WINDOWS over the panel (docs/windows.md) ----------
+     Square language only: 45° chamfer (same as the lime cards), 1px
+     outline, no radius anywhere. Palette: green only, derived from the
+     panel ramp (hue 142.8 ±3°). */
+  :root {
+    --crt-bg: #011403;      /* green almost-black */
+    --crt-edge: #036806;    /* ramp level 5 */
+    --crt-dim: #038409;     /* ramp level 6 */
+    --crt-fg: #12dc1b;      /* ramp level 9 */
+    --crt-hi: #c9fbc4;      /* ramp level 11 (near-white mint) */
+    --win-chamfer: 10px;
+    --z-win: 30;            /* between content (10) and HUD (50) */
+    --crt-intensity: 1;
+  }
+  .game-win {
+    position: absolute;
+    z-index: var(--z-win);
+    background: var(--crt-edge); /* the 1px border layer */
+    clip-path: polygon(var(--win-chamfer) 0, 100% 0, 100% calc(100% - var(--win-chamfer)), calc(100% - var(--win-chamfer)) 100%, 0 100%, 0 var(--win-chamfer));
+    pointer-events: none;
+  }
+  .win-body {
+    position: absolute;
+    inset: 1px;
+    display: flex;
+    flex-direction: column;
+    background: var(--crt-bg);
+    clip-path: polygon(calc(var(--win-chamfer) - 1px) 0, 100% 0, 100% calc(100% - (var(--win-chamfer) - 1px)), calc(100% - (var(--win-chamfer) - 1px)) 100%, 0 100%, 0 calc(var(--win-chamfer) - 1px));
+    overflow: hidden;
+  }
+  .game-win.is-live { pointer-events: auto; }
+  .game-win.is-hidden { visibility: hidden; }
+  /* the CRT skin: scanlines + vignette + top sheen — CSS only */
+  .win-body::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    opacity: var(--crt-intensity);
+    background:
+      repeating-linear-gradient(0deg, transparent 0 2px, rgba(1, 20, 3, 0.5) 2px 3px),
+      radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(1, 20, 3, 0.9) 100%),
+      linear-gradient(180deg, rgba(46, 255, 70, 0.05), transparent 18%);
+  }
+  html.crt-off .win-body::after { display: none; }
+  .win-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px 6px 10px;
+    border-bottom: 1px solid var(--crt-dim);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--crt-fg);
+    text-shadow: 0 0 4px color-mix(in srgb, var(--crt-fg) 40%, transparent);
+    background: linear-gradient(180deg, rgba(3, 104, 6, 0.35), transparent 80%);
+    min-height: 28px;
+  }
+  .win-handle {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    width: 12px;
+    flex: none;
+  }
+  .win-handle i {
+    width: 3px;
+    height: 2px;
+    background: var(--crt-dim);
+  }
+  .win-status {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    background: var(--crt-fg);
+  }
+  .win-state {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--crt-dim);
+  }
+  .win-level {
+    display: flex;
+    gap: 2px;
+  }
+  .win-level i {
+    width: 4px;
+    height: 8px;
+    background: var(--crt-edge);
+  }
+  .win-level i.on { background: var(--crt-hi); }
+  .win-expand {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    border: 1px solid var(--crt-dim);
+    background: transparent;
+    color: var(--crt-fg);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    padding: 0;
+  }
+  .win-expand::before { content: ''; width: 8px; height: 8px; border: 1px solid currentColor; }
+  .win-screen {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    background: var(--crt-bg);
+    overflow: hidden;
+  }
+  .win-screen canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: block;
+  }
+  .win-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 10px;
+    border-top: 1px solid var(--crt-dim);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--crt-dim);
+    min-height: 28px;
+    align-items: center;
+  }
+  .keycap {
+    display: inline-grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border: 1px solid var(--crt-dim);
+    color: var(--crt-fg);
+    background: rgba(3, 104, 6, 0.3);
+  }
+  .win-splash {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    background: var(--crt-bg);
+  }
+  .win-splash .t {
+    font-family: var(--font-mono);
+    color: var(--crt-hi);
+    text-align: center;
+    text-shadow: 0 0 6px color-mix(in srgb, var(--crt-hi) 40%, transparent);
+  }
+  .win-splash .t b { display: block; font-size: clamp(18px, 1.8vw, 26px); letter-spacing: 0.3em; font-weight: 500; }
+  .win-splash .t span { display: block; margin-top: 10px; font-size: var(--fs-hud); letter-spacing: 0.18em; color: var(--crt-fg); }
+  .term-lines {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    line-height: 1.55;
+    color: var(--crt-fg);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .term-lines .ts { color: var(--crt-edge); margin-right: 6px; }
+  .term-lines .bar { color: var(--crt-hi); }
+  /* focus-mode overlay (mobile tap + EXPAND) */
+  .game-focus-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-menu) + 5);
+    background: var(--crt-bg);
+    display: grid;
+    place-items: center;
+    padding: max(10px, var(--gutter));
+  }
+  .game-focus-overlay .win-close {
+    position: absolute;
+    top: max(10px, var(--gutter));
+    right: max(10px, var(--gutter));
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--crt-dim);
+    background: var(--crt-bg);
+    color: var(--crt-hi);
+    font-family: var(--font-mono);
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .game-win:focus-visible,
+  .game-win.is-focused {
+    outline: 2px solid var(--crt-hi);
+    outline-offset: 2px;
+  }
+  html.game-focused .cursor-root { visibility: hidden; }
+  .win-touch-btn {
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--crt-dim);
+    background: rgba(3, 104, 6, 0.3);
+    color: var(--crt-hi);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+  html.debug-layout .game-win {
+    outline: 1px dashed var(--crt-hi);
+    outline-offset: 2px;
+  }
+  html.debug-layout .axis-grid {
+    outline: 1px dashed rgba(46, 255, 70, 0.4);
+  }
   /* frames fill the stage; each frame's own section centers */
   [data-flip-frame] > section,
   [data-flip-frame] > footer,

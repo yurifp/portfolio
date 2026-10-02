@@ -13,7 +13,7 @@
 */
 export const SCENES = [
   { id: 'hero', vh: 132 },   // was 12% of 1100vh
-  { id: 'led', vh: 200 },    // NEW — the LED wall page
+  { id: 'led', vh: 300 },    // NEW scene — extended for the windows plateau (§5)
   { id: 'lime', vh: 198 },   // was 18%
   { id: 'snap', vh: 467.5 }, // was 42.5%
   { id: 'work', vh: 231 },   // was 21%
