@@ -499,12 +499,19 @@ function initProgress() {
   const fill = document.querySelector<HTMLElement>('.progress-rail__fill');
   const pct = document.querySelector<HTMLElement>('[data-progress-pct]');
   if (!fill) return;
+  let lastPct = -1;
   ScrollTrigger.create({
     start: 0,
     end: () => document.documentElement.scrollHeight - innerHeight,
     onUpdate(self) {
       fill.style.transform = `scaleY(${self.progress})`;
-      if (pct) pct.textContent = `${Math.round(self.progress * 100)}%`;
+      /* DOM write only when the rounded percentage changed — keeps the
+         scroll path free of no-op text mutations */
+      const v = Math.round(self.progress * 100);
+      if (pct && v !== lastPct) {
+        lastPct = v;
+        pct.textContent = `${v}%`;
+      }
     },
   });
   document.querySelector('[data-scroll-top]')?.addEventListener('click', (e) => {

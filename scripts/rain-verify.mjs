@@ -182,6 +182,28 @@ async function main() {
   await p.screenshot({ path: 'evidence/rain-wave-live.png' });
   note('ONDA com chuva viva', waveRain.drops > 5, JSON.stringify(waveRain));
 
+  /* REGRESSION: the simulation must advance in real time DURING scroll
+     (the t0-reset bug froze the rain while scrolling) */
+  const scrollSim = await p.evaluate(async () => {
+    const pn = window.__panel;
+    const total = document.documentElement.scrollHeight - innerHeight;
+    const t0 = pn.tick();
+    const rt0 = performance.now();
+    const tEnd = rt0 + 2500;
+    await new Promise((done) => {
+      const tick = () => {
+        const t = (performance.now() - rt0) / 2500;
+        if (performance.now() >= tEnd) { done(); return; }
+        /* continuous scroll inside the scene window */
+        window.scrollTo(0, total * (0.225 + 0.05 * Math.sin(t * Math.PI * 6)));
+        setTimeout(tick, 25);
+      };
+      tick();
+    });
+    return +((pn.tick() - t0) / ((performance.now() - rt0) / 1000)).toFixed(3);
+  });
+  note('SIM AVANÇA DURANTE SCROLL (regressão)', scrollSim >= 0.85 && scrollSim <= 1.4, 'sim/real durante roda contínua = ' + scrollSim);
+
   note('CONSOLE', errs.length === 0, errs.length ? errs[0] : 'limpo');
 
   /* reduced-motion */

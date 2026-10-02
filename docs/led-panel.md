@@ -309,3 +309,41 @@ gotas nas 4 bandas · 60s sem repetição · p95 frame 2.0-2.1ms (sim
 fisicamente com a banda de luminância 0.22-0.32 sob chuva contínua; o
 equilíbrio se move com UMA constante (EXPOSURE_TARGET). Amostragem por
 gota no teste de aspecto (cortinas legítimas fundem componentes conectados).
+
+---
+
+## 4. Fix: chuva congelava durante o scroll
+
+**Causa raiz**: `led-wall.ts`, `setActive()` resetava `t0 = performance.now()`
+incondicionalmente — e o `onUpdate` do flipbook chama `setActive(true)` a
+CADA tick de scroll (scrub) → `dt = now − t0` colapsava para ~1-3ms durante
+qualquer rolagem (chuva em câmera lenta; wheel: sim/real 0.446, PageDown:
+0.189) e voltava ao normal quando o scroll parava.
+
+**Hipóteses testadas** (instrumentação: `scripts/scroll-freeze-diag.mjs`):
+1. IO/pausa — DESCARTADA (loop contnuou: frames avançaram; flags estáveis).
+2. dt zerado — **CONFIRMADA** (t0 reset por setActive). 3. render do handler
+com sim parada — DESCARTADA (kick só agenda; paint roda no frame loop).
+4. Contenção de main thread — DESCARTADA (rAF p95 = 16.8ms durante scroll).
+5. Ticker GSAP/Lenis — DESCARTADA (loop é rAF próprio, intervalos normais).
+
+**Correções**: `t0` resetado só na transição inativo→ativo (setActive, io,
+visibilitychange); multiplicador NaN-safe e clamp [1, +35%] (scroll+varredura
+lime combinados, nunca desacelera); indicador de % do trilho só escreve no DOM
+quando o valor muda (main.ts); spawn blue-noise com 24 candidatos (χ²
+4.6-6.7). **Instrumentação permanente atrás de `?tune=1`**: HUD com rAF
+p50/p95/máx/%>33ms, dt da sim, t_rain, multiplicador, flags
+(active/io/hidden/scrolling), custo sim/paint e longtasks (PerformanceObserver).
+
+**Verificação** (`scripts/scroll-fix-verify.mjs`, **15/15**; `rain-verify.mjs`
+13/13 com a regressão nova "SIM AVANÇA DURANTE SCROLL"; `field-verify.mjs`
+13/13×2): ida 0→100% sim/real 1.217, volta 100→0% 1.32 (tempo real + boost do
+acoplamento ≤+35%); rAF p50/p95/máx 16.7/16.8/33.4ms, >33ms 0.2-0.4% em
+1878×946 e 1440×900, DPR 1 e 2; gota na fronteira rolando→parado: pior
+avanço 0.72 LED/frame, 0 retrocessos (47.609 amostras por frame); onda de
+ignição com 284 gotas em voo durante scroll; console limpo. Folha de contato
+10×100ms DURANTE scroll: `evidence/scroll-during-contact-sheet.png`.
+
+Não automatizável no Playwright: arrasto da barra de rolagem nativa e inércia
+de trackpad (cobertos wheel, teclado — dentro da janela — e programático;
+o caminho de código é o mesmo: ScrollTrigger onUpdate).

@@ -159,6 +159,7 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   let disposed = false, raf = 0;
   let drawCount = 0;
   let simMs = 0;
+  let engineFrames = 0;
 
   /* ---------- grid ---------- */
   let cssW = 1, cssH = 1, cellDev = 17, gapDev = 1, cols = 0, rows = 0, N = 0;
@@ -306,7 +307,7 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   /* blue-noise x sampling: coolest bin (+ jitter) among random candidates */
   function blueNoiseX(): number {
     let best = -1, bestHeat = 1e9;
-    for (let k = 0; k < 12; k++) {
+    for (let k = 0; k < 24; k++) {
       const b = Math.floor(rng() * heatBins);
       const h = heat[b] + rng() * 0.4;
       if (h < bestHeat) { bestHeat = h; best = b; }
@@ -569,11 +570,13 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
       const v = Math.abs(y - lastScrollY) / Math.max(1, now - lastCoupleCheck);
       lastScrollY = y;
       lastCoupleCheck = now;
-      coupleVel = v;
+      coupleVel = Number.isFinite(v) ? v : 0;
     }
+    /* scroll + lime-sweep boost can only SPEED UP the fall, capped at
+       +35% overall, NaN-safe */
     const scroll = 1 + SCROLL_SPEED_COUPLING * Math.min(1, coupleVel / 1.5);
     const sweepBoost = 1 + 0.35 * (sweep > 0 && sweep < 1 ? sweep : 0);
-    return scroll * sweepBoost;
+    return Math.max(1, Math.min(1 + SCROLL_SPEED_COUPLING, Number.isFinite(scroll * sweepBoost) ? scroll * sweepBoost : 1));
   }
 
   /* ---------- frame ---------- */
@@ -597,13 +600,16 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   function frame(now: number) {
     raf = 0;
     if (disposed) return;
+    engineFrames++;
     if (fpsGate > 0 && ++frameGate % fpsGate !== 0) { raf = requestAnimationFrame(frame); return; }
     const dt = Math.min(now - t0, DT_CAP_MS);
     t0 = now;
     const tStart = performance.now();
     if (freezeT === null) step(dt, true);
     simMs = simMs * 0.9 + (performance.now() - tStart) * 0.1;
+    const pStart = performance.now();
     paint();
+    diagFrame(now, dt, performance.now() - pStart);
     if (filmActive && ioVisible && !hidden) raf = requestAnimationFrame(frame);
   }
 
@@ -612,11 +618,16 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   }
 
   /* ---------- wiring ---------- */
-  const io = new IntersectionObserver(([e]) => { ioVisible = e.isIntersecting; if (e.isIntersecting) t0 = performance.now(); kick(); }, { rootMargin: '100% 0%' });
+  const io = new IntersectionObserver(([e]) => {
+    diagIO = e.isIntersecting ? 1 : 0;
+    if (e.isIntersecting && !ioVisible) t0 = performance.now(); /* resume without jump */
+    ioVisible = e.isIntersecting;
+    kick();
+  }, { rootMargin: '100% 0%' });
   io.observe(canvas);
   const ro = new ResizeObserver(() => { metrics(); paint(true); });
   ro.observe(canvas);
-  const onVis = () => { hidden = document.hidden; t0 = performance.now(); kick(); };
+  const onVis = () => { hidden = document.hidden; if (!hidden) t0 = performance.now(); kick(); };
   document.addEventListener('visibilitychange', onVis);
 
   metrics();
@@ -632,8 +643,32 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   }
   paint(true);
 
+  /* ---------- per-frame instrumentation (?tune=1 only) ---------- */
+  const tuned = params.get('tune') === '1';
+  const diagRaf: number[] = [];
+  const diagDt: number[] = [];
+  let diagLast = performance.now();
+  let diagPaintMs = 0;
+  let diagLong = 0;
+  let diagIO = -1;
+  ioInit();
+  function ioInit() {
+    if (!tuned) return;
+    try {
+      new PerformanceObserver((list) => { for (const e of list.getEntries()) diagLong++; }).observe({ entryTypes: ['longtask'] });
+    } catch { /* longtask unsupported */ }
+  }
+  function diagFrame(now: number, dtMs: number, paintMs: number) {
+    if (!tuned) return;
+    diagRaf.push(now - diagLast);
+    diagDt.push(dtMs);
+    diagLast = now;
+    diagPaintMs = diagPaintMs * 0.9 + paintMs * 0.1;
+    if (diagRaf.length > 300) { diagRaf.shift(); diagDt.shift(); }
+  }
+
   /* ---------- tuning panel (?tune=1) ---------- */
-  if (params.get('tune') === '1') {
+  if (tuned) {
     const panelEl = document.createElement('div');
     panelEl.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:9999;background:#000c;color:#9df133;font:11px monospace;padding:10px;border:1px solid #9df13355;max-height:70vh;overflow:auto';
     const tunables: Array<[string, number, number, (v: number) => void]> = [
@@ -662,6 +697,24 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     btn.textContent = 'copy JSON';
     btn.onclick = () => navigator.clipboard?.writeText(JSON.stringify(values));
     panelEl.appendChild(btn);
+    /* mini HUD: rAF interval, sim dt, t_rain, multiplier, flags, sim/paint
+       cost, IntersectionObserver result, long tasks */
+    const hud = document.createElement('pre');
+    hud.style.cssText = 'margin:6px 0 0;color:#f5f0eb;border-top:1px solid #9df13333;padding-top:6px;min-width:290px';
+    panelEl.appendChild(hud);
+    const hudIv = setInterval(() => {
+      if (!document.body.contains(panelEl)) { clearInterval(hudIv); return; }
+      const s = [...diagRaf].sort((a, z) => a - z);
+      const d = [...diagDt].sort((a, z) => a - z);
+      const q = (arr, f) => (arr.length ? +arr[Math.floor(arr.length * f)].toFixed(1) : -1);
+      hud.textContent = [
+        'rAF ms p50/p95/max: ' + q(s, 0.5) + '/' + q(s, 0.95) + '/' + (diagRaf.length ? Math.max(...diagRaf).toFixed(1) : -1) + '  >33ms: ' + (diagRaf.length ? Math.round(diagRaf.filter((x) => x > 33).length / diagRaf.length * 100) : -1) + '%',
+        'sim dt ms p50/p95: ' + q(d, 0.5) + '/' + q(d, 0.95),
+        't_rain: ' + tSim.toFixed(2) + 's  mult: ' + speedMult.toFixed(3),
+        'flags: active=' + filmActive + ' io=' + ioVisible + '(last=' + diagIO + ') hidden=' + hidden + ' scrolling=' + (coupleVel > 0.05),
+        'sim ' + simMs.toFixed(2) + 'ms  paint ' + diagPaintMs.toFixed(2) + 'ms  longtasks=' + diagLong,
+      ].join('\n');
+    }, 250);
     document.body.appendChild(panelEl);
   }
 
@@ -698,6 +751,7 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
     hash: () => fnv(level),
     tick: () => +tSim.toFixed(2),
     get speedMult() { return +speedMult.toFixed(3); },
+    get engineFrames() { return engineFrames; },
     get simMs() { return +simMs.toFixed(2); },
     get exposureMult() { return +expoMult.toFixed(2); },
     get meanE() { let s = 0; for (let i = 0; i < N; i++) s += E[i]; return +(s / Math.max(1, N)).toFixed(3); },
@@ -707,7 +761,14 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
   wall = {
     setIgnite(v) { ignite = Math.min(1, Math.max(0, v)); kick(); },
     setSweep(v) { sweep = Math.min(1, Math.max(0, v)); kick(); },
-    setActive(on) { filmActive = on; if (on) t0 = performance.now(); kick(); },
+    /* t0 resets ONLY on the inactive->active transition — the flipbook's
+       onUpdate calls this every scroll tick, and an unconditional reset
+       collapsed dt to ~1-3ms during scroll (the rain froze) */
+    setActive(on) {
+      if (on && !filmActive) t0 = performance.now();
+      filmActive = on;
+      kick();
+    },
     setTier() { /* single 2D pipeline */ },
     histogram: () => {
       const buckets = [0, 0, 0, 0];
