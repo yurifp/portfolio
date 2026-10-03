@@ -161,6 +161,8 @@ async function main() {
   await p.mouse.click(w1box.x, w1box.y);
   await p.waitForTimeout(500);
   const st1 = await p.evaluate(() => ({ f: window.__host.focused(), l: window.__host.locked(), label: document.querySelector('[data-win-label]').textContent }));
+  /* the real module lands on its MENU; start the run so held inputs reach PLAY (the stub had no menu) */
+  if (await p.evaluate(() => window.__game?.state) === 'menu') { await p.keyboard.press('Space'); await p.waitForTimeout(400); }
   await p.keyboard.down('ArrowLeft');
   await p.keyboard.down('Space');
   await p.keyboard.down('KeyX');
@@ -182,9 +184,11 @@ async function main() {
   const sq2 = await p.evaluate(() => ({ tick: window.__host.tick() }));
   note('8d. loop 60Hz', sq2.tick - sq.tick >= 30 && sq2.tick - sq.tick <= 45, `${sq2.tick - sq.tick} ticks/600ms`);
 
-  /* 9: ESC releases, progress restored, Tab never captured */
+  /* 9: with the game module, ESC in PLAY pauses; ESC again releases */
   await p.keyboard.press('Escape');
   await p.waitForTimeout(400);
+  const stPause = await p.evaluate(() => window.__game?.state ?? 'stub');
+  if (stPause === 'pause') { await p.keyboard.press('Escape'); await p.waitForTimeout(400); }
   const st2 = await p.evaluate(() => ({ f: window.__host.focused(), prog: window.__flipbook.progress(), y: window.scrollY, foc: document.activeElement?.dataset?.win }));
   note('9. ESC solta', st2.f === false && Math.abs(st2.prog - before) <= 0.0001, JSON.stringify(st2));
   /* click outside releases */

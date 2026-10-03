@@ -5,6 +5,7 @@
   that obeys the inputs.
 */
 import { lockScroll, unlockScroll } from './main';
+import { createShaftRunner } from '../games/shaft-runner';
 import { ledLocal, termEmit, announce } from './windows-shell';
 
 /* ---------- contract (Part 2 implements only this) ---------- */
@@ -12,6 +13,7 @@ export interface InputState {
   left: boolean; right: boolean; up: boolean; down: boolean;
   fire: boolean; bomb: boolean; pause: boolean;
   autopilot: boolean; esc: boolean; ok: boolean; quit: boolean;
+  px?: number; /* touch drag target (logical x) */
 }
 export interface HostContext {
   canvas: HTMLCanvasElement;
@@ -24,6 +26,8 @@ export interface HostContext {
   emit(evt: string, data?: Record<string, unknown>): void;
   release(): void;
   scale: number;              /* device px per logical cell */
+  setLabel?(t: string): void;
+  setActivity?(v: number): void;
 }
 export interface GameModule {
   id: string;
@@ -52,6 +56,8 @@ let winEl: HTMLElement | null = null;
 let labelEl: HTMLElement | null = null;
 let levelEls: HTMLElement[] = [];
 let activity = 0;
+let activityPulse = 0;
+let telemFlash = 0;
 
 const input: InputState = {
   left: false, right: false, up: false, down: false,
@@ -80,9 +86,10 @@ function onKeyDown(e: KeyboardEvent) {
 }
 function onKeyUp(e: KeyboardEvent) {
   const k = KEYMAP[e.code];
-  /* ESC latches until the module consumes it — a fast tap must not be
-     eaten by keyup before any fixed step runs */
-  if (k && k !== 'esc') input[k] = false;
+  if (!k || k === 'esc') return; /* ESC latches until consumed */
+  /* pulse: keep the bit on for ~6 frames after release, so a fast tap
+     is always seen by at least one fixed step */
+  setTimeout(() => { input[k] = false; }, 100);
 }
 function onWheel(e: WheelEvent) { e.preventDefault(); }
 function onTouchMove(e: TouchEvent) { e.preventDefault(); }
@@ -145,6 +152,19 @@ function openOverlay() {
   close.setAttribute('aria-label', 'Exit focus mode');
   close.addEventListener('click', () => releaseGame('close'));
   overlay.appendChild(close);
+  if (matchMedia('(hover: none)').matches) {
+    const bomb = document.createElement('button');
+    bomb.className = 'win-touch-btn'; bomb.textContent = 'BOMB';
+    bomb.style.cssText = 'position:absolute;right:max(10px,var(--gutter));bottom:max(10px,var(--gutter));';
+    bomb.addEventListener('pointerdown', (e) => { e.preventDefault(); input.bomb = true; });
+    bomb.addEventListener('pointerup', () => { input.bomb = false; });
+    overlay.appendChild(bomb);
+    const pause = document.createElement('button');
+    pause.className = 'win-touch-btn'; pause.textContent = 'PAUSE';
+    pause.style.cssText = 'position:absolute;left:max(10px,var(--gutter));bottom:max(10px,var(--gutter));';
+    pause.addEventListener('pointerdown', (e) => { e.preventDefault(); input.esc = true; });
+    overlay.appendChild(pause);
+  }
   /* the canvas moves into the overlay at full 9:16 */
   if (canvas?.parentElement) {
     const screen = canvas.parentElement;
@@ -204,7 +224,9 @@ function loopFrame(now: number) {
 }
 
 function updateLevelMeter() {
-  const n = Math.round(activity * 5);
+  activityPulse *= 0.94;
+  activity = Math.max(activity * 0.97, activityPulse);
+  const n = Math.round(Math.min(1, activity) * 5);
   levelEls.forEach((el, i) => el.classList.toggle('on', i < n));
 }
 
@@ -235,8 +257,17 @@ function renderTelemetry() {
     if (w < 4 || h < 4) return;
     if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
     const x = c.getContext('2d')!;
-    x.fillStyle = '#011403';
-    x.fillRect(0, 0, w, h);
+    /* event flash (stage/death): bright border for a few renders */
+    if (telemFlash > 0) {
+      x.fillStyle = '#72f16d';
+      x.fillRect(0, 0, w, h);
+      x.fillStyle = '#011403';
+      x.fillRect(1, 1, w - 2, h - 2);
+      telemFlash--;
+    } else {
+      x.fillStyle = '#011403';
+      x.fillRect(0, 0, w, h);
+    }
     const bw = Math.floor(w / 12);
     const mx = Math.max(1, ...counts);
     for (let b = 0; b < 12; b++) {
@@ -395,18 +426,41 @@ export function mountGameHost(w1: HTMLElement) {
   framesCv = document.querySelector('[data-frames]');
 
   /* the stub module through the full contract */
-  module = makeStub();
+  module = createShaftRunner();
   module.mount({
     canvas, ctx2d, input,
     palette: PALETTE,
     seed: 0x5157,
     audio: { enabled: false },
     storage: safeStorage(),
-    emit: (evt, data) => termEmit(`${evt}${data ? ' ' + JSON.stringify(data) : ''}`),
+    emit: (evt, data) => { termEmit(`${evt}${data ? ' ' + JSON.stringify(data) : ''}`); if (evt === 'stage') telemFlash = 12; if (evt === 'death' || evt === 'game-over') telemFlash = 20; },
     release: () => releaseGame('module'),
     scale,
+    setLabel: (t: string) => { if (state === 'focused') setLabel(t); },
+    setActivity: (v: number) => { activityPulse = Math.max(activityPulse, v); },
   });
+  /* the real game replaces the stub: the temporary splash goes away */
+  const splashEl = screen.querySelector('[data-splash]');
+  splashEl?.remove();
   updateProbe();
+
+  /* touch: drag moves the ship 1:1 (input.px), tap = auto-fire */
+  let touchDown = false;
+  canvas.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'touch') return;
+    touchDown = true;
+    input.fire = true;
+    const r = canvas.getBoundingClientRect();
+    input.px = ((e.clientX - r.left) / r.width) * 108;
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'touch' || !touchDown) return;
+    const r = canvas.getBoundingClientRect();
+    input.px = ((e.clientX - r.left) / r.width) * 108;
+  });
+  const endTouch = () => { touchDown = false; input.fire = false; input.px = undefined; };
+  canvas.addEventListener('pointerup', endTouch);
+  canvas.addEventListener('pointercancel', endTouch);
 
   /* focus triggers — mobile/touch taps enter the expanded overlay mode */
   const wantOverlay = () => matchMedia('(max-width: 1199px)').matches || matchMedia('(hover: none)').matches;
