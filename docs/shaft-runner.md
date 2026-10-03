@@ -89,3 +89,43 @@ densidade simultânea de balas miradas + formações de drones nos estágios 3+.
    spec diz "só ao iniciar partida"; um retry É uma nova partida.
 3. A sonda `input()` do host devolve cópia (readonly) — os testes de fluxo
    usam teclado real por isso.
+
+---
+
+## 6. Passada visual (fósforo v2)
+
+**Causa raiz dos inimigos pretos**: `spr()` (index.ts) mapeava os dígitos dos
+sprites para `PAL[1..3]` = índices 1/3/5 da rampa antiga do painel
+(`#020f02/#023502/#036806`) — verde-escuro sobre terreno igualmente escuro.
+
+**Rampa de fósforo v2** (index.ts `GAME_PAL`, única fonte): L0 `#020a04` ·
+L1 `#07240d` · L2 `#0f7a2a` · L3 `#2cff4a` · L4 `#d6ffd9` + acento limão
+`#9df133` (pickups/CTA/alertas) e violeta `#905cff` (reservado, raro).
+Papéis: L1/L2 só decoração (paredes, grades, frestas); INFORMAÇÃO sempre
+L3/L4/acento. Sprites re-nivelados (1=sombra L2, 2=corpo L3, 3=claro L4,
+4=acento). Blit direto por hex (sem passagem pela rampa do painel).
+
+**CRT**: scanlines/máscara só ESCURECEM (piso L0 intacto), vinheta amainada
+(45%), bloom aditivo sutil no topo (`mix-blend-mode: screen`), `--crt-intensity`
++ `?crt=0`.
+
+**HUD**: placas L0 com borda L2 (topo 0–11, base 181–191); SCORE/HI números
+2× em L4, rótulos L3; FUEL barra larga gradiente L2→L3, piscando em limão
+abaixo de 25% com ícone; BOMB/LIVES como ícones (nada de letras soltas);
+telas (menu/hiscores/gameover/banner/pause) sobre placa, CTA piscando em
+limão. Balas inimigas = losango pulsante L4 (distintas por FORMA das
+traços da nave); booms/bomba L4; borda do terreno L3.
+
+**Cromo**: título em L4, bisel superior em limão 35%, LED com glow, CTA
+"CLICK TO PLAY" piscando em limão, foco com borda+glow lime, janelas sem
+foco escurecidas 22%, keycaps borda L3/texto L4. TERMINAL ancorado no topo
+com prompt `yf@portfolio:~$` + cursor piscando, níveis OK (limão) / EVENT /
+WARN; TELEMETRIA com 3 mini-gráficos (FRAME MS / DROPS / SCROLL %) — linha
+L4, área L2, grade L1, valor atual destacado.
+
+**Medido (pixels finais, com CRT)**: preto da tela `#020a04` (≤ #031208 ✓) ·
+HUD número 18.29:1 · HUD rótulo 14.8:1 · nave 14.8:1 · drone 14.8:1 ·
+pickup 14.8:1 · tiro inimigo 18.29:1 · cromo título 18.29:1 · rótulo estado
+14.8:1 · terminal 18.29:1 · terreno (decoração) 1.21:1 — tudo ≥ alvo.
+Evidências: `evidence/vis-after/`. Suíte: `shaft-verify` 13/13 (rampa v2),
+`rain-verify` 13/13.

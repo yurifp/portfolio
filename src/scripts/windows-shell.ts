@@ -151,6 +151,7 @@ export function mountWindows(container: HTMLElement) {
       expand: root.querySelector('[data-win-expand]')!,
     });
     els.get(w.id)!.label.textContent = w.stateLabel;
+    els.get(w.id)!.root.dataset.stateText = w.stateLabel;
   }
   layout();
 }

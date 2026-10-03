@@ -230,12 +230,17 @@ function updateLevelMeter() {
   levelEls.forEach((el, i) => el.classList.toggle('on', i < n));
 }
 
-function setLabel(t: string) { if (labelEl) labelEl.textContent = t; }
+function setLabel(t: string) {
+  if (labelEl) labelEl.textContent = t;
+  if (winEl) winEl.dataset.stateText = t;
+}
 
 /* ---------- telemetry (W3) ---------- */
 let histCv: HTMLCanvasElement | null = null;
 let framesCv: HTMLCanvasElement | null = null;
 const frameTimes: number[] = [];
+const dropSeries: number[] = [];
+const scrollSeries: number[] = [];
 let lastTelem = 0;
 const PAL = ['#020602', '#020f02', '#011e01', '#023502', '#034e04', '#036806', '#038409', '#02a00b', '#00be0e', '#12dc1b', '#72f16d', '#c9fbc4'];
 
@@ -280,128 +285,47 @@ function renderTelemetry() {
     }
   }
   if (framesCv) {
+    /* 3 stacked mini-charts: FRAME MS / DROPS / SCROLL % — line L4/lime,
+       area L2 wash, grid L1, current value highlighted */
     const c = framesCv;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const w = Math.round(c.clientWidth * dpr), h = Math.round(c.clientHeight * dpr);
     if (w < 4 || h < 4) return;
     if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
     const x = c.getContext('2d')!;
-    x.fillStyle = '#011403';
+    x.fillStyle = '#020a04';
     x.fillRect(0, 0, w, h);
-    /* frame-ms line: square cells along a Bresenham path, no AA */
-    const n = frameTimes.length;
-    const px = Math.max(1, Math.floor(w / 120));
-    for (let i = 1; i < n; i++) {
-      const x0 = (i - 1) * px, x1 = i * px;
-      const y0 = Math.round(h - Math.min(1, frameTimes[i - 1] / 40) * (h - 6)) - 2;
-      const y1 = Math.round(h - Math.min(1, frameTimes[i] / 40) * (h - 6)) - 2;
-      let ax = x0, ay = y0;
-      const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-      const dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-      let err = dx + dy;
-      for (;;) {
-        x.fillStyle = frameTimes[i] > 20 ? PAL[11] : PAL[9];
-        x.fillRect(ax, ay, Math.max(1, px - 1), 2);
-        if (ax === x1 && ay === y1) break;
-        const e2 = 2 * err;
-        if (e2 >= dy) { err += dy; ax += sx; }
-        if (e2 <= dx) { err += dx; ay += sy; }
+    const third = Math.floor(h / 3);
+    const series = [
+      { data: frameTimes, max: 40, fmt: (v: number) => String(Math.round(v)), label: 'MS', color: '#d6ffd9' },
+      { data: dropSeries, max: Math.max(8, ...dropSeries), fmt: (v: number) => String(v), label: 'DRP', color: '#2cff4a' },
+      { data: scrollSeries, max: 1, fmt: (v: number) => Math.round(v * 100) + '%', label: 'SCR', color: '#9df133' },
+    ];
+    series.forEach((sr, k) => {
+      const y0 = k * third;
+      x.fillStyle = '#07240d';
+      for (let gy = y0 + 4; gy < y0 + third - 4; gy += 6) x.fillRect(0, gy, w, 1);
+      const n = sr.data.length;
+      if (n > 1) {
+        const px = Math.max(1, Math.floor(w / 120));
+        x.fillStyle = 'rgba(15, 122, 42, 0.35)';
+        x.beginPath();
+        x.moveTo(0, y0 + third - 4);
+        for (let i = 0; i < n; i++) x.lineTo(i * px, y0 + third - 4 - Math.min(1, sr.data[i] / sr.max) * (third - 10));
+        x.lineTo((n - 1) * px, y0 + third - 4);
+        x.closePath();
+        x.fill();
+        x.fillStyle = sr.color;
+        for (let i = 1; i < n; i++) x.fillRect(i * px, y0 + third - 4 - Math.min(1, sr.data[i] / sr.max) * (third - 10), Math.max(1, px - 1), 2);
+        x.fillRect((n - 1) * px, y0 + third - 4 - Math.min(1, sr.data[n - 1] / sr.max) * (third - 10) - 2, Math.max(1, px), 5);
       }
-    }
+      x.fillStyle = '#2cff4a';
+      x.font = (9 * dpr) + 'px monospace';
+      x.fillText(sr.label + ' ' + sr.fmt(sr.data[sr.data.length - 1] ?? 0), 4 * dpr, y0 + 11 * dpr);
+    });
   }
 }
 
-/* ---------- the STUB module (proves the pipeline) ---------- */
-const PALETTE = PAL;
-function makeStub(): GameModule {
-  let ctxRef: HostContext | null = null;
-  const sq = { x: 50, y: 88 };
-  const off = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(108, 192) : Object.assign(document.createElement('canvas'), { width: 108, height: 192 });
-  const offCtx = (off as HTMLCanvasElement).getContext('2d')!;
-  let img = offCtx.createImageData(108, 192);
-  const cellCol = (lv: number) => {
-    const hex = PALETTE[lv];
-    return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
-  };
-  const draw = () => {
-    const d = img.data;
-    const bg = cellCol(0);
-    for (let i = 0; i < d.length; i += 4) { d[i] = bg[0]; d[i + 1] = bg[1]; d[i + 2] = bg[2]; d[i + 3] = 255; }
-    /* test pattern: border, crosshair ticks, dither block */
-    const l2 = cellCol(2), l1 = cellCol(1), l6 = cellCol(11);
-    for (let x = 0; x < 108; x++) {
-      for (const y of [0, 1, 190, 191]) { const i = (y * 108 + x) * 4; d[i] = l2[0]; d[i + 1] = l2[1]; d[i + 2] = l2[2]; }
-    }
-    for (let y = 0; y < 192; y++) {
-      for (const x of [0, 1, 106, 107]) { const i = (y * 108 + x) * 4; d[i] = l2[0]; d[i + 1] = l2[1]; d[i + 2] = l2[2]; }
-    }
-    for (let y = 8; y < 24; y++) for (let x = 8; x < 24; x++) {
-      if (((x + y) & 3) === 0) { const i = (y * 108 + x) * 4; d[i] = l1[0]; d[i + 1] = l1[1]; d[i + 2] = l1[2]; }
-    }
-    /* the input-following square (8×8, hot) */
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
-      const px = Math.floor(sq.x) + x, py = Math.floor(sq.y) + y;
-      if (px < 2 || px > 105 || py < 2 || py > 189) continue;
-      const i = (py * 108 + px) * 4;
-      d[i] = l6[0]; d[i + 1] = l6[1]; d[i + 2] = l6[2];
-    }
-    offCtx.putImageData(img, 0, 0);
-  };
-  return {
-    id: 'stub',
-    logical: { w: 108, h: 192 },
-    capturesEsc: true,
-    mount(ctx) {
-      ctxRef = ctx;
-      sq.x = 50; sq.y = 88;
-      img = offCtx.createImageData(108, 192);
-    },
-    update() {
-      const inp = ctxRef!.input;
-      const v = 60 / 60; /* cells per step */
-      if (inp.left) sq.x -= v;
-      if (inp.right) sq.x += v;
-      if (inp.up) sq.y -= v;
-      if (inp.down) sq.y += v;
-      sq.x = Math.max(2, Math.min(98, sq.x));
-      sq.y = Math.max(2, Math.min(182, sq.y));
-      const active = ['left', 'right', 'up', 'down', 'fire', 'bomb'].filter((k) => (inp as unknown as Record<string, boolean>)[k]).length;
-      activity = Math.min(1, active / 4 + 0.2);
-      if (inp.esc) { inp.esc = false; (ctxRef as HostContext & { release(): void }).release(); }
-    },
-    render() {
-      draw();
-      const c = ctxRef!.ctx2d;
-      c.imageSmoothingEnabled = false;
-      const s = ctxRef!.scale;
-      c.clearRect(0, 0, 108 * s, 192 * s);
-      c.drawImage(off as HTMLCanvasElement, 0, 0, 108, 192, 0, 0, 108 * s, 192 * s);
-      /* the cell gap: 1 device-px grid in the exact background color */
-      if (s >= 4) {
-        c.fillStyle = PALETTE[0];
-        for (let x = 1; x < 108; x++) c.fillRect(x * s, 0, 1, 192 * s);
-        for (let y = 1; y < 192; y++) c.fillRect(0, y * s, 108 * s, 1);
-      }
-    },
-    setMode(m) { void m; },
-    destroy() { ctxRef = null; },
-  };
-}
-
-/* ---------- probe ---------- */
-function updateProbe() {
-  (window as unknown as { __host?: Record<string, unknown> }).__host = {
-    windows: () => (window as unknown as { __windowsProbe?: () => Record<string, unknown> }).__windowsProbe?.() ?? null,
-    state: () => state,
-    focused: () => state === 'focused',
-    locked: () => state === 'focused',
-    tick: () => tick,
-    module: () => module?.id ?? null,
-    input: () => ({ ...input }),
-  };
-}
-
-/* ---------- mount ---------- */
 export function mountGameHost(w1: HTMLElement) {
   winEl = w1;
   canvas = document.createElement('canvas');
@@ -429,7 +353,7 @@ export function mountGameHost(w1: HTMLElement) {
   module = createShaftRunner();
   module.mount({
     canvas, ctx2d, input,
-    palette: PALETTE,
+    palette: ['#020a04', '#07240d', '#0f7a2a', '#2cff4a', '#d6ffd9', '#2cff4a', '#2cff4a', '#2cff4a', '#2cff4a', '#d6ffd9', '#d6ffd9', '#9df133'],
     seed: 0x5157,
     audio: { enabled: false },
     storage: safeStorage(),
@@ -443,6 +367,18 @@ export function mountGameHost(w1: HTMLElement) {
   const splashEl = screen.querySelector('[data-splash]');
   splashEl?.remove();
   updateProbe();
+
+function updateProbe() {
+  (window as unknown as { __host?: Record<string, unknown> }).__host = {
+    windows: () => (window as unknown as { __windowsProbe?: () => Record<string, unknown> }).__windowsProbe?.() ?? null,
+    state: () => state,
+    focused: () => state === "focused",
+    locked: () => state === "focused",
+    tick: () => tick,
+    module: () => module?.id ?? null,
+    input: () => ({ ...input }),
+  };
+}
 
   /* touch: drag moves the ship 1:1 (input.px), tap = auto-fire */
   let touchDown = false;

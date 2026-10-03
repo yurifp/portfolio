@@ -12,8 +12,13 @@ import type { GameModule, HostContext, InputState } from '../../scripts/game-hos
 import { F35, F57, SPR_SHIP, SPR_DRONE, SPR_TOWER, SPR_MINE, SPR_TANK, STAGE_ROWS, FIELD_Y0 } from './data';
 import { Shaft, mulberry32, stageOf, stageCfg } from './world';
 
-/* closed palette: bg + 7 levels of the panel ramp (indices) */
-const PAL = [0, 1, 3, 5, 7, 9, 11];
+/* PHOSPHOR RAMP — the game screen's own closed palette (hex, one place):
+   L0 floor, L1/L2 decoration only, L3/L4 = INFORMATION (HUD, ship,
+   shots, enemies, text), ACC = lime (pickups/CTA/alerts), VIO = rare */
+const GAME_PAL = ['#020a04', '#07240d', '#0f7a2a', '#2cff4a', '#d6ffd9'];
+const ACC = '#9df133';
+const VIO = '#905cff';
+const PAL = [0, 1, 2, 3, 4]; /* level indices into GAME_PAL */
 const BG = 0;
 
 type GState = 'attract' | 'menu' | 'play' | 'pause' | 'gameover' | 'hiscores';
@@ -479,13 +484,16 @@ export function createShaftRunner(): GameModule {
   }
 
   /* ---------- render ---------- */
-  function text3(s: string, x: number, y: number, lv: number) {
+  function text3(s: string, x: number, y: number, lv: number, k = 1) {
     s = s.toUpperCase();
     for (let i = 0; i < s.length; i++) {
       const g = F35[s[i]] || F35[' '];
       for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) {
-        const px = x + i * 4 + c, py = y + r;
-        if (g[r][c] === '1' && py >= 0 && py < H && px >= 0 && px < W) buf[py * W + px] = lv;
+        if (g[r][c] !== '1') continue;
+        for (let dy = 0; dy < k; dy++) for (let dx = 0; dx < k; dx++) {
+          const px = x + (i * 4 + c) * k + dx, py = y + r * k + dy;
+          if (py >= 0 && py < H && px >= 0 && px < W) buf[py * W + px] = lv;
+        }
       }
     }
   }
@@ -505,6 +513,13 @@ export function createShaftRunner(): GameModule {
       if (ch === '0') continue;
       const px = Math.round(x) + c, py = Math.round(y) + r;
       if (px >= 0 && px < W && py >= 0 && py < H) buf[py * W + px] = PAL[Math.min(3, parseInt(ch, 10))];
+    }
+  }
+  function plate(x0: number, y0: number, x1: number, y1: number) {
+    /* placa: L0 fill, 1px L2 border — separates from the field */
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      if (y < 0 || y >= H || x < 0 || x >= W) continue;
+      buf[y * W + x] = y === y0 || y === y1 || x === x0 || x === x1 ? PAL[2] : BG;
     }
   }
   function box(x0: number, y0: number, x1: number, y1: number, lv: number) {
@@ -532,8 +547,8 @@ export function createShaftRunner(): GameModule {
       const w = wallAt(row);
       const stripe = (row % 2 === 0) ? PAL[1] : PAL[2];
       for (let x = 0; x < W; x++) buf[sy * W + x] = (x <= w.l || x >= w.r) ? stripe : BG;
-      buf[sy * W + w.l] = PAL[5];
-      buf[sy * W + w.r] = PAL[5];
+      buf[sy * W + w.l] = PAL[3]; /* border = L3 (information edge) */
+      buf[sy * W + w.r] = PAL[3];
     }
     /* dust: 2 parallax layers (0.3×, 0.6×) */
     for (let i = 0; i < 26; i++) {
@@ -547,19 +562,44 @@ export function createShaftRunner(): GameModule {
   }
 
   function renderHUD() {
-    text3('SCORE ' + String(score).padStart(6, '0'), 2, 3, PAL[5]);
-    text3('HI ' + String(Math.max(score, hiscores[0] || 0)).padStart(6, '0'), 60, 3, PAL[4]);
-    const fy = 182;
-    if (!(fuel < 20 && (tick >> 3) % 2 === 0)) {
-      box(2, fy, 34, fy + 4, PAL[3]);
-      const fw = Math.round((Math.max(0, fuel) / 100) * 31);
-      for (let x = 3; x < 3 + fw; x++) for (let y = fy + 1; y <= fy + 3; y++) buf[y * W + x] = fuel < 20 ? PAL[6] : PAL[5];
+    /* top placa 0–11 */
+    plate(0, 0, 107, 11);
+    /* big numbers L4 (2x), labels L3 */
+    text3('SCORE', 2, 1, 3);
+    text3(String(score).padStart(6, '0'), 2, 6, 4, 2);
+    text3('HI', 66, 1, 3);
+    text3(String(Math.max(score, hiscores[0] || 0)).padStart(6, '0'), 60, 6, 4, 2);
+    text3('ST ' + stage, 92, 6, 3);
+    /* bottom placa 181–191 */
+    plate(0, 181, 107, 191);
+    const fy = 184;
+    text3('FUEL', 2, fy - 2, 3);
+    /* wide bar with L2→L3 gradient fill; blink accent below 25% */
+    const low = fuel < 25;
+    const blink = !low || (tick >> 3) % 2 === 0;
+    box(2, fy + 4, 56, fy + 7, PAL[2]);
+    const fw = Math.round((Math.max(0, fuel) / 100) * 53);
+    for (let x = 3; x < 3 + fw; x++) {
+      const lv = x < 3 + fw * 0.5 ? PAL[2] : PAL[3];
+      for (let y = fy + 5; y <= fy + 6; y++) buf[y * W + x] = low && blink ? 9 : lv;
     }
-    text3('B', 40, fy, PAL[4]);
-    for (let i = 0; i < bombs; i++) box(46 + i * 5, fy, 48 + i * 5, fy + 2, PAL[5]);
-    text3('L', 76, fy, PAL[4]);
-    for (let i = 0; i < Math.min(lives, 4); i++) box(82 + i * 5, fy, 84 + i * 5, fy + 2, PAL[6]);
-    text3('ST' + stage, 96, fy, PAL[4]);
+    if (low && blink) { /* alert icon (square exclamation) */
+      box(59, fy, 61, fy + 7, 9);
+    }
+    /* BOMBS: bomb pips (2×3 body + spark) */
+    text3('BOMB', 66, fy - 2, 3);
+    for (let i = 0; i < 5; i++) {
+      const x0 = 66 + i * 6;
+      if (i < bombs) { box(x0, fy + 2, x0 + 3, fy + 6, PAL[3]); buf[(fy + 1) * W + x0 + 1] = 4; }
+      else box(x0, fy + 2, x0 + 3, fy + 6, PAL[1]);
+    }
+    /* LIVES: mini ships */
+    for (let i = 0; i < Math.min(lives, 4); i++) {
+      const x0 = 92 + i * 5;
+      box(x0, fy + 2, x0 + 2, fy + 6, PAL[3]);
+      buf[fy * W + x0 + 1] = 4;
+    }
+    text3(String(lives), 104, fy + 2, 4);
   }
 
   function render() {
@@ -576,63 +616,77 @@ export function createShaftRunner(): GameModule {
         else if (e.type === 'tank') spr(SPR_TANK, ex - 4, sy - 3);
       }
       for (const b of bullets) {
-        const sy = Math.round(b.sy);
-        if (b.foe) box(Math.round(b.x), sy, Math.round(b.x) + 1, sy + 1, PAL[5]);
-        else for (let k = 0; k < 3; k++) { const yy = sy + k; if (yy >= 0 && yy < H) buf[yy * W + Math.round(b.x)] = PAL[6]; }
+        const sy = Math.round(b.sy), bx = Math.round(b.x);
+        if (b.foe) {
+          /* diamond (plus-shape) L4 + pulsing L3 halo — distinct from the
+             ship streaks by SHAPE and motion */
+          const hot = (tick >> 2) % 2 === 0;
+          if (sy >= 0 && sy < H && bx >= 0 && bx < W) buf[sy * W + bx] = 4;
+          for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+            const px = bx + dx, py = sy + dy;
+            if (px >= 0 && px < W && py >= 0 && py < H) buf[py * W + px] = hot ? 4 : 3;
+          }
+        } else {
+          /* ship shot: 1×3 streak, L4 head + L3 tail */
+          for (let k = 0; k < 3; k++) { const yy = sy + k; if (yy >= 0 && yy < H && bx >= 0 && bx < W) buf[yy * W + bx] = k === 0 ? 4 : 3; }
+        }
       }
-      for (const bm of booms) square(bm.x, bm.sy, (bm.t / 22) * (bm.big ? 14 : 8), PAL[6]);
-      if (bombWave >= 0) square(bombX, bombSY, ((tick - bombWave) / 30) * 54, PAL[6]);
+      for (const bm of booms) square(bm.x, bm.sy, (bm.t / 22) * (bm.big ? 14 : 8), 4);
+      if (bombWave >= 0) square(bombX, bombSY, ((tick - bombWave) / 30) * 54, 4);
       if (invuln <= 0 || (tick >> 2) % 2 === 0) spr(SPR_SHIP, Math.round(ship.x) - 3, Math.round(ship.y) - 4);
       renderHUD();
       if (banner > 0) {
         banner--;
-        box(24, 80, 83, 100, PAL[5]);
-        text5('STAGE ' + String(stage).padStart(2, '0'), 27, 86, PAL[6]);
+        plate(24, 80, 83, 100);
+        text5('STAGE ' + String(stage).padStart(2, '0'), 27, 86, 4);
       }
       if (state === 'pause') {
-        box(16, 78, 91, 104, PAL[5]);
-        text5('PAUSED', 36, 83, PAL[6]);
-        text3('SPACE RESUME   ESC EXIT', 8, 96, PAL[4]);
+        plate(16, 78, 91, 104);
+        text5('PAUSED', 36, 83, 4);
+        text3('SPACE RESUME   ESC EXIT', 8, 96, 3);
       }
     }
     if (state === 'attract') {
-      text5('SHAFT', 30, 48, PAL[6]);
-      text5('RUNNER', 24, 60, PAL[5]);
-      text3('AUTOPILOT', 36, 72, PAL[3]);
+      plate(18, 42, 89, 80);
+      text5('SHAFT', 30, 46, 4);
+      text5('RUNNER', 24, 56, 3);
+      if ((tick >> 4) % 2 === 0) text3('AUTOPILOT', 36, 70, 9);
     } else if (state === 'menu') {
-      text5('SHAFT', 30, 30, PAL[6]);
-      text5('RUNNER', 24, 42, PAL[5]);
-      text3((menuIdx === 0 ? '▶' : ' ') + ' START NEW RUN', 16, 76, menuIdx === 0 ? PAL[6] : PAL[4]);
-      text3((menuIdx === 1 ? '▶' : ' ') + ' HIGH SCORES', 16, 88, menuIdx === 1 ? PAL[6] : PAL[4]);
-      text3('ARROWS SELECT  SPACE OK', 4, 122, PAL[3]);
-      text3('P AUTOPILOT', 28, 132, PAL[3]);
-      text3('CREDIT 01', 34, 142, PAL[3]);
-      text3('Q RETURN', 34, 152, PAL[3]);
+      plate(18, 24, 89, 160);
+      text5('SHAFT', 30, 30, 4);
+      text5('RUNNER', 24, 40, 3);
+      text3((menuIdx === 0 ? '▶' : ' ') + ' START NEW RUN', 16, 76, menuIdx === 0 ? 4 : 3);
+      text3((menuIdx === 1 ? '▶' : ' ') + ' HIGH SCORES', 16, 88, menuIdx === 1 ? 4 : 3);
+      text3('ARROWS SELECT  SPACE OK', 4, 122, 3);
+      text3('P AUTOPILOT', 28, 132, 3);
+      text3('CREDIT 01', 34, 142, 3);
+      text3('Q RETURN', 34, 152, 3);
     } else if (state === 'hiscores') {
-      text5('HIGH SCORES', 12, 30, PAL[5]);
-      hiscores.slice(0, 5).forEach((v, i) => text3(String(i + 1) + '  ' + String(v).padStart(6, '0'), 34, 52 + i * 12, PAL[4]));
-      if (!savedOk) text3('SCORES NOT SAVED', 24, 118, PAL[3]);
-      text3('SPACE BACK', 32, 140, PAL[4]);
+      plate(14, 24, 93, 150);
+      text5('HIGH SCORES', 12, 30, 3);
+      hiscores.slice(0, 5).forEach((v, i) => text3(String(i + 1) + '  ' + String(v).padStart(6, '0'), 34, 52 + i * 12, i === 0 ? 4 : 3));
+      if (!savedOk) text3('SCORES NOT SAVED', 24, 118, 3);
+      text3('SPACE BACK', 32, 140, 3);
     } else if (state === 'gameover') {
-      text5('GAME OVER', 21, 60, PAL[6]);
-      text3('SCORE ' + String(score).padStart(6, '0'), 30, 80, PAL[5]);
-      if (score > 0 && hiscores.includes(score) && !autopilot) text3('NEW HIGH SCORE', 24, 92, PAL[6]);
-      text3('SPACE RETRY   ESC EXIT', 8, 110, PAL[4]);
+      plate(14, 54, 93, 116);
+      text5('GAME OVER', 21, 60, 4);
+      text3('SCORE ' + String(score).padStart(6, '0'), 30, 80, 4);
+      if (score > 0 && hiscores.includes(score) && !autopilot) text3('NEW HIGH SCORE', 24, 92, 9);
+      text3('SPACE RETRY   ESC EXIT', 8, 106, 3);
     }
     blit();
   }
 
   function blit() {
-    const pal12 = ctx!.palette;
     const d = img.data;
+    /* inline level colors (one place: GAME_PAL) + accent at slot 9 */
+    const L0 = GAME_PAL[0], L1 = GAME_PAL[1], L2 = GAME_PAL[2], L3 = GAME_PAL[3], L4 = GAME_PAL[4];
+    const put = (p: number, hx: string) => { d[p] = parseInt(hx.slice(1, 3), 16); d[p + 1] = parseInt(hx.slice(3, 5), 16); d[p + 2] = parseInt(hx.slice(5, 7), 16); d[p + 3] = 255; };
     for (let i = 0; i < W * H; i++) {
-      const hex = pal12[buf[i]];
-      const p = i * 4;
-      d[p] = parseInt(hex.slice(1, 3), 16);
-      d[p + 1] = parseInt(hex.slice(3, 5), 16);
-      d[p + 2] = parseInt(hex.slice(5, 7), 16);
-      d[p + 3] = 255;
+      const v = buf[i];
+      put(i * 4, v === 9 ? ACC : v === 8 ? VIO : GAME_PAL[Math.min(4, v)]);
     }
+    void L0; void L1; void L2; void L3; void L4;
     offCtx.putImageData(img, 0, 0);
     const c = ctx!.ctx2d;
     c.imageSmoothingEnabled = false;
@@ -640,7 +694,7 @@ export function createShaftRunner(): GameModule {
     c.clearRect(0, 0, W * s, H * s);
     c.drawImage(off as unknown as CanvasImageSource, 0, 0, W, H, 0, 0, W * s, H * s);
     if (s >= 4) {
-      c.fillStyle = pal12[0];
+      c.fillStyle = GAME_PAL[0];
       for (let x = 1; x < W; x++) c.fillRect(x * s, 0, 1, H * s);
       for (let y = 1; y < H; y++) c.fillRect(0, y * s, W * s, 1);
     }

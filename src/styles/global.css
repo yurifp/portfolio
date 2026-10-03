@@ -339,11 +339,12 @@
      outline, no radius anywhere. Palette: green only, derived from the
      panel ramp (hue 142.8 ±3°). */
   :root {
-    --crt-bg: #011403;      /* green almost-black */
-    --crt-edge: #036806;    /* ramp level 5 */
-    --crt-dim: #038409;     /* ramp level 6 */
-    --crt-fg: #12dc1b;      /* ramp level 9 */
-    --crt-hi: #c9fbc4;      /* ramp level 11 (near-white mint) */
+    --crt-bg: #020a04;      /* L0 floor — screen black, never lighter */
+    --crt-edge: #0f7a2a;    /* L2 decoration */
+    --crt-dim: #2cff4a;     /* L3 information */
+    --crt-fg: #d6ffd9;      /* L4 near-white green */
+    --crt-hi: #d6ffd9;      /* L4 (alias) */
+    --crt-lime: #9df133;    /* site lime — CTA/pickups/alerts */
     --win-chamfer: 10px;
     --z-win: 30;            /* between content (10) and HUD (50) */
     --crt-intensity: 1;
@@ -429,7 +430,7 @@
     height: 8px;
     background: var(--crt-edge);
   }
-  .win-level i.on { background: var(--crt-hi); }
+  .win-level i.on { background: var(--crt-lime); box-shadow: 0 0 5px color-mix(in srgb, var(--crt-lime) 60%, transparent); }
   .win-expand {
     width: 18px;
     height: 18px;

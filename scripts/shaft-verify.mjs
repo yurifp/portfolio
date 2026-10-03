@@ -183,8 +183,8 @@ async function main() {
       seen.set(k, (seen.get(k) || 0) + 1);
     }
     /* expected: bg + 7 ramp colors + gap bg (same) */
-    const ramp = ['#020602', '#020f02', '#011e01', '#023502', '#034e04', '#036806', '#038409', '#02a00b', '#00be0e', '#12dc1b', '#72f16d', '#c9fbc4'];
-    const rampSet = new Set(ramp.map((hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255); }));
+    const ramp = ['#020a04', '#07240d', '#0f7a2a', '#2cff4a', '#d6ffd9', '#9df133', '#905cff'];
+    const rampSet = new Set(ramp.map((hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255); }));
     let off = 0;
     for (const k of seen.keys()) if (!rampSet.has(k)) off++;
     void g; void pal;
