@@ -6,6 +6,7 @@
   kills the CRT skin.
 */
 import { WINDOWS, LED_EXIT_AT } from '../data/windows';
+import { calcScale } from '../games/shaft-runner/layout';
 import { sceneStart, sceneLen } from './scenes';
 
 const LED_START = sceneStart('led');
@@ -23,11 +24,13 @@ interface Rect { left: number; top: number; width: number; height: number }
 const rects = new Map<string, Rect>();
 
 function gridMetrics() {
-  const cs = getComputedStyle(document.documentElement);
-  const gutter = parseFloat(cs.getPropertyValue('--gutter')) || 24;
-  const rail = parseFloat(cs.getPropertyValue('--rail-lane')) || 40;
-  const colGap = parseFloat(cs.getPropertyValue('--col-gap')) || 16;
+  /* the CSS custom props hold clamp() tokens — getComputedStyle returns
+     them unsubstituted, so replicate the clamp math here (single source
+     of truth remains the CSS; the formulas mirror it 1:1) */
   const vw = innerWidth, vh = innerHeight;
+  const gutter = Math.max(16, Math.min(44, vw * 0.016));
+  const rail = Math.max(28, Math.min(56, vw * 0.024));
+  const colGap = Math.max(12, Math.min(32, vw * 0.012));
   const inner = vw - gutter - (gutter + rail);
   const colW = (inner - 11 * colGap) / 12;
   return { gutter, rail, colGap, colW, inner, vw, vh };
@@ -50,14 +53,18 @@ function layout() {
       const right = colX(span[1], g) + g.colW;
       width = right - left;
     } else {
-      /* W1: portrait — height drives width via the 9:16 screen */
-      const titleH = 29, footH = 30, pad = 8;
-      const h = Math.min(w.maxHVh / 100 * g.vh, g.vh - (w.topVh / 100 * g.vh) - (4 / 100 * g.vh));
-      const screenH = h - titleH - footH - pad;
-      const screenW = screenH * 9 / 16;
-      width = screenW + pad;
-      if (mobile) width = Math.min(width, g.vw - 2 * g.gutter);
+      /* W1: portrait — fixed chrome (titlebar 28 + hints 24); the scale
+         comes from the height budget; the canvas then fills the screen
+         1:1 device (fitCanvas reads root.dataset.scale) */
+      const dpr = Math.min(devicePixelRatio || 1, 3);
+      const s = calcScale(216 * 20, Math.max(320, g.vh * 0.9 - 52) * dpr);
+      const screenW = (216 * s) / dpr, screenH = Math.min((384 * s) / dpr, g.vh - 128);
+      width = screenW + 2;
+      const height = 52 + screenH + 2;
       left = g.vw / 2 - width / 2;
+      rects.set(w.id, { left, top: Math.max(40, (g.vh - height) * 0.42), width, height });
+      els.get(w.id)!.root.dataset.scale = String(s);
+      continue;
     }
     const height = w.cols && !mobile
       ? Math.min(w.maxHVh / 100 * g.vh, g.vh - (w.topVh / 100 * g.vh) - (8 / 100 * g.vh))

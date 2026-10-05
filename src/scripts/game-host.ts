@@ -6,6 +6,7 @@
 */
 import { lockScroll, unlockScroll } from './main';
 import { createShaftRunner } from '../games/shaft-runner';
+import { LOGICAL, calcScale } from '../games/shaft-runner/layout';
 import { ledLocal, termEmit, announce } from './windows-shell';
 
 /* ---------- contract (Part 2 implements only this) ---------- */
@@ -118,7 +119,6 @@ export function focusGame(expanded = false) {
   if (winEl) winEl.style.touchAction = 'none';
   if (winEl) winEl.style.overscrollBehavior = 'contain';
   module.setMode('focused');
-  setLabel('PLAYING');
   termEmit('game focused — keyboard captured');
   announce('Game focused. Press Escape to exit.');
   if (expanded) openOverlay();
@@ -135,7 +135,6 @@ export function releaseGame(reason = 'user') {
   closeOverlay();
   if (winEl) { winEl.classList.remove('is-focused'); winEl.style.touchAction = ''; }
   module?.setMode('attract');
-  setLabel('CLICK TO PLAY');
   termEmit(`game released (${reason})`);
   announce('Game released.');
   if (winEl) winEl.focus({ preventScroll: true });
@@ -186,15 +185,21 @@ function closeOverlay() {
 /* ---------- integer scale (device px per cell) ---------- */
 function fitCanvas(host?: HTMLElement) {
   if (!canvas) return;
-  const box = (host || canvas.parentElement)!.getBoundingClientRect();
   const dpr = Math.min(devicePixelRatio || 1, 3);
-  const devW = Math.max(1, Math.round(box.width * dpr));
-  const devH = Math.max(1, Math.round(box.height * dpr));
-  scale = Math.max(2, Math.floor(Math.min(devW / 108, devH / 192)));
-  canvas.width = 108 * scale;
-  canvas.height = 192 * scale;
-  canvas.style.width = `${canvas.width / dpr}px`;
-  canvas.style.height = `${canvas.height / dpr}px`;
+  if (host) {
+    /* focus overlay: scale from the overlay box itself */
+    const box = host.getBoundingClientRect();
+    scale = calcScale(box.width * dpr, box.height * dpr);
+  } else if (winEl?.dataset.scale) {
+    scale = parseInt(winEl.dataset.scale, 10); /* the shell owns W1 scale */
+  } else {
+    const box = canvas.parentElement!.getBoundingClientRect();
+    scale = calcScale(box.width * dpr, box.height * dpr);
+  }
+  canvas.width = LOGICAL.w * scale;
+  canvas.height = LOGICAL.h * scale;
+  canvas.style.width = canvas.width / dpr + 'px';
+  canvas.style.height = canvas.height / dpr + 'px';
 }
 
 /* ---------- loop (fixed 60Hz, catch-up ≤ 5) ---------- */
@@ -360,7 +365,7 @@ export function mountGameHost(w1: HTMLElement) {
     emit: (evt, data) => { termEmit(`${evt}${data ? ' ' + JSON.stringify(data) : ''}`); if (evt === 'stage') telemFlash = 12; if (evt === 'death' || evt === 'game-over') telemFlash = 20; },
     release: () => releaseGame('module'),
     scale,
-    setLabel: (t: string) => { if (state === 'focused') setLabel(t); },
+    setLabel: (t: string) => setLabel(t),
     setActivity: (v: number) => { activityPulse = Math.max(activityPulse, v); },
   });
   /* the real game replaces the stub: the temporary splash goes away */
@@ -419,8 +424,8 @@ function updateProbe() {
   });
 
   /* auto-pause: hidden tab, resize, leaving the plateau */
-  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseGame('hidden'); });
-  window.addEventListener('resize', () => { releaseGame('resize'); fitCanvas(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && state === 'focused') { module?.setMode('paused'); setLabel('PAUSED'); } });
+  window.addEventListener("resize", () => { if (state === "focused") { module?.setMode("paused"); setLabel("PAUSED"); } requestAnimationFrame(() => fitCanvas()); });
   addEventListener('scroll', () => {
     const fb = (window as unknown as { __flipbook?: { progress: () => number } }).__flipbook;
     if (!fb) return;

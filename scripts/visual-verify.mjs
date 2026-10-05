@@ -41,20 +41,22 @@ async function main() {
     const x = cv.getContext('2d');
     const d = x.getImageData(0, 0, cv.width, cv.height).data;
     const w = cv.width, h = cv.height;
-    const s = cv.width / 108; /* device px per cell */
-    const at = (cx, cy) => { const i = (Math.round(cy * s) * w + Math.round(cx * s)) * 4; return [d[i], d[i + 1], d[i + 2]]; };
     const ship = window.__game.ship;
-    /* HUD: score number at cell (~4,8) scaled 2 → cells 2..20 rows 6..15 */
-    const scoreNum = at(6, 10);
-    const scoreBg = at(30, 3);
-    const fuelFill = at(28, 189);
-    const fuelBg = at(50, 189);
-    /* terrain wall vs shaft */
-    const wall = at(4, 100);
-    const shaft = at(54, 100);
-    const border = at(0, 100);
-    /* ship pixel (center) */
-    const shipPx = at(Math.round(ship.x), Math.round(ship.y));
+    const s = cv.width / 216; /* device px per logical cell */
+    const at = (cx, cy) => { const i = (Math.round(cy * s) * w + Math.round(cx * s)) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+    /* new layout sample points (216×384 cells) */
+    const regionMax = (x0, y0, x1, y1) => { let best = [0, 0, 0]; for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) { const c2 = at(cx, cy); if (c2[1] > best[1]) best = c2; } return best; };
+    const scoreNum = regionMax(6, 13, 53, 21);
+    const scoreBg = at(80, 5);
+    const fuelFill = regionMax(42, 353, 120, 363);
+    const fuelBg = at(14, 358);
+    
+    
+    const wall = at(3, 100);
+    const shaft = at(108, 100);
+    const wl = window.__game ? window.__game.wall(Math.round(1)) : { l: 10, r: 98 };
+    const border = at(wl.l * 2, 100);
+    const shipPx = at(Math.round(ship.x * 2), Math.round(ship.y));
     /* chrome: titlebar text vs bg (DOM) */
     const title = getComputedStyle(document.querySelector('[data-win="w1"] .win-title')).color.match(/\d+/g).map(Number);
     const titleBg = [2, 10, 4];
@@ -64,10 +66,10 @@ async function main() {
     /* enemy: find a drone cell via probe */
     let enemy = null, foeBullet = null, pickup = null;
     const es = window.__game.entities();
-    for (const e of es) { if (e.type === 'drone' && e.sy > 14 && e.sy < 178) { enemy = at(Math.round(e.x), Math.round(e.sy)); break; } }
-    for (const e of es) { if (e.type === 'tank' && e.sy > 14 && e.sy < 178) { pickup = at(Math.round(e.x), Math.round(e.sy)); break; } }
+    for (const e of es) { if (e.type === 'drone' && e.sy > 32 && e.sy < 338) { enemy = at(Math.round(e.x * 2), Math.round(e.sy)); break; } }
+    for (const e of es) { if (e.type === 'tank' && e.sy > 32 && e.sy < 338) { pickup = at(Math.round(e.x * 2), Math.round(e.sy)); break; } }
     const bs = window.__game.bullets();
-    for (const bl of bs) { if (bl.foe) { foeBullet = at(Math.round(bl.x), Math.round(bl.sy)); break; } }
+    for (const bl of bs) { if (bl.foe && bl.sy > 32 && bl.sy < 338) { foeBullet = regionMax(Math.round(bl.x) - 3, Math.round(bl.sy) - 3, Math.round(bl.x) + 3, Math.round(bl.sy) + 3); break; } }
     return { scoreNum, scoreBg, fuelFill, fuelBg, wall, shaft, border, shipPx, title, titleBg, stateLbl, term, enemy, foeBullet, pickup, w, h };
   });
 

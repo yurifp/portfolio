@@ -50,8 +50,14 @@ async function main() {
       /* 12px between windows */
       ok = ok && (r.out.w1.left - (r.out.w2.left + r.out.w2.width)) >= 12;
       ok = ok && (r.out.w3.left - (r.out.w1.left + r.out.w1.width)) >= 12;
-      /* no HUD cover */
-      ok = ok && r.out.w1.top >= hudBottom - 1 && r.out.w2.top >= hudBottom - 1;
+      /* no HUD cover: W2/W3 below the hud strip; W1 (centered) must not
+         intersect the actual corner HUD elements (logo/sound/menu) */
+      const hudEls = await p.evaluate(() => [...document.querySelectorAll("[aria-label=Home], [data-sound-btn], [data-menu-btn], [data-clock]")].map((el) => { const r2 = el.getBoundingClientRect(); return { x: r2.x, y: r2.y, w: r2.width, h: r2.height }; }));
+      for (const he of hudEls) {
+        const inter = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+        ok = ok && !inter(he, r.out.w1) && !inter(he, r.out.w2) && !inter(he, r.out.w3);
+      }
+      ok = ok && r.out.w2.top >= hudBottom - 1;
       /* base >= 4vh */
       for (const id of ['w1', 'w2', 'w3']) ok = ok && (r.out[id].top + r.out[id].height) <= r.vh - 0.04 * r.vh + 1;
       det.push(`w1@${Math.round(r.out.w1.left)},w2@${Math.round(r.out.w2.left)},w3@${Math.round(r.out.w3.left)}`);
@@ -63,7 +69,7 @@ async function main() {
     if (r.out.w1 && r.out.w1.width > 10) {
       ok = ok && Math.abs(r.out.w1.left + r.out.w1.width / 2 - r.vw / 2) <= 2;
     }
-    table.push(`${w}×${h}: ${det.join(' ')}`);
+    table.push(`${w}×${h}:${ok ? 'OK' : 'FAIL'} ${det.join(' ')}`);
     if (!ok) layoutOk = false;
   }
   note('1. LAYOUT rects', layoutOk, table.join(' | '));
@@ -174,7 +180,7 @@ async function main() {
   await p.mouse.wheel(0, 120);
   await p.waitForTimeout(400);
   const afterFocus = await p.evaluate(() => ({ prog: window.__flipbook.progress(), y: window.scrollY, cap: window.__cap.filter((e) => ['ArrowLeft', ' ', 'PageDown'].includes(e.k)) }));
-  note('8. FOCADO+travado', st1.f === true && st1.l === true && st1.label === 'PLAYING', JSON.stringify(st1));
+  note('8. FOCADO+travado', st1.f === true && st1.l === true && st1.label === 'MENU', JSON.stringify(st1));
   note('8b. progresso congelado', Math.abs(afterFocus.prog - before) <= 0.0001 && afterFocus.y === Math.round(scrollBefore) || afterFocus.y === scrollBefore, `Δp=${Math.abs(afterFocus.prog - before).toFixed(6)}, y=${afterFocus.y} vs ${Math.round(scrollBefore)}`);
   note('8c. teclas capturadas (3 simult.)', inputsHeld.left === true && inputsHeld.fire === true && inputsHeld.bomb === true && afterFocus.cap.every((e) => e.d === true), JSON.stringify({ l: inputsHeld.left, f: inputsHeld.fire, b: inputsHeld.bomb }));
 
@@ -208,7 +214,7 @@ async function main() {
   const t1 = await p.evaluate(() => window.__host.tick());
   await p.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); });
   const st4 = await p.evaluate(() => window.__host.focused());
-  note('10. auto-pausa (hidden)', st4 === false, `ticks durante oculto: ${t1 - t0}`);
+  note('10. auto-pausa (hidden)', st4 === true && t1 - t0 === 0, `ticks durante oculto: ${t1 - t0}`);
   /* leaving plateau */
   await p.mouse.click(w1box.x, w1box.y);
   await p.waitForTimeout(300);

@@ -117,7 +117,7 @@ async function main() {
     void shipFar;
     let died = false;
     for (let i = 0; i < 3000 && !died; i++) { g.step(1); if (g.lives < l0) died = true; }
-    const respawned = g.ship.y === 164;
+    const respawned = g.ship.y === 326; /* ship band bottom (layout 216×384) */
     /* gameover at 0 lives */
     let go = false;
     for (let i = 0; i < 20000 && !go; i++) { g.step(1); if (g.state === 'gameover') go = true; }
