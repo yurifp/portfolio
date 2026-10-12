@@ -29,7 +29,7 @@ async function lintState(p, state) {
       }
     }
     if (state === 'play') {
-      const hudInField = boxes.filter((b) => b.band === 'field' && /^(score|fuel|hi\.|bomb\.|life\.|stage|combo)/.test(b.n));
+      const hudInField = boxes.filter((b) => b.band === 'field' && /^(score|hi\.|bomb\.|life\.|stage|combo)/.test(b.n));
       for (const b of hudInField) problems.push('hud no campo: ' + b.n);
     }
     return { problems, boxes, W: hb.W, H: hb.H };

@@ -48,10 +48,8 @@ async function main() {
     const regionMax = (x0, y0, x1, y1) => { let best = [0, 0, 0]; for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) { const c2 = at(cx, cy); if (c2[1] > best[1]) best = c2; } return best; };
     const scoreNum = regionMax(6, 13, 53, 21);
     const scoreBg = at(80, 5);
-    const fuelFill = regionMax(42, 353, 120, 363);
-    const fuelBg = at(14, 358);
-    
-    
+    const bombLbl = regionMax(6, 344, 28, 350);
+    const bombBg = at(212, 346);
     const wall = at(3, 100);
     const shaft = at(108, 100);
     const wl = window.__game ? window.__game.wall(Math.round(1)) : { l: 10, r: 98 };
@@ -64,13 +62,12 @@ async function main() {
     /* terminal text */
     const term = getComputedStyle(document.querySelector('[data-term]')).color.match(/\d+/g).map(Number);
     /* enemy: find a drone cell via probe */
-    let enemy = null, foeBullet = null, pickup = null;
+    let enemy = null, foeBullet = null;
     const es = window.__game.entities();
     for (const e of es) { if (e.type === 'drone' && e.sy > 32 && e.sy < 338) { enemy = at(Math.round(e.x * 2), Math.round(e.sy)); break; } }
-    for (const e of es) { if (e.type === 'tank' && e.sy > 32 && e.sy < 338) { pickup = at(Math.round(e.x * 2), Math.round(e.sy)); break; } }
     const bs = window.__game.bullets();
     for (const bl of bs) { if (bl.foe && bl.sy > 32 && bl.sy < 338) { foeBullet = regionMax(Math.round(bl.x) - 3, Math.round(bl.sy) - 3, Math.round(bl.x) + 3, Math.round(bl.sy) + 3); break; } }
-    return { scoreNum, scoreBg, fuelFill, fuelBg, wall, shaft, border, shipPx, title, titleBg, stateLbl, term, enemy, foeBullet, pickup, w, h };
+    return { scoreNum, scoreBg, bombLbl, bombBg, wall, shaft, border, shipPx, title, titleBg, stateLbl, term, enemy, foeBullet, w, h };
   });
 
   /* screen-black floor: most common color in the canvas */
@@ -87,10 +84,9 @@ async function main() {
 
   const rows = [
     ['HUD número (SCORE) vs placa', ratio(data.scoreNum, data.scoreBg)],
-    ['HUD rótulo FUEL vs placa', ratio(data.fuelFill, data.fuelBg)],
+    ['HUD rótulo BOMB vs placa', ratio(data.bombLbl, data.bombBg)],
     ['nave vs poço (fundo local)', ratio(data.shipPx, data.shaft)],
     ['inimigo (drone) vs poço', data.enemy ? ratio(data.enemy, data.shaft) : null],
-    ['pickup (tanque) vs poço', data.pickup ? ratio(data.pickup, data.shaft) : null],
     ['tiro inimigo vs poço', data.foeBullet ? ratio(data.foeBullet, data.shaft) : null],
     ['borda do terreno vs poço', ratio(data.border, data.shaft)],
     ['parede vs poço', ratio(data.wall, data.shaft)],

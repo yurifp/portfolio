@@ -23,7 +23,9 @@ async function main() {
   /* ---------- DETERMINISMO ---------- */
   const det = await p.evaluate(() => {
     const g = window.__game;
-    const run = (seed, script) => { g.start(seed); g.autopilot(true); g.setInputs(script); g.step(3000); return g.hash(); };
+    /* stop at gameover: the script's fire would auto-restart the run,
+       and startRun() reseeds from the persistent runs counter by design */
+    const run = (seed, script) => { g.start(seed); g.autopilot(true); g.setInputs(script); let n = 0; for (; n < 3000; n++) { if (g.state === 'gameover') break; g.step(1); } return g.hash() + ':' + n; };
     const script = Array.from({ length: 3000 }, (_, i) => (i % 120 < 60 ? { left: true, fire: true } : { right: true }));
     const a = run(1234, script), b2 = run(1234, script), c = run(999, script);
     /* step(n) no-render vs realtime ticks */
@@ -50,7 +52,7 @@ async function main() {
       for (const e of es) {
         checked++;
         const w = g.wall(Math.round(e.y));
-        if (e.type !== 'tower' && e.type !== 'tank') {
+        if (e.type !== 'tower') {
           if (e.x <= w.l || e.x >= w.r) bad++;
         }
         /* 24px-at-spawn is enforced by construction (nudge in
@@ -65,12 +67,12 @@ async function main() {
   const stages = await p.evaluate(() => {
     const g = window.__game;
     const exp = [
-      { v: 36, gapBase: 66, dronesMin: 14, towerIv: 1.8, minesChamber: 2, drain: 3.2 },
-      { v: 42, gapBase: 62, dronesMin: 18, towerIv: 1.65, minesChamber: 3, drain: 3.5 },
-      { v: 48, gapBase: 58, dronesMin: 22, towerIv: 1.5, minesChamber: 3, drain: 3.8 },
-      { v: 54, gapBase: 54, dronesMin: 26, towerIv: 1.35, minesChamber: 4, drain: 4.1 },
-      { v: 60, gapBase: 50, dronesMin: 30, towerIv: 1.2, minesChamber: 4, drain: 4.4 },
-      { v: 66, gapBase: 46, dronesMin: 34, towerIv: 1.05, minesChamber: 5, drain: 4.7 },
+      { v: 36, gapBase: 66, dronesMin: 14, towerIv: 1.8, minesChamber: 2 },
+      { v: 42, gapBase: 62, dronesMin: 18, towerIv: 1.65, minesChamber: 3 },
+      { v: 48, gapBase: 58, dronesMin: 22, towerIv: 1.5, minesChamber: 3 },
+      { v: 54, gapBase: 54, dronesMin: 26, towerIv: 1.35, minesChamber: 4 },
+      { v: 60, gapBase: 50, dronesMin: 30, towerIv: 1.2, minesChamber: 4 },
+      { v: 66, gapBase: 46, dronesMin: 34, towerIv: 1.05, minesChamber: 5 },
     ];
     /* the probe exposes the ACTIVE stage row: jump stages via fast steps */
     const out = [];
@@ -81,19 +83,20 @@ async function main() {
   });
   const stOk = stages.out.every((m, i) => {
     const e = stages.exp[i], c = m.cfg;
-    return c.v === e.v && c.gapBase === e.gapBase && c.dronesMin === e.dronesMin && c.towerIv === e.towerIv && c.minesChamber === e.minesChamber && c.drain === e.drain;
+    return c.v === e.v && c.gapBase === e.gapBase && c.dronesMin === e.dronesMin && c.towerIv === e.towerIv && c.minesChamber === e.minesChamber;
   });
-  note('4. TABELA de estágios vs sonda (cfg ativa)', stOk, stages.out.map((m) => `S${m.s}:v${m.cfg.v}/g${m.cfg.gapBase}/d${m.cfg.drain}`).join(' '));
+  note('4. TABELA de estágios vs sonda (cfg ativa)', stOk, stages.out.map((m) => `S${m.s}:v${m.cfg.v}/g${m.cfg.gapBase}`).join(' '));
 
-  const fuel = await p.evaluate(() => {
+  const nofuel = await p.evaluate(() => {
     const g = window.__game;
-    /* fuel never > 100; tank +25 */
-    g.start(4242); g.autopilot(false); g.setInputs(null);
-    g.step(300);
-    const before = g.fuel;
-    return { fuel: before, max100: g.fuel <= 100 };
+    let tanks = 0;
+    for (let s = 0; s < 3; s++) {
+      g.start(s + 60); g.autopilot(true); g.setInputs(null); g.step(720);
+      for (const e of g.entities()) if (e.type === 'tank') tanks++;
+    }
+    return { probeClean: g.fuel === undefined, tanks };
   });
-  note('5. FUEL ≤ 100 (inicial)', fuel.max100, 'fuel=' + fuel.fuel);
+  note('5. SEM FUEL: probe sem getter; 0 tanques em 3 seeds', nofuel.probeClean && nofuel.tanks === 0, JSON.stringify(nofuel));
 
   const rules = await p.evaluate(() => {
     const g = window.__game;

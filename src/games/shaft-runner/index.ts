@@ -13,7 +13,7 @@
   no fixed HUD inside the field; plates separate the bands.
 */
 import type { GameModule, HostContext, InputState } from '../../scripts/game-host';
-import { F35, F57, F79, SPR_SHIP, SPR_DRONE, SPR_TOWER, SPR_MINE, SPR_TANK } from './data';
+import { F35, F57, F79, SPR_SHIP, SPR_DRONE, SPR_TOWER, SPR_MINE } from './data';
 import { Shaft, mulberry32, stageOf, stageCfg, checkWorld } from './world';
 import { LOGICAL, BANDS, HUD, calcScale } from './layout';
 
@@ -35,7 +35,7 @@ const FIELD_UNITS = (FB - FT) / 2;                      /* 155 world rows visibl
 type GState = 'attract' | 'menu' | 'play' | 'pause' | 'gameover' | 'hiscores';
 
 interface Ent {
-  type: 'drone' | 'tower' | 'mine' | 'tank';
+  type: 'drone' | 'tower' | 'mine';
   x: number; y: number;       /* world coords */
   hp: number;
   phase?: number; amp?: number; per?: number; baseX?: number;
@@ -54,7 +54,7 @@ export function createShaftRunner(): GameModule {
   let shaft = new Shaft(0);
   let scroll = 0;                    /* world rows */
   let ship = { x: 54, sy: 300 };     /* x in world units, sy in cells */
-  let lives = 3, fuel = 100, bombs = 3, score = 0, dispScore = 0, stage = 1;
+  let lives = 3, bombs = 3, score = 0, dispScore = 0, stage = 1;
   let invuln = 0;
   let nextExtra = 10000, extraStep = 20000, nextBombScore = 5000;
   let ents: Ent[] = [];
@@ -68,12 +68,10 @@ export function createShaftRunner(): GameModule {
   let hiscores: number[] = [];
   let runs = 0;
   let savedOk = true;
-  let lowFuelBeeped = false;
-  let deathCauses: string[] = [];
-  let tanksSpawned = 0, tanksGot = 0;
-  let script: Array<Partial<InputState>> | null = null;
+    let deathCauses: string[] = [];
+    let script: Array<Partial<InputState>> | null = null;
   let seedBase = 0x5157;
-  let nextDroneRow = 40, nextTowerRow = 200, nextTankRow = 90, chamberArmed = -1;
+  let nextDroneRow = 40, nextTowerRow = 200, chamberArmed = -1;
 
   const buf = new Uint8Array(W * H);
   const off = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(W, H) : Object.assign(document.createElement('canvas'), { width: W, height: H });
@@ -143,12 +141,12 @@ export function createShaftRunner(): GameModule {
     shaft = new Shaft(s);
     scroll = 0;
     ship = { x: 54, sy: 300 };
-    lives = 3; fuel = 100; bombs = 3; score = 0; dispScore = 0; stage = 1;
+    lives = 3; bombs = 3; score = 0; dispScore = 0; stage = 1;
     invuln = 0; nextExtra = 10000; nextBombScore = 5000;
-    ents = []; bullets = []; booms = []; bombWave = -1;
-    banner = 90; lowFuelBeeped = false;
-    deathCauses = []; tanksSpawned = 0; tanksGot = 0;
-    nextDroneRow = 40; nextTowerRow = 200; nextTankRow = 90; chamberArmed = -1;
+    ents = []; bullets = []; booms = []; bombWave = -1; fireCool = 0;
+    banner = 90;
+    deathCauses = [];
+    nextDroneRow = 40; nextTowerRow = 200; chamberArmed = -1;
     tick = 0;
   }
 
@@ -189,17 +187,6 @@ export function createShaftRunner(): GameModule {
       if (ents.length < 64) ents.push({ type: 'tower', x: side < 0 ? w.l + 4 : w.r - 4, y: nextTowerRow, hp: 3, side, cool: 0.5, warp: 12 });
       nextTowerRow += c.towerIv * v * (0.75 + rnd() * 0.5);
     }
-    while (nextTankRow <= horizon) {
-      const w = wallAt(nextTankRow);
-      const onWall = rnd() < 0.55;
-      let x = onWall ? (rnd() < 0.5 ? w.l + 4 : w.r - 4) : w.l + 6 + rnd() * Math.max(1, w.r - w.l - 12);
-      if (Math.abs(x - ship.x) < 24) {
-        const cand = x <= ship.x ? ship.x - 24 : ship.x + 24;
-        x = cand >= w.l + 3 && cand <= w.r - 3 ? cand : (x <= ship.x ? w.l + 3 : w.r - 3);
-      }
-      if (ents.length < 64) { ents.push({ type: 'tank', x, y: nextTankRow, hp: 1, warp: 12 }); tanksSpawned++; }
-      nextTankRow += 0.9 * 25 * v / c.drain * (0.75 + rnd() * 0.5);
-    }
     const aheadW = wallAt(Math.round(scroll + FIELD_UNITS));
     if (aheadW.chamber > 0 && chamberArmed < 0) {
       chamberArmed = Math.round(scroll) + FIELD_UNITS;
@@ -218,18 +205,6 @@ export function createShaftRunner(): GameModule {
     const shipRow = rowAt(ship.sy);
     const ahead = wallAt(Math.round(shipRow + 28));
     let target = (ahead.l + ahead.r) / 2;
-    /* fuel lean: nearest REACHABLE tank (min intercept time) */
-    if (fuel < 82) {
-      let best: Ent | null = null, bestT = 1e9;
-      for (const e of ents) {
-        if (e.type !== 'tank' || e.hp <= 0) continue;
-        const dsy = ship.sy - syOf(e.y);
-        if (dsy <= 0 || dsy > 140) continue;
-        const t = dsy / (cfg().v * 2) + Math.abs(e.x - ship.x) / 70;
-        if (t < bestT) { bestT = t; best = e; }
-      }
-      if (best && Math.abs(best.x - ship.x) / 70 < (ship.sy - syOf(best.y)) / (cfg().v * 2) + 0.4) target = best.x;
-    }
     target = Math.max(ahead.l + 8, Math.min(ahead.r - 8, target));
     /* bullet dodge: predict each bullet's crossing of the ship line,
        aggregate pushes, steer to the side with room */
@@ -251,9 +226,9 @@ export function createShaftRunner(): GameModule {
       const room = dir > 0 ? (now.r - 6) - ship.x : ship.x - (now.l + 6);
       const step = Math.min(Math.max(12, threats * 8), Math.max(4, room));
       target = Math.max(now.l + 6, Math.min(now.r - 6, ship.x + dir * step));
-    } else if (fuel >= 55) {
+    } else {
       for (const e of ents) {
-        if (e.hp <= 0 || e.type === 'tank') continue;
+        if (e.hp <= 0) continue;
         const dsy = ship.sy - syOf(e.y);
         if (dsy > 0 && dsy < 88 && Math.abs(e.x - ship.x) < 14) {
           const now = wallAt(Math.round(shipRow));
@@ -269,10 +244,9 @@ export function createShaftRunner(): GameModule {
     inp.up = ship.sy < 288;
     inp.down = ship.sy > 296;
     const inCol = (e: Ent) => e.hp > 0 && (e.warp || 0) <= 0 && Math.abs(e.x - ship.x) <= 12 && ship.sy - syOf(e.y) > 0 && ship.sy - syOf(e.y) < 260;
-    if (ents.some((e) => e.type === 'tank' && inCol(e))) inp.fire = true;
-    else if (ents.some(inCol)) inp.fire = true;
+    if (ents.some(inCol)) inp.fire = true;
     const closeB = bullets.filter((b) => b.foe && Math.hypot(b.x - ship.x * 2, b.sy - ship.sy) < 72).length;
-    const closeE = ents.some((e) => e.hp > 0 && e.type !== 'tank' && (e.warp || 0) <= 0 && Math.hypot(e.x * 2 - ship.x * 2, syOf(e.y) - ship.sy) < 48);
+    const closeE = ents.some((e) => e.hp > 0 && (e.warp || 0) <= 0 && Math.hypot(e.x * 2 - ship.x * 2, syOf(e.y) - ship.sy) < 48);
     inp.bomb = (closeB >= 3 || closeE) && bombs > 0;
     return inp;
   }
@@ -301,12 +275,11 @@ export function createShaftRunner(): GameModule {
   function hitEnt(e: Ent, dmg: number) {
     e.hp -= dmg;
     if (e.hp > 0) { e.flash = 4; return; }
-    const pts = e.type === 'drone' ? 100 : e.type === 'tower' ? 250 : e.type === 'mine' ? 150 : 50;
+    const pts = e.type === 'drone' ? 100 : e.type === 'tower' ? 250 : 150;
     if (!autopilot) score += pts;
     booms.push({ x: e.x * 2, sy: syOf(e.y), t: 0, big: false });
-    playSfx(e.type === 'tank' ? 'pick' : 'boomS');
+    playSfx('boomS');
     ctx?.setActivity?.(0.8);
-    if (e.type === 'tank') { fuel = Math.min(100, fuel + 25); tanksGot++; }
     if (e.type === 'mine') {
       for (const [dx, dy] of [[1.8, 1.8], [1.8, -1.8], [-1.8, 1.8], [-1.8, -1.8]]) {
         bullets.push({ x: e.x * 2, sy: syOf(e.y), vx: dx, vy: dy, foe: true, trail: [] });
@@ -368,11 +341,6 @@ export function createShaftRunner(): GameModule {
     const prevRows = Math.floor(scroll);
     scroll += cfg().v * dt;
     score += Math.floor((Math.floor(scroll) - prevRows) / 4);
-
-    fuel -= cfg().drain * dt;
-    if (fuel < 20 && !lowFuelBeeped) { lowFuelBeeped = true; playSfx('low'); ctx?.emit('low-fuel', { pct: Math.round(fuel) }); }
-    if (fuel > 20) lowFuelBeeped = false;
-    if (fuel <= 0) { fuel = 60; die('fuel'); if (state === 'gameover') return; }
 
     /* ship (speeds in world units → ×2 cells) */
     const sx = 70 * dt, sy = 48 * dt;
@@ -457,7 +425,7 @@ export function createShaftRunner(): GameModule {
       if (b.foe) continue;
       for (const e of ents) {
         if (e.hp <= 0 || e.warp! > 0) continue;
-        const sprW = (e.type === 'tower' || e.type === 'tank' ? 9 : 7) * 2;
+        const sprW = (e.type === 'tower' ? 9 : 7) * 2;
         const sprH = e.type === 'tower' ? 12 : 16;
         if (Math.abs(b.x - e.x * 2) <= sprW / 2 && Math.abs(b.sy - syOf(e.y)) <= sprH / 2) {
           hitEnt(e, 1);
@@ -473,12 +441,10 @@ export function createShaftRunner(): GameModule {
       }
       if (state === 'gameover') return;
     }
-    /* entities × ship: tanks PICK UP, others kill */
+    /* entities × ship: contact kills */
     for (const e of ents) {
       if (e.hp <= 0 || e.warp! > 0) continue;
-      if (e.type === 'tank') {
-        if (Math.abs(e.x - ship.x) <= 5 && Math.abs(syOf(e.y) - ship.sy) <= 10) hitEnt(e, 99);
-      } else if (invuln <= 0 && Math.abs(e.x - ship.x) <= 4 && Math.abs(syOf(e.y) - ship.sy) <= 8) { die('enemy'); break; }
+      if (invuln <= 0 && Math.abs(e.x - ship.x) <= 4 && Math.abs(syOf(e.y) - ship.sy) <= 8) { die('enemy'); break; }
     }
     if (state === 'gameover') return;
 
@@ -599,30 +565,18 @@ export function createShaftRunner(): GameModule {
     rec('hi.value', HUD.top.hiValue.x, HUD.top.hiValue.y, HUD.top.hiValue.w, HUD.top.hiValue.h);
     box(0, BANDS.top.y1, W - 1, BANDS.top.y1, PAL[2]);
 
-    /* ===== BOTTOM band (340..384) ===== */
+    /* ===== BOTTOM band (340..384) — BOMB/LIVES row, reserved bars ===== */
     box(0, BANDS.bottom.y0, W - 1, BANDS.bottom.y0, PAL[2]);
     plate(0, BANDS.bottom.y0 + 1, W - 1, H - 1);
-    text3('FUEL', HUD.bottom.fuelLabel.x, HUD.bottom.fuelLabel.y, 3);
-    rec('fuel.label', HUD.bottom.fuelLabel.x, HUD.bottom.fuelLabel.y, HUD.bottom.fuelLabel.w, HUD.bottom.fuelLabel.h);
-    const low = fuel < 25;
-    const blink = !low || (tick >> 3) % 2 === 0;
-    const segW = 6, segs = 20;
-    for (let i = 0; i < segs; i++) {
-      const x0 = HUD.bottom.fuelBar.x + i * segW;
-      const fill = fuel / 100 * segs > i + 0.5;
-      const lv = fill ? (i < segs / 2 ? PAL[2] : PAL[3]) : PAL[1];
-      box(x0, HUD.bottom.fuelBar.y, x0 + segW - 2, HUD.bottom.fuelBar.y + HUD.bottom.fuelBar.h - 1, low && blink ? 9 : lv);
-    }
-    rec('fuel.bar', HUD.bottom.fuelBar.x, HUD.bottom.fuelBar.y, HUD.bottom.fuelBar.w, HUD.bottom.fuelBar.h);
-    const pct = String(Math.max(0, Math.round(fuel)));
-    num(pct, HUD.bottom.fuelPct.x + (24 - numW(pct)), HUD.bottom.fuelPct.y, low && blink ? 9 : 4);
-    rec('fuel.pct', HUD.bottom.fuelPct.x, HUD.bottom.fuelPct.y, HUD.bottom.fuelPct.w, HUD.bottom.fuelPct.h);
     text3('BOMB', HUD.bottom.bombLabel.x, HUD.bottom.bombLabel.y, 3);
     rec('bomb.label', HUD.bottom.bombLabel.x, HUD.bottom.bombLabel.y, HUD.bottom.bombLabel.w, HUD.bottom.bombLabel.h);
     for (let i = 0; i < 5; i++) {
-      const x0 = HUD.bottom.bombIcons.x + i * 8;
-      if (i < bombs) { box(x0 + 1, HUD.bottom.bombIcons.y + 3, x0 + 5, HUD.bottom.bombIcons.y + 8, PAL[3]); buf[(HUD.bottom.bombIcons.y + 1) * W + x0 + 3] = 4; }
-      else box(x0 + 1, HUD.bottom.bombIcons.y + 3, x0 + 5, HUD.bottom.bombIcons.y + 8, PAL[1]);
+      const x0 = HUD.bottom.bombIcons.x + i * 12;
+      if (i < bombs) {
+        box(x0, HUD.bottom.bombIcons.y + 2, x0 + 9, HUD.bottom.bombIcons.y + 11, PAL[3]);
+        buf[(HUD.bottom.bombIcons.y) * W + x0 + 4] = 4;
+        buf[(HUD.bottom.bombIcons.y + 1) * W + x0 + 4] = 4;
+      } else box(x0, HUD.bottom.bombIcons.y + 2, x0 + 9, HUD.bottom.bombIcons.y + 11, PAL[1]);
     }
     rec('bomb.icons', HUD.bottom.bombIcons.x, HUD.bottom.bombIcons.y, HUD.bottom.bombIcons.w, HUD.bottom.bombIcons.h);
     text3('LIFE', HUD.bottom.lifeLabel.x, HUD.bottom.lifeLabel.y, 3);
@@ -636,7 +590,8 @@ export function createShaftRunner(): GameModule {
     ];
     for (const [nm, r] of res) {
       box(r.x, r.y, r.x + r.w - 1, r.y + r.h - 1, PAL[1]);
-      text3(nm, r.x + Math.floor((r.w - textW(nm, 1)) / 2), r.y + Math.floor((r.h - 5) / 2), PAL[1]);
+      text3(nm, r.x + 4, r.y + 2, PAL[1]);
+      rec('res.' + nm, r.x, r.y, r.w, r.h);
     }
   }
 
@@ -688,13 +643,12 @@ export function createShaftRunner(): GameModule {
       for (const e of ents) {
         const sy = Math.round(syOf(e.y));
         const sx = Math.round(e.x * 2);
-        const hw = e.type === 'tower' || e.type === 'tank' ? 9 : 7;
+        const hw = e.type === 'tower' ? 9 : 7;
         if (sy < FT - 16 || sy > FB + 16) continue;
         if (e.warp! > 0) { square(sx, sy, hw * 2 * (1 - e.warp! / 12) + 2, PAL[3]); continue; }
         if (e.type === 'drone') spr(SPR_DRONE, sx, sy);
         else if (e.type === 'tower') spr(SPR_TOWER, sx, sy);
         else if (e.type === 'mine') spr(SPR_MINE, sx, sy);
-        else if (e.type === 'tank') spr(SPR_TANK, sx, sy);
         box(sx - hw, sy - hw + (e.type === 'tower' ? -2 : 0), sx + hw, sy + hw + (e.type === 'tower' ? -2 : 0), 4);
         const core = (tick >> 3) % 2 === 0 ? 4 : 3;
         buf[sy * W + sx] = e.flash! > 0 ? 4 : core;
@@ -815,7 +769,7 @@ export function createShaftRunner(): GameModule {
   function hash(): number {
     let h = 2166136261;
     const mix = (v: number) => { h ^= Math.round(v * 100); h = Math.imul(h, 16777619); };
-    mix(scroll); mix(ship.x); mix(ship.sy); mix(score); mix(fuel); mix(lives); mix(bombs); mix(stage); mix(ents.length); mix(bullets.length);
+    mix(scroll); mix(ship.x); mix(ship.sy); mix(score); mix(lives); mix(bombs); mix(stage); mix(ents.length); mix(bullets.length);
     for (const e of ents) { mix(e.x); mix(e.y); mix(e.hp); }
     for (const b of bullets) { mix(b.x); mix(b.sy); }
     return h >>> 0;
@@ -826,7 +780,6 @@ export function createShaftRunner(): GameModule {
     get seed() { return seed; },
     get score() { return score; },
     get lives() { return lives; },
-    get fuel() { return fuel; },
     get stage() { return stage; },
     get bombs() { return bombs; },
     get ship() { return { x: +ship.x.toFixed(2), y: +ship.sy.toFixed(1) }; },
@@ -845,10 +798,10 @@ export function createShaftRunner(): GameModule {
     font5: (t: string) => t.toUpperCase().split('').map((ch) => F57[ch] || F57[' ']),
     font3: (t: string) => t.toUpperCase().split('').map((ch) => F35[ch] || F35[' ']),
     frame: () => buf.slice(),
-    stats: () => ({ runs, hiscores: [...hiscores], savedOk, deaths: [...deathCauses], tanksSpawned, tanksGot }),
+    stats: () => ({ runs, hiscores: [...hiscores], savedOk, deaths: [...deathCauses] }),
     checkWorld: (seeds: number, rows: number) => checkWorld(seeds, rows),
-    cfg: () => { const c = stageCfg(stage); return { v: c.v, gapBase: c.gapBase, dronesMin: c.dronesMin, towerIv: c.towerIv, minesChamber: c.minesChamber, drain: c.drain }; },
-    cfgFor: (n: number) => { const c = stageCfg(Math.min(6, Math.max(1, n))); return { v: c.v, gapBase: c.gapBase, dronesMin: c.dronesMin, towerIv: c.towerIv, minesChamber: c.minesChamber, drain: c.drain }; },
+    cfg: () => { const c = stageCfg(stage); return { v: c.v, gapBase: c.gapBase, dronesMin: c.dronesMin, towerIv: c.towerIv, minesChamber: c.minesChamber }; },
+    cfgFor: (n: number) => { const c = stageCfg(Math.min(6, Math.max(1, n))); return { v: c.v, gapBase: c.gapBase, dronesMin: c.dronesMin, towerIv: c.towerIv, minesChamber: c.minesChamber }; },
     hudBoxes: () => ({ W, H, bands: BANDS, boxes: meas.map((m) => ({ ...m })) }),
   };
 

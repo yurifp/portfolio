@@ -22,18 +22,16 @@ async function main() {
       g.start(s * 17); g.autopilot(true); g.setInputs(null);
       g.step(10800); /* 180 simulated seconds */
       const st = g.stats();
-      results.push({ stage: g.stage, state: g.state, deaths: st.deaths, tanks: st.tanksSpawned, got: st.tanksGot });
+      results.push({ stage: g.stage, state: g.state, deaths: st.deaths });
     }
     const s2 = results.filter((x) => x.stage >= 2).length;
     const s4 = results.filter((x) => x.stage >= 4).length;
     const all = results.flatMap((x) => x.deaths);
     const dist = all.reduce((m, c) => ((m[c] = (m[c] || 0) + 1), m), {});
-    const tanks = results.reduce((a, x) => a + x.tanks, 0), got = results.reduce((a, x) => a + x.got, 0);
     return {
       seeds: n, s2Pct: +(s2 / n * 100).toFixed(0), s4Pct: +(s4 / n * 100).toFixed(0),
       deaths: all.length, dist, maxPct: +(Math.max(0, ...Object.values(dist)) / Math.max(1, all.length) * 100).toFixed(1),
       alive: results.filter((x) => x.state === 'play').length,
-      collect: +(got / Math.max(1, tanks) * 100).toFixed(0) + '%',
       softlocks: results.filter((x) => x.state === 'play' && x.stage === 1 && x.deaths.length === 0).length,
     };
   }, N);

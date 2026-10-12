@@ -22,7 +22,7 @@
   OFF), persistência top-5 + RUNS em try/catch.
 - Ligação na Parte 1 (`game-host.ts`): `createShaftRunner()` no lugar do stub
   (splash removido), `ctx.setLabel/setActivity`, telemetria pisca em
-  stage/death, terminal recebe start/stage/low-fuel/death/game-over/hiscore,
+  stage/death, terminal recebe start/stage/death/game-over/hiscore,
   touch 1:1 (`input.px`) + auto-fire no toque + BOMB/PAUSE ≥44px no overlay.
 
 ## 2. Parâmetros finais
@@ -33,40 +33,35 @@ drone 7×7 HP1 100 pts (v+22, onda 10–20 px / 1.2–2 s, formações 3–5 ×2
 amplitude limitada à parede da própria fileira) · torre 9×6 HP3 250 pts (parede,
 janela de tiro sy ∈ [14,120], intervalo da tabela, bala mirada 2×2 a 52 px/s) ·
 mina 7×7 HP2 150 pts (câmaras, 14 px dispara/morre → 4 estilhaços diagonais) ·
-tanque 9×8 HP1 50 pts (+25 fuel; reposicionado ao longo do poço se cair a
-<24 px da nave — nunca descartado; cadência `0.9·25·v/dreno` ±25%) ·
-combustível 100, dreno da tabela, 0 → −1 vida +60% · 3 vidas, invulnerável 90
-ticks, respawn y=164 no centro · vidas extras 10000 + 20000/20000 ·
-1 pt/4 linhas · bônus de estágio 1000 + fuel×10 · banner STAGE por 90 ticks.
+3 vidas, invulnerável 90 ticks, respawn sy=326 no centro do eixo (células
+216×384) · vidas extras 10000 + 20000/20000 ·
+1 pt/4 linhas · bônus de estágio 1000 · banner STAGE por 90 ticks ·
+**sem mecânica de combustível** (removida: sem dreno, tanques, aviso ou morte
+por fuel — sobrevivência é só esquiva/combate).
 
 Tabela (idêntica à spec; exposta por `__game.cfgFor(n)`): v 36/42/48/54/60/66 ·
 gapBase 66/62/58/54/50/46 · drones/min 14/18/22/26/30/34 · torre 1.80/1.65/
-1.50/1.35/1.20/1.05 s · minas 2/3/3/4/4/5 · dreno 3.2/3.5/3.8/4.1/4.4/4.7.
+1.50/1.35/1.20/1.05 s · minas 2/3/3/4/4/5.
 
 ## 3. O que ajustei nos "valores iniciais" (jogando com o bot)
 
-1. **Tanques**: nascer a <24 px da nave **reposiciona** ao longo do poço (a
-   spec diz "nada nasce a <24 px"; descartar tanques sevava a economia —
-   coleta caiu a 30%).
-2. **Drones**: amplitude da onda limitada a `(largura/2 − 16)` no spawn **e**
+1. **Drones**: amplitude da onda limitada a `(largura/2 − 16)` no spawn **e**
    clamp por tick contra a parede da fileira corrente (o poço estreita ao
    descer; sem isso o drone entra na rocha — 1 violação/234).
-3. **Torres**: janela de tiro EXATA da spec (sy ∈ [14,120]); meu intervalo
+2. **Torres**: janela de tiro EXATA da spec (sy ∈ [14,120]); meu intervalo
    anterior permitia tiro à queima-roupa (10 px) — indodgeável.
-4. **Tanques são pickup no contato** (±5 px), não colisão mortal — a spec os
-   define como fonte de combustível, não inimigo.
-5. **Bot**: previsão de cruzamento de balas em espaço de tela (100 ticks,
+3. **Bot**: previsão de cruzamento de balas em espaço de tela (100 ticks,
    agregando todas as ameaças), dodge de inimigos só quando não há bala,
    alvo final clampado à INTERSEÇÃO das faixas seguras (linha atual ∩ 28 à
-   frente), fome de tanque a <82 com seleção por tempo de interceptação
-   mínimo, tiro prioritário em tanques, voo em y≈150–158.
+   frente), voo em y≈150–158.
 
 ## 4. Verificação (13/13 + bot)
 
 Determinismo (3×3000 ticks idênticos; seeds diferentes diferem) · invariantes
 1000×4000 = **0 violações** (pior gap 48, slope 0) · spawn: 0 na parede em 234
-entidades, ≤64 ents, ≤6 balas · tabela vs `cfgFor` exata · fuel ≤100 · bomba
-custa 1 / parede mata / respawn 164 / gameover · máquina de estados por teclado
+entidades, ≤64 ents, ≤6 balas · tabela vs `cfgFor` exata · sem fuel (probe
+limpo, 0 tanques em 5 seeds) · bomba
+custa 1 / parede mata / respawn sy=326 / gameover · máquina de estados por teclado
 real (menu→play→pause→PAUSED→play→release→hiscores→menu→Q) · paleta: **7 cores,
 0 fora da rampa** · áudio guardado por `ctx.audio.enabled` · persistência
 try/catch · eventos no terminal (start/pause/release) · p95 JS **2.4ms** ·
@@ -75,8 +70,8 @@ enemies→pause→gameover→hiscores) + `evidence/sr-bomb-seq/` e `sr-boom-seq/
 (24 quadros cada).
 
 **Bot (20 seeds × 180 s simulados)**: distribuição de mortes parede 10% /
-bala 40% / inimigo 42% / fuel 8% — **nenhuma > 60% ✓**; zero softlocks ✓;
-coleta de tanques 64%. **NÃO ATINGIDO**: estágio 2 em ≥85% (medido 60%) e
+bala 40% / inimigo 42% / fuel 8% (pré-remoção do fuel; rodada nova pendente) —
+**nenhuma > 60% ✓**; zero softlocks ✓. **NÃO ATINGIDO**: estágio 2 em ≥85% (medido 60%) e
 estágio 4 em ≥40% (medido 0%) — o bot morre as 3 vidas dentro de ~90 s
 médios. As 6 iterações acima levaram s2 de 5%→60%; os gargalos restantes são
 densidade simultânea de balas miradas + formações de drones nos estágios 3+.
@@ -110,8 +105,8 @@ L3/L4/acento. Sprites re-nivelados (1=sombra L2, 2=corpo L3, 3=claro L4,
 + `?crt=0`.
 
 **HUD**: placas L0 com borda L2 (topo 0–11, base 181–191); SCORE/HI números
-2× em L4, rótulos L3; FUEL barra larga gradiente L2→L3, piscando em limão
-abaixo de 25% com ícone; BOMB/LIVES como ícones (nada de letras soltas);
+2× em L4, rótulos L3; BOMB/LIVES como ícones grandes na banda inferior
+(sem fuel: barra e tanques removidos; slots DSH/GRZ/WPN reservados);
 telas (menu/hiscores/gameover/banner/pause) sobre placa, CTA piscando em
 limão. Balas inimigas = losango pulsante L4 (distintas por FORMA das
 traços da nave); booms/bomba L4; borda do terreno L3.

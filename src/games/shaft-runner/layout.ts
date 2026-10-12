@@ -6,8 +6,8 @@
   Three bands, in logical cells:
     TOP    y 0..30    (7.8%)  — HUD: labels row + values row
     FIELD  y 30..340  (80.7%) — play field, 1-cell frame, no fixed HUD
-    BOTTOM y 340..384 (11.5%) — HUD: FUEL (dominant), BOMBS, LIVES,
-                                 RESERVED slots (DASH / GRAZE / WPN)
+    BOTTOM y 340..384 (11.5%) — HUD: BOMB + LIVES row, reserved slots
+                                 (DSH / GRZ / WPN)
 */
 
 export const LOGICAL = { w: 216, h: 384 } as const;
@@ -39,16 +39,13 @@ export const HUD = {
     hiValue: { x: 163, y: 13, w: 47, h: 9 },
   },
   bottom: {
-    fuelLabel: { x: 6, y: 343, w: 23, h: 7 },
-    fuelBar: { x: 40, y: 343, w: 141, h: 12 },
-    fuelPct: { x: 188, y: 342, w: 24, h: 9 },
-    bombLabel: { x: 6, y: 361, w: 23, h: 7 },
-    bombIcons: { x: 34, y: 359, w: 39, h: 10 },
-    lifeLabel: { x: 80, y: 361, w: 17, h: 7 },
-    lifeIcons: { x: 102, y: 358, w: 34, h: 9 },
-    resDash: { x: 142, y: 358, w: 22, h: 20 },
-    resGraze: { x: 166, y: 358, w: 22, h: 20 },
-    resWpn: { x: 190, y: 358, w: 22, h: 20 },
+    bombLabel: { x: 6, y: 344, w: 23, h: 7 },
+    bombIcons: { x: 38, y: 342, w: 62, h: 14 },
+    lifeLabel: { x: 108, y: 344, w: 17, h: 7 },
+    lifeIcons: { x: 130, y: 342, w: 60, h: 14 },
+    resDash: { x: 6, y: 362, w: 64, h: 18 },
+    resGraze: { x: 76, y: 362, w: 64, h: 18 },
+    resWpn: { x: 146, y: 362, w: 64, h: 18 },
   },
 } as const;
 

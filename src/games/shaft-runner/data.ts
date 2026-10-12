@@ -166,30 +166,18 @@ export const SPR_MINE = [
   '0030300',
   '0300030',
 ];
-/* fuel tank 9×8 */
-export const SPR_TANK = [
-  '001111100',
-  '014444410',
-  '014242410',
-  '014444410',
-  '014242410',
-  '014444410',
-  '011111110',
-  '000000000',
-];
-
 /* ---------- stage table (clamp at 6) ---------- */
 export interface StageCfg {
   v: number; gapBase: number; dronesMin: number;
-  towerIv: number; minesChamber: number; drain: number;
+  towerIv: number; minesChamber: number;
 }
 export const STAGES: StageCfg[] = [
-  { v: 36, gapBase: 66, dronesMin: 14, towerIv: 1.80, minesChamber: 2, drain: 3.2 },
-  { v: 42, gapBase: 62, dronesMin: 18, towerIv: 1.65, minesChamber: 3, drain: 3.5 },
-  { v: 48, gapBase: 58, dronesMin: 22, towerIv: 1.50, minesChamber: 3, drain: 3.8 },
-  { v: 54, gapBase: 54, dronesMin: 26, towerIv: 1.35, minesChamber: 4, drain: 4.1 },
-  { v: 60, gapBase: 50, dronesMin: 30, towerIv: 1.20, minesChamber: 4, drain: 4.4 },
-  { v: 66, gapBase: 46, dronesMin: 34, towerIv: 1.05, minesChamber: 5, drain: 4.7 },
+  { v: 36, gapBase: 66, dronesMin: 14, towerIv: 1.80, minesChamber: 2 },
+  { v: 42, gapBase: 62, dronesMin: 18, towerIv: 1.65, minesChamber: 3 },
+  { v: 48, gapBase: 58, dronesMin: 22, towerIv: 1.50, minesChamber: 3 },
+  { v: 54, gapBase: 54, dronesMin: 26, towerIv: 1.35, minesChamber: 4 },
+  { v: 60, gapBase: 50, dronesMin: 30, towerIv: 1.20, minesChamber: 4 },
+  { v: 66, gapBase: 46, dronesMin: 34, towerIv: 1.05, minesChamber: 5 },
 ];
 export const STAGE_ROWS = 1500;
 export const SHIP_W = 7, SHIP_H = 8;
