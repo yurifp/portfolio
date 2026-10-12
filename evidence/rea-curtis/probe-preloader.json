@@ -1,0 +1,1522 @@
+{
+ "samples": [
+  {
+   "t": 0,
+   "pre": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": "0%"
+   },
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 1538,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": {
+    "op": "0",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": "0%"
+   }
+  },
+  {
+   "t": 377,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 550,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 723,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 806,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 922,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1006,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1133,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1223,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1311,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1395,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1477,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1559,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1643,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1726,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1809,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1893,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 1976,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2057,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2142,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2225,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2309,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2392,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2473,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2559,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2642,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2726,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2809,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2892,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 2975,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3059,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3142,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3225,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3309,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3392,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3476,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3559,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3642,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3726,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3809,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3892,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 3976,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4059,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4142,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4226,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4309,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4390,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4475,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4559,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4642,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4725,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4807,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4893,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 4976,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5059,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5142,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5226,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5309,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5392,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5475,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5559,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5642,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5725,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5809,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5890,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 5976,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6059,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6142,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6225,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6307,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6392,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6475,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6559,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6642,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6725,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6809,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6893,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 6976,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  },
+  {
+   "t": 7059,
+   "pre": null,
+   "boot": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 0,
+    "txt": ""
+   },
+   "html": {
+    "op": "1",
+    "tr": "",
+    "clip": "none",
+    "h": 806,
+    "txt": "CURTIS.DESIGNRtry{"
+   },
+   "counter": null
+  }
+ ],
+ "staticInfo": {
+  "preloaderHTML": null,
+  "bootHTML": "<div class=\"boot-cover\"></div>",
+  "htmlAttrs": "<html lang=\"en\" class=\"rajdhani_2eae19f1-module__nT8raG__variable dm_mono_4cbaa3a1-module__vJ39pq__variable dm_sans_78e3e10c-module__ZPtN2q__variable scroll-locked\" data-booted=\"\" style=\"--scroller-width: 1586px; --nav-height: 84px;\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=d"
+ }
+}
