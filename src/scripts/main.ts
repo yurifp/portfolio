@@ -445,7 +445,10 @@ function initMenu() {
 }
 
 /* ------------------------------------------------------------------ */
-/* sound toggle — tiny WebAudio drone, no assets                        */
+/* sound — machine-room drone (toggle) + synthesized CRT blips for
+   hover/click on [data-sfx] elements. Everything is generated in
+   code (no audio assets); SFX only sound while the switch is ON,
+   which itself only happens after a user gesture.
 /* ------------------------------------------------------------------ */
 function initSound() {
   const btn = document.querySelector<HTMLButtonElement>('[data-sound-btn]');
@@ -453,6 +456,32 @@ function initSound() {
   let ctx: AudioContext | null = null;
   let gain: GainNode | null = null;
   let on = false;
+  const announce = document.createElement('span');
+  announce.className = 'sr-only';
+  announce.setAttribute('aria-live', 'polite');
+  btn.appendChild(announce);
+
+  /* short synthesized blip — square wave, fast exponential decay */
+  const blip = (freqA: number, freqB: number, dur: number, vol: number) => {
+    if (!ctx || !on || document.documentElement.classList.contains('game-focused')) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freqA, t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(40, freqB), t + dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g).connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.02);
+  };
+  const sfxHover = () => blip(1180, 880, 0.055, 0.028);
+  const sfxClick = () => {
+    blip(340, 300, 0.05, 0.035);
+    setTimeout(() => blip(620, 560, 0.06, 0.03), 45);
+  };
+
   btn.addEventListener('click', async () => {
     if (!ctx) {
       ctx = new AudioContext();
@@ -478,8 +507,25 @@ function initSound() {
     }
     await ctx.resume();
     on = !on;
+    announce.textContent = on ? 'Sound on' : 'Sound off';
+    if (on) sfxClick();
     gain!.gain.linearRampToValueAtTime(on ? 0.045 : 0, ctx.currentTime + 0.6);
     btn.setAttribute('aria-checked', String(on));
+  });
+
+  /* delegated SFX — one pair of listeners for the whole page */
+  let hovered: Element | null = null;
+  document.addEventListener('mouseover', (e) => {
+    const el = (e.target as HTMLElement).closest('[data-sfx]');
+    if (el && el !== hovered) {
+      hovered = el;
+      sfxHover();
+    } else if (!el) {
+      hovered = null;
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('[data-sfx]')) sfxClick();
   });
 }
 
@@ -503,6 +549,7 @@ function initClock() {
 function initProgress() {
   const fill = document.querySelector<HTMLElement>('.progress-rail__fill');
   const pct = document.querySelector<HTMLElement>('[data-progress-pct]');
+  const cue = document.querySelector<HTMLElement>('.rail-cue');
   if (!fill) return;
   let lastPct = -1;
   ScrollTrigger.create({
@@ -517,6 +564,8 @@ function initProgress() {
         lastPct = v;
         pct.textContent = `${v}%`;
       }
+      /* the scroll cue retires once the film actually starts */
+      if (cue && self.progress > 0.04) cue.dataset.spent = '';
     },
   });
   document.querySelector('[data-scroll-top]')?.addEventListener('click', (e) => {
@@ -526,69 +575,126 @@ function initProgress() {
 }
 
 /* ------------------------------------------------------------------ */
-/* preloader + page wipes                                               */
+/* preloader — CRT boot. The counter tracks REAL loading signals
+   (fonts, window load, the hero portrait); a slow creep keeps it
+   alive while the network works, exactly like a terminal boot.
+   Once per session: a warm reload lifts the curtain instantly.
 /* ------------------------------------------------------------------ */
 function initPreloader() {
   const pre = document.querySelector<HTMLElement>('.preloader');
   if (!pre) return;
   const pctEl = pre.querySelector<HTMLElement>('.preloader__pct')!;
+  const barFill = pre.querySelector<HTMLElement>('.preloader__bar-fill');
+  const bootLines = [...pre.querySelectorAll<HTMLElement>('[data-boot-line]')];
   const state = { p: 0 };
-  let loaded = false;
-  let fontsReady = false;
 
-  const release = () => {
+  const sessionBooted = (() => {
+    try { return sessionStorage.getItem('yf.boot') === '1'; } catch { return false; }
+  })();
+  const markBooted = () => {
+    try { sessionStorage.setItem('yf.boot', '1'); } catch { /* private mode */ }
+  };
+
+  const paint = () => {
+    pctEl.textContent = `${Math.round(state.p)}%`;
+    if (barFill) barFill.style.width = `${Math.round(state.p)}%`;
+  };
+
+  const lift = (instant: boolean) => {
+    markBooted();
     document.documentElement.classList.remove('is-loading');
-    if (prefersReduced) {
+    const finish = () => {
       pre.remove();
+      ScrollTrigger.refresh();
+      document.body.dataset.ready = 'true';
+      dispatchEvent(new CustomEvent('field:ready'));
+    };
+    if (instant || prefersReduced) {
+      finish();
       return;
     }
     gsap.to(state, {
       p: 100,
-      duration: 0.6,
+      duration: 0.45,
       ease: 'power2.in',
-      onUpdate: () => {
-        pctEl.textContent = `${Math.round(state.p)}%`;
-      },
+      onUpdate: paint,
       onComplete: () => {
         gsap.to(pre, {
           yPercent: -100,
           duration: 0.9,
           ease: 'power4.inOut',
-          onComplete: () => {
-            pre.remove();
-            ScrollTrigger.refresh();
-            document.body.dataset.ready = 'true';
-            dispatchEvent(new CustomEvent('field:ready'));
-          },
+          onComplete: finish,
         });
       },
     });
   };
 
   document.documentElement.classList.add('is-loading');
-  gsap.to(state, {
-    p: 86,
-    duration: 2.4,
-    ease: 'power1.out',
-    onUpdate: () => {
-      pctEl.textContent = `${Math.round(state.p)}%`;
-    },
-  });
 
-  const maybe = () => loaded && fontsReady && release();
-  addEventListener('load', () => {
-    loaded = true;
-    maybe();
-  });
-  document.fonts?.ready.then(() => {
-    fontsReady = true;
-    maybe();
-  });
-  // hard fallback: never trap the user behind the curtain
+  /* warm session: the boot already played — lift without theater */
+  if (sessionBooted) {
+    lift(true);
+    return;
+  }
+
+  /* boot log lines rise behind a mask (CSS base = visible; reduced
+     or no-JS-split visitors simply see them) */
+  if (!prefersReduced && bootLines.length) {
+    pre.querySelector('.preloader__log')?.classList.add('is-booting');
+    gsap.set(bootLines, { yPercent: 110 });
+    gsap.to(bootLines, {
+      yPercent: 0,
+      duration: 0.5,
+      ease: 'power3.out',
+      stagger: 0.12,
+      delay: 0.15,
+    });
+  }
+
+  /* real signals: fonts + load + the hero portrait decode */
+  let done = 0;
+  const TOTAL = 3;
+  let target = 8;
+  const glide = () => {
+    gsap.to(state, { p: target, duration: 0.5, ease: 'power2.out', overwrite: true, onUpdate: paint });
+  };
+  const signal = () => {
+    done += 1;
+    target = 8 + Math.round((done / TOTAL) * 87);
+    glide();
+    if (done >= TOTAL) lift(false);
+  };
+  state.p = 0;
+  gsap.to(state, { p: target, duration: 0.4, ease: 'power2.out', onUpdate: paint });
+
+  /* creep: while a signal is pending, the counter keeps crawling */
+  const creep = setInterval(() => {
+    if (done >= TOTAL) return;
+    if (target < 86) target += 3;
+    glide();
+  }, 420);
+
+  document.fonts?.ready.then(signal).catch(signal);
+  addEventListener('load', signal, { once: true });
+  const portrait = document.querySelector<HTMLImageElement>('[data-portrait]');
+  if (portrait?.complete) signal();
+  else portrait?.addEventListener('load', signal, { once: true });
+  portrait?.addEventListener('error', signal, { once: true });
+
+  /* hard fallback: never trap the user behind the curtain */
   setTimeout(() => {
-    loaded = fontsReady = true;
-    maybe();
+    if (done < TOTAL) {
+      done = TOTAL;
+      lift(false);
+    }
   }, 6000);
+  /* the creep interval dies with the curtain */
+  new MutationObserver((_m, obs) => {
+    if (!document.contains(pre)) {
+      clearInterval(creep);
+      obs.disconnect();
+    }
+  }).observe(document.body, { childList: true });
 }
 
 /* wipe cover on internal navigation */

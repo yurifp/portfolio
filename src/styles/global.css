@@ -828,7 +828,7 @@
   }
   @media (hover: none) { .cursor-root { display: none; } }
 
-  /* ---------- preloader ---------- */
+  /* ---------- preloader — CRT boot ---------- */
   .preloader {
     position: fixed;
     inset: 0;
@@ -837,8 +837,10 @@
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    padding: 1.4rem 1.6rem;
+    padding: 1.4rem 1.6rem 1.9rem;
   }
+  .preloader__log { display: flex; flex-direction: column; gap: 0.35rem; }
+  .preloader__log.is-booting { overflow: hidden; }
   .preloader__pct {
     font-family: var(--font-heading);
     font-weight: 500;
@@ -846,7 +848,35 @@
     line-height: 0.8;
     color: #fff;
     letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
   }
+  /* progress line: 1px lime hugging the bottom edge, width = % (JS) */
+  .preloader__bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.85rem;
+    height: 1px;
+    background: color-mix(in srgb, #9df133 18%, transparent);
+  }
+  .preloader__bar-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: #9df133;
+  }
+  /* chamfer marks — 1px Ls in the four corners, our frame signature */
+  .preloader__corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 0 solid #9df133;
+    opacity: 0.9;
+  }
+  .preloader__corner--tl { top: 0.85rem; left: 1.6rem; border-top-width: 1px; border-left-width: 1px; }
+  .preloader__corner--tr { top: 0.85rem; right: 1.6rem; border-top-width: 1px; border-right-width: 1px; }
+  .preloader__corner--bl { bottom: 0.85rem; left: 1.6rem; border-bottom-width: 1px; border-left-width: 1px; }
+  .preloader__corner--br { bottom: 0.85rem; right: 1.6rem; border-bottom-width: 1px; border-right-width: 1px; }
 
   /* CSS-only backstop: if the runtime never boots (dead bundle,
      hiccup), the curtain lifts by itself — a static page beats a
@@ -907,6 +937,32 @@
     background: var(--hud-ink);
     transform-origin: top;
     transform: scaleY(0);
+  }
+
+  /* scroll cue — 3 pixel chevrons blinking out of phase below the
+     SCROLL label; JS retires it (data-spent) once the film starts */
+  .rail-cue {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 0.5rem;
+  }
+  .rail-cue i {
+    width: 5px;
+    height: 5px;
+    background: var(--hud-ink);
+    opacity: 0.35;
+    animation: rail-cue-blink 1.4s steps(1, end) infinite;
+  }
+  .rail-cue i:nth-child(2) { animation-delay: 0.18s; }
+  .rail-cue i:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes rail-cue-blink {
+    0%, 28% { opacity: 1; }
+    29%, 100% { opacity: 0.25; }
+  }
+  .rail-cue[data-spent] { visibility: hidden; }
+  @media (prefers-reduced-motion: reduce) {
+    .rail-cue i { animation: none; opacity: 0.6; }
   }
 
   /* bio body — class-based so short-viewport overrides win (no inline) */

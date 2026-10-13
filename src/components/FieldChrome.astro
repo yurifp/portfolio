@@ -10,7 +10,7 @@ import { site, socials } from '../data/site';
      Color = --hud-ink, scrubbed by the film (light on void, ink on lime). -->
 <nav class="fixed top-0 inset-x-0" style="z-index: var(--z-hud); color: var(--hud-ink);">
   <div class="flex items-center justify-between" style="padding: var(--gutter) var(--gutter) 0 0;">
-    <a href="/" class="flex items-center gap-3 group" style="margin-left: var(--gutter);" aria-label="Home">
+    <a href="/" data-sfx class="flex items-center gap-3 group" style="margin-left: var(--gutter);" aria-label="Home">
       <span class="font-heading font-semibold text-[1.05rem] tracking-[0.02em] uppercase">{site.wordmark}</span>
     </a>
     <div class="flex items-center gap-[1.6rem]" style="padding-right: var(--rail-lane);">
@@ -26,7 +26,7 @@ import { site, socials } from '../data/site';
         <div>{site.location.city} / <span data-clock>--:--</span></div>
         <div style="opacity: 0.6;">{site.location.coords}</div>
       </div>
-      <button data-menu-btn aria-expanded="false" class="mono-tiny flex items-center gap-2 px-[0.7rem] py-[0.4rem] min-h-[24px] box-border hover:bg-white hover:text-black transition-colors" style="border: 1px solid color-mix(in srgb, var(--hud-ink) 40%, transparent);">
+      <button data-menu-btn data-sfx aria-expanded="false" class="mono-tiny flex items-center gap-2 px-[0.7rem] py-[0.4rem] min-h-[24px] box-border hover:bg-white hover:text-black transition-colors" style="border: 1px solid color-mix(in srgb, var(--hud-ink) 40%, transparent);">
         Menu
       </button>
     </div>
@@ -37,8 +37,8 @@ import { site, socials } from '../data/site';
 <div class="menu-overlay" role="dialog" aria-label="Menu">
   <div class="h-full flex flex-col justify-between px-[1.6rem] pt-[5.5rem] pb-[1.4rem]">
     <nav class="flex flex-col gap-[0.4rem] overflow-hidden">
-      <a href="/" data-menu-stagger class="font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink hover:text-lime transition-colors">About</a>
-      <a href="/work" data-menu-stagger class="font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink hover:text-lime transition-colors">Work</a>
+      <a href="/" data-menu-stagger data-sfx class="font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink hover:text-lime transition-colors">About</a>
+      <a href="/work" data-menu-stagger data-sfx class="font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink hover:text-lime transition-colors">Work</a>
     </nav>
     <div class="flex items-end justify-between gap-8">
       <div class="overflow-hidden">
@@ -46,7 +46,7 @@ import { site, socials } from '../data/site';
         <ul class="space-y-[0.55rem]">
           {socials.menu.map((s) => (
             <li data-menu-stagger>
-              <a href={s.url} class="mono-tiny text-dim hover:text-ink transition-colors inline-block py-[0.4rem] min-h-[24px] box-border">
+              <a href={s.url} data-sfx class="mono-tiny text-dim hover:text-ink transition-colors inline-block py-[0.4rem] min-h-[24px] box-border">
                 <span class="text-faint mr-2">{s.n}</span>{s.label}
               </a>
             </li>
@@ -64,13 +64,19 @@ import { site, socials } from '../data/site';
   <div class="cursor-label"></div>
 </div>
 
-<!-- preloader -->
+<!-- preloader — CRT boot: log real, pct gigante, linha 1px, chanfros -->
 <div class="preloader" aria-hidden="true">
-  <div>
-    <p class="mono-tiny text-dim mb-2">LOADING FIELD</p>
-    <p class="mono-tiny text-faint">{site.wordmark}</p>
+  <span class="preloader__corner preloader__corner--tl"></span>
+  <span class="preloader__corner preloader__corner--tr"></span>
+  <span class="preloader__corner preloader__corner--bl"></span>
+  <span class="preloader__corner preloader__corner--br"></span>
+  <div class="preloader__log">
+    <p class="mono-tiny text-dim" data-boot-line>YF.KERNEL — BOOT</p>
+    <p class="mono-tiny text-faint" data-boot-line>LOADING FIELD</p>
+    <p class="mono-tiny text-faint" data-boot-line>{site.wordmark}</p>
   </div>
   <p class="preloader__pct">0%</p>
+  <div class="preloader__bar"><i class="preloader__bar-fill"></i></div>
 </div>
 
 <!-- progress rail — 3-row grid INSIDE the exclusive lane:
@@ -81,6 +87,7 @@ import { site, socials } from '../data/site';
     <span class="mono-tiny" data-progress-pct style="font-variant-numeric: tabular-nums; width: 3ch; text-align: center;">0%</span>
     <div class="progress-rail__track"><div class="progress-rail__fill"></div></div>
     <span class="mono-tiny rail-scroll">SCROLL</span>
+    <span class="rail-cue" aria-hidden="true"><i></i><i></i><i></i></span>
   </div>
   <span class="mono-tiny rail-slot">SALVADOR — BR</span>
 </div>
