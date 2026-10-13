@@ -415,7 +415,9 @@ function initCursor() {
 }
 
 /* ------------------------------------------------------------------ */
-/* menu overlay                                                         */
+/* menu overlay — snap wipe + chamfer frame. Opening locks BOTH the
+   native scroll and Lenis (the film freezes mid-crank), focus moves
+   into the dialog and returns to the trigger on close.
 /* ------------------------------------------------------------------ */
 function initMenu() {
   const overlay = document.querySelector<HTMLElement>('.menu-overlay');
@@ -427,12 +429,22 @@ function initMenu() {
     btn.setAttribute('aria-expanded', String(open));
     btn.textContent = open ? 'Close' : 'Menu';
     document.documentElement.style.overflow = open ? 'hidden' : '';
-    if (open && !prefersReduced) {
-      gsap.fromTo(
-        links,
-        { yPercent: 120, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.8, ease: 'power4.out', stagger: 0.05, delay: 0.25 },
-      );
+    if (open) {
+      lockScroll();
+      if (!prefersReduced) {
+        gsap.fromTo(
+          links,
+          { yPercent: 120, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.8, ease: 'power4.out', stagger: 0.05, delay: 0.25 },
+        );
+      }
+      /* keyboard users land inside the dialog immediately */
+      overlay.querySelector<HTMLElement>('a, button')?.focus({ preventScroll: true });
+    } else {
+      unlockScroll();
+      if (document.activeElement instanceof HTMLElement && overlay.contains(document.activeElement)) {
+        btn.focus({ preventScroll: true });
+      }
     }
   };
   btn.addEventListener('click', () => set(overlay.dataset.open !== 'true'));

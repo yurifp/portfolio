@@ -1222,7 +1222,7 @@
     transform-origin: left;
   }
 
-  /* menu overlay */
+  /* menu overlay — CRT frame: chamfer corner marks + snap wipe */
   .menu-overlay {
     position: fixed;
     inset: 0;
@@ -1236,6 +1236,50 @@
     clip-path: inset(0 0 0% 0);
     visibility: visible;
     transition: clip-path 0.8s var(--ease-snap);
+  }
+  .menu-corner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 0 solid #9df133;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  .menu-corner--tl { top: 0.9rem; left: 1.6rem; border-top-width: 1px; border-left-width: 1px; }
+  .menu-corner--tr { top: 0.9rem; right: 1.6rem; border-top-width: 1px; border-right-width: 1px; }
+  .menu-corner--bl { bottom: 0.9rem; left: 1.6rem; border-bottom-width: 1px; border-left-width: 1px; }
+  .menu-corner--br { bottom: 0.9rem; right: 1.6rem; border-bottom-width: 1px; border-right-width: 1px; }
+
+  /* item hover — short overshoot lean (the chip spring of the
+     reference, translated to our flat typographic language) */
+  .menu-link {
+    display: inline-block;
+    transform: translateX(0);
+    transition:
+      transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+      color 0.18s ease-out;
+  }
+  .menu-link:hover,
+  .menu-link:focus-visible {
+    transform: translateX(10px);
+    color: #9df133;
+  }
+  .menu-link-sm {
+    display: inline-block;
+    transform: translateX(0);
+    transition:
+      transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+      color 0.18s ease-out;
+  }
+  .menu-link-sm:hover,
+  .menu-link-sm:focus-visible {
+    transform: translateX(6px);
+    color: #f5f0eb;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .menu-link, .menu-link-sm { transition: color 0.18s ease-out; }
+    .menu-link:hover, .menu-link:focus-visible { transform: none; }
+    .menu-link-sm:hover, .menu-link-sm:focus-visible { transform: none; }
   }
 
   /* case study typography */

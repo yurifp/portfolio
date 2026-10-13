@@ -35,10 +35,14 @@ import { site, socials } from '../data/site';
 
 <!-- menu overlay -->
 <div class="menu-overlay" role="dialog" aria-label="Menu">
+  <span class="menu-corner menu-corner--tl" aria-hidden="true"></span>
+  <span class="menu-corner menu-corner--tr" aria-hidden="true"></span>
+  <span class="menu-corner menu-corner--bl" aria-hidden="true"></span>
+  <span class="menu-corner menu-corner--br" aria-hidden="true"></span>
   <div class="h-full flex flex-col justify-between px-[1.6rem] pt-[5.5rem] pb-[1.4rem]">
     <nav class="flex flex-col gap-[0.4rem] overflow-hidden">
-      <a href="/" data-menu-stagger data-sfx class="font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink hover:text-lime transition-colors">About</a>
-      <a href="/work" data-menu-stagger data-sfx class="font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink hover:text-lime transition-colors">Work</a>
+      <a href="/" data-menu-stagger data-sfx class="menu-link font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink">About</a>
+      <a href="/work" data-menu-stagger data-sfx class="menu-link font-heading font-medium text-[3.2rem] leading-[1.02] tracking-[-0.02em] uppercase text-ink">Work</a>
     </nav>
     <div class="flex items-end justify-between gap-8">
       <div class="overflow-hidden">
@@ -46,7 +50,7 @@ import { site, socials } from '../data/site';
         <ul class="space-y-[0.55rem]">
           {socials.menu.map((s) => (
             <li data-menu-stagger>
-              <a href={s.url} data-sfx class="mono-tiny text-dim hover:text-ink transition-colors inline-block py-[0.4rem] min-h-[24px] box-border">
+              <a href={s.url} data-sfx class="menu-link-sm mono-tiny text-dim hover:text-ink inline-block py-[0.4rem] min-h-[24px] box-border">
                 <span class="text-faint mr-2">{s.n}</span>{s.label}
               </a>
             </li>
