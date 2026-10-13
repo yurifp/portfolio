@@ -67,12 +67,12 @@ async function main() {
   const stages = await p.evaluate(() => {
     const g = window.__game;
     const exp = [
-      { v: 36, gapBase: 66, dronesMin: 14, towerIv: 1.8, minesChamber: 2 },
-      { v: 42, gapBase: 62, dronesMin: 18, towerIv: 1.65, minesChamber: 3 },
-      { v: 48, gapBase: 58, dronesMin: 22, towerIv: 1.5, minesChamber: 3 },
-      { v: 54, gapBase: 54, dronesMin: 26, towerIv: 1.35, minesChamber: 4 },
-      { v: 60, gapBase: 50, dronesMin: 30, towerIv: 1.2, minesChamber: 4 },
-      { v: 66, gapBase: 46, dronesMin: 34, towerIv: 1.05, minesChamber: 5 },
+      { v: 30, gapBase: 70, dronesMin: 12, towerIv: 2.0, minesChamber: 1 },
+      { v: 37, gapBase: 66, dronesMin: 16, towerIv: 1.8, minesChamber: 2 },
+      { v: 44, gapBase: 61, dronesMin: 20, towerIv: 1.62, minesChamber: 3 },
+      { v: 52, gapBase: 56, dronesMin: 24, towerIv: 1.45, minesChamber: 3 },
+      { v: 60, gapBase: 51, dronesMin: 28, towerIv: 1.28, minesChamber: 4 },
+      { v: 68, gapBase: 46, dronesMin: 32, towerIv: 1.12, minesChamber: 5 },
     ];
     /* the probe exposes the ACTIVE stage row: jump stages via fast steps */
     const out = [];

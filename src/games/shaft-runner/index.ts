@@ -64,6 +64,8 @@ export function createShaftRunner(): GameModule {
   let fireCool = 0;
   let menuIdx = 0;
   let banner = 0;
+  let clearT = 0; /* stage-clear interstitial ticks */
+  let rowCarry = 0; /* rows since the last whole score point */
   let autopilot = true;
   let hiscores: number[] = [];
   let runs = 0;
@@ -146,7 +148,7 @@ export function createShaftRunner(): GameModule {
     ents = []; bullets = []; booms = []; bombWave = -1; fireCool = 0;
     banner = 90;
     deathCauses = [];
-    nextDroneRow = 40; nextTowerRow = 200; chamberArmed = -1;
+    nextDroneRow = 40; nextTowerRow = 200; chamberArmed = -1; clearT = 0; rowCarry = 0;
     tick = 0;
   }
 
@@ -326,6 +328,17 @@ export function createShaftRunner(): GameModule {
       return;
     }
 
+    /* stage-clear interstitial: the world freezes ~1.2s while the plate
+       shows — a beat of relief between difficulty steps */
+    if (clearT > 0) {
+      clearT--;
+      if (clearT === 0) {
+        score += 1000;
+        ctx?.emit('stage-clear-end', { stage });
+      }
+      return;
+    }
+
     /* play / attract */
     const dt = 1 / 60;
     if (inp.autopilot) {
@@ -337,10 +350,22 @@ export function createShaftRunner(): GameModule {
     const eff: typeof inp = state === 'attract' || autopilot ? { ...inp, ...autopilotInputs() } : inp;
 
     const newStage = stageOf(Math.round(scroll));
-    if (newStage !== stage) { stage = newStage; banner = 90; playSfx('stage'); ctx?.emit('stage', { stage }); }
+    if (newStage !== stage) {
+      stage = newStage;
+      banner = 90;
+      clearT = 72;
+      playSfx('stage');
+      ctx?.emit('stage', { stage });
+    }
     const prevRows = Math.floor(scroll);
     scroll += cfg().v * dt;
-    score += Math.floor((Math.floor(scroll) - prevRows) / 4);
+    /* row points: per-tick deltas are 0–1 rows — accumulate, THEN divide,
+       or floor() eats every point (the row score was silently zero) */
+    rowCarry += Math.floor(scroll) - prevRows;
+    if (rowCarry >= 4) {
+      score += Math.floor(rowCarry / 4);
+      rowCarry %= 4;
+    }
 
     /* ship (speeds in world units → ×2 cells) */
     const sx = 70 * dt, sy = 48 * dt;
@@ -607,6 +632,11 @@ export function createShaftRunner(): GameModule {
     text5(t, x, y, lv, k);
     rec('text:' + t, x, y, w, 7 * k);
   }
+  function centerText3(t: string, y: number, lv: number) {
+    const w = t.length * 4 - 1;
+    text3(t, Math.round((W - w) / 2), y, lv);
+    rec('text3:' + t, Math.round((W - w) / 2), y, w, 5);
+  }
   function centerNum(t: string, y: number, lv: number) {
     const w = numW(t);
     const x = Math.round((W - w) / 2);
@@ -687,6 +717,13 @@ export function createShaftRunner(): GameModule {
         banner--;
         plate(48, 150, 167, 190);
         centerText5('STAGE ' + String(stage).padStart(2, '0'), 162, 4);
+      }
+      if (clearT > 0) {
+        /* stage-clear plate: relief beat between difficulty steps */
+        const a = clearT > 60 || (clearT >> 2) % 2 === 0;
+        plate(40, 150, 175, 192);
+        centerText5('STAGE CLEAR', 160, a ? 4 : 3);
+        centerText3('+1000 BONUS', 176, 3);
       }
     }
     /* ===== screens (plates over the darkened demo) ===== */
@@ -839,6 +876,7 @@ export function createShaftRunner(): GameModule {
       try { ac?.close(); } catch { /* closed */ }
       ac = null;
       ctx = null;
+      delete (window as unknown as { __game?: unknown }).__game;
     },
   };
 }

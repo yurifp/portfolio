@@ -203,15 +203,23 @@ export function mountCli() {
 
   function toGame() {
     if (!gameMount) {
-      /* Lote 1 interim: engine not wired yet — say it and stay idle */
       foot.textContent = 'SHAFT RUNNER MODULE NOT LOADED';
       return;
     }
     setMode('game');
-    gameMount(shell!);
+    foot.textContent = 'BOOTING SHAFT RUNNER…';
+    gameMount({
+      win, screen, canvas, foot, kbd, status,
+      root: shell!.root, btn: shell!.btn, mode: shell!.mode,
+      raf: shell!.raf, bootT0: shell!.bootT0, msSeries: shell!.msSeries,
+      scrSeries: shell!.scrSeries, lastFrame: shell!.lastFrame, lastSample: shell!.lastSample,
+      dragged: shell!.dragged, fs: shell!.fs,
+      open, close, setMode, toGame, fromGame,
+    });
   }
 
   function fromGame() {
+    gameDestroy?.();
     setMode('idle');
   }
 
