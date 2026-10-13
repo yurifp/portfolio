@@ -31,7 +31,7 @@ const stagePos = (p: (typeof homeProjects)[number]) => ({
     <div class="absolute top-[13%] inset-x-0 px-[1.6rem] z-20 flex items-baseline justify-between">
       <h2 class="display-section" data-split="chars" data-stage-split>Snap-shots</h2>
       <span class="overflow-hidden hidden sm:inline-block">
-        <a href="/work" class="mono-tiny nav-link inline-block py-[0.45rem] min-h-[24px] box-border font-medium" style="color: var(--ink-now);" data-snap-viewall>
+        <a href="/work" data-sfx class="mono-tiny nav-link inline-block py-[0.45rem] min-h-[24px] box-border font-medium" style="color: var(--ink-now);" data-snap-viewall>
           View all — {homeProjects.length}+ projects
         </a>
       </span>
@@ -46,7 +46,7 @@ const stagePos = (p: (typeof homeProjects)[number]) => ({
         style={stagePos(p)}
       >
         <span class="mono-tiny absolute top-[0.55rem] right-[0.6rem] z-[3] font-medium" style="color: rgba(7,2,16,0.65);" data-card-meta>{String(i + 1).padStart(2, '0')}</span>
-        <a href={withHref(p)} class="absolute inset-0 z-[3]" aria-label={`${p.title} — ${p.cat}`}></a>
+        <a href={withHref(p)} data-sfx class="absolute inset-0 z-[3]" aria-label={`${p.title} — ${p.cat}`}></a>
         <div class="art-card__img">
           <img src={`/images/work/${p.slug}.webp`} alt={p.title} loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
         </div>

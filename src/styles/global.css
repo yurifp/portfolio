@@ -1119,6 +1119,44 @@
     aspect-ratio: 1;
     width: auto;
   }
+  .lime-dither-wrap {
+    position: relative;
+    align-self: flex-start;
+    aspect-ratio: 1;
+  }
+  .lime-dither-wrap .lime-dither { align-self: auto; height: 100%; }
+  /* alt ink (lime) rides hidden over the base — CRT invert on hover */
+  .lime-dither--alt {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s linear;
+  }
+
+  /* stack hover — CRT invert: card goes void, stroke goes lime, the
+     icon re-inks lime (alt canvas), label flips. Hover-only affordance;
+     touch simply keeps the resting state */
+  @media (hover: hover) {
+    .lime-cell[data-lime-stack] .lime-card__shape,
+    .lime-cell[data-lime-stack] .lime-card__fill {
+      transition: background-color 0.18s ease-out;
+    }
+    .lime-cell[data-lime-stack] .lime-label {
+      transition: color 0.18s ease-out;
+    }
+    .lime-cell[data-lime-stack]:hover .lime-card__shape { background: #9df133; }
+    .lime-cell[data-lime-stack]:hover .lime-card__fill { background: #070210; }
+    .lime-cell[data-lime-stack]:hover .lime-label { color: #9df133; }
+    .lime-cell[data-lime-stack]:hover .lime-dither--alt { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lime-cell[data-lime-stack] .lime-card__shape,
+    .lime-cell[data-lime-stack] .lime-card__fill,
+    .lime-cell[data-lime-stack] .lime-label { transition: none; }
+    .lime-dither--alt { transition: none; }
+  }
 
   /* mobile/tablet (< 1200px): two sequential frames inside the same
      band — stats 2×2 first, stacks 3×4 after (no checkerboard) */
@@ -1157,7 +1195,7 @@
     height: 100%;
     object-fit: cover;
     transform: scale(1.12);
-    transition: transform 1s var(--ease-field);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .art-card:hover .art-card__img img { transform: scale(1.02); }
   .art-card__cat {

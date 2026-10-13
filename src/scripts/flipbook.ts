@@ -187,6 +187,19 @@ export function initFlipbook() {
       ditherMap.set(cv, mountDitherIcon(cv, cv.dataset.iconPath || '', { ink: '#070210' }));
     });
 
+    /* stack hover invert: the alt canvas (lime ink) mounts lazily on
+       the FIRST hover — zero boot cost, then a pure CSS crossfade */
+    limeFrame.querySelectorAll<HTMLElement>('[data-lime-stack]').forEach((cell) => {
+      const alt = cell.querySelector<HTMLCanvasElement>('[data-dither-alt]');
+      if (!alt) return;
+      let mounted = false;
+      cell.addEventListener('mouseenter', () => {
+        if (mounted) return;
+        mounted = true;
+        mountDitherIcon(alt, alt.dataset.iconPath || '', { ink: '#9df133' }).draw(28);
+      }, { once: false });
+    });
+
     /* per-card odometers */
     const limeOdos = qs(limeFrame, '[data-lime-odo]', 4).map((el) => ({
       cols: [...el.querySelectorAll<HTMLElement>('.odo-digit__col')],

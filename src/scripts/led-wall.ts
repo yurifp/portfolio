@@ -93,6 +93,9 @@ const N_LEVELS = 12;
 const SOFT_BAND = 0.4;
 const WAVE_JITTER = 3;
 const SWEEP_JITTER = 4;
+/* rows of LEDs forced OFF just above the lime front — the wall dies
+   line by line as the takeover consumes it (a scanline power-down) */
+const SWEEP_OFF_BAND = 3;
 const RAMP_GREEN = ['#020602', '#020f02', '#011e01', '#023502', '#034e04', '#036806', '#038409', '#02a00b', '#00be0e', '#12dc1b', '#72f16d', '#c9fbc4'];
 const RAMP_LIME = ['#081301', '#122401', '#1d3502', '#2b4b02', '#3a6202', '#4a7a02', '#5c9204', '#6fa906', '#84c109', '#9cd90f', '#bbe03f', '#dcffa8'];
 const COLOR_BG = '#070210';
@@ -544,7 +547,12 @@ export function mountLedWall(canvas: HTMLCanvasElement): LedWallHandle {
         let eff: number;
         if (sweep > 0.0001) {
           const sj = (hash2(c, 311) - 0.5) * 2 * SWEEP_JITTER;
-          eff = r < sweepF + sj ? LIME_V : level[i];
+          const front = sweepF + sj;
+          if (r < front) eff = LIME_V;
+          /* off-band rides the front (skipped once the sweep lands —
+             the flat lime handoff must stay exact) */
+          else if (sweep < 0.9999 && r < front + SWEEP_OFF_BAND) eff = 0;
+          else eff = level[i];
         } else if (ignite < 0.9999) {
           const jit = (hash2(c, 913) - 0.5) * 2 * WAVE_JITTER;
           const fd = waveF + jit - r;

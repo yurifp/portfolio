@@ -72,13 +72,16 @@ const area = (c: number, r: number) => `${r} / ${c} / ${r + 1} / ${c + 1}`;
     ))}
 
     {stacks.map((t, i) => (
-      <div class="lime-cell" data-lime-cell style={`grid-area: ${area(stackCells[i].col, stackCells[i].row)};`}>
+      <div class="lime-cell" data-lime-cell data-lime-stack style={`grid-area: ${area(stackCells[i].col, stackCells[i].row)};`}>
         <div class="lime-card" data-lime-card>
           <div class="lime-card__reveal" data-lime-reveal>
             <div class="lime-card__shape" data-lime-shape>
               <div class="lime-card__fill">
                 <p class="lime-label" data-lime-label>{t.label.toUpperCase()}</p>
-                <canvas class="lime-dither" data-dither-icon={t.id} data-icon-path={ICON_PATHS[t.icon]} style="height: clamp(44px, 15vh, 112px);"></canvas>
+                <div class="lime-dither-wrap" style="height: clamp(44px, 15vh, 112px);">
+                  <canvas class="lime-dither" data-dither-icon={t.id} data-icon-path={ICON_PATHS[t.icon]}></canvas>
+                  <canvas class="lime-dither lime-dither--alt" data-dither-alt data-icon-path={ICON_PATHS[t.icon]} aria-hidden="true"></canvas>
+                </div>
               </div>
             </div>
           </div>

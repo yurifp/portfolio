@@ -59,6 +59,22 @@
 
 ## Status (preenchido ao final)
 
-- [x] Lote A — ver "Resultado" abaixo
-- [x] Lote B
-- [x] Lote C
+- [x] **Lote A** — preloader CRT com progresso real (fontes + load; retrato é canvas e
+  não pode ser sinal — registrado acima), creep lento, 1×/sessão (`sessionStorage
+  yf.boot`, reload quente sem cortina), barra 1px lime, chanfros, boot log mascarado;
+  cue de scroll (3 chevrons pixel, aposenta a 4%); SFX hover/clique sintetizados por
+  delegação `[data-sfx]` (6 itens no chrome + cards/view-all no snap), aria-live no
+  toggle. **Correção de bug encontrada pelas suites**: `readyState === 'complete'`
+  cobre loads quentes em que o evento `load` dispara antes do módulo.
+- [x] **Lote B** — menu com 4 cantoneiras chanfradas, hover com overshoot
+  `cubic-bezier(.34,1.56,.64,1)` 220ms (desligado em reduced), lock duplo
+  (overflow + `lenis.stop()`), foco entra no diálogo e volta ao trigger no close.
+- [x] **Lote C** — sweep LED→lime com faixa de apagão (3 linhas de LEDs forçadas a 0
+  acima da frente lime; desligada em sweep≥0.9999 para o handoff flat exato —
+  verificada por pixels a p=0.3215); stacks com invert CRT no hover (2º canvas dither
+  lime montado lazy no 1º hover, crossfade 150ms, card vira void + stroke lime);
+  zoom de arte refinado para `0.6s cubic-bezier(.16,1,.3,1)`; `data-sfx` nos cards.
+  **Pulados** (já aprovados/intocáveis): odômetro por IO (regra scrub), hero split
+  (preservado), acordeão por clique (abre por crank).
+- [x] **Não-regressão**: rain 13/13 · scroll-fix 15/15 · windows 27/27 · layout 6/6 ·
+  shaft 13/13 · console limpo · preloader some em ~0.8s cold / imediato warm.

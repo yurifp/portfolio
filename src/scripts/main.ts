@@ -663,9 +663,11 @@ function initPreloader() {
     });
   }
 
-  /* real signals: fonts + load + the hero portrait decode */
+  /* real signals: fonts + window load. (The hero "portrait" is a
+     CANVAS painted from an internal Image — it has no .complete/load
+     in the DOM, so it cannot be one of the signals.) */
   let done = 0;
-  const TOTAL = 3;
+  const TOTAL = 2;
   let target = 8;
   const glide = () => {
     gsap.to(state, { p: target, duration: 0.5, ease: 'power2.out', overwrite: true, onUpdate: paint });
@@ -687,11 +689,10 @@ function initPreloader() {
   }, 420);
 
   document.fonts?.ready.then(signal).catch(signal);
-  addEventListener('load', signal, { once: true });
-  const portrait = document.querySelector<HTMLImageElement>('[data-portrait]');
-  if (portrait?.complete) signal();
-  else portrait?.addEventListener('load', signal, { once: true });
-  portrait?.addEventListener('error', signal, { once: true });
+  /* the module can execute AFTER window load already fired (warm
+     caches) — the event would never come; readyState closes that */
+  if (document.readyState === 'complete') signal();
+  else addEventListener('load', signal, { once: true });
 
   /* hard fallback: never trap the user behind the curtain */
   setTimeout(() => {
