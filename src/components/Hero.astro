@@ -1,5 +1,6 @@
 ---
 import { site, bio } from '../data/site';
+import CliWindow from './CliWindow.astro';
 
 /* contact split across the column grid, reference-style */
 const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
@@ -50,6 +51,7 @@ const phoneCols = ['+55', '71', '99', 'XXX', 'XXXX'];
           <p data-split="words">{'If I ever cash out, I open a '}<span style="color: var(--color-lime);">{'<studio-lab/>'}</span>{' where young builders prototype the ideas nobody will fund yet.'}</p>
         </div>
         <p class="mono-tiny bio-avail" style="color: var(--color-lime);" data-avail data-fade data-delay={0.45}>{bio.available}</p>
+        <CliWindow />
       </div>
 
       <!-- C3 portrait + caption + the tags list under the photo (LEFT side) -->

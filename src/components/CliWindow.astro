@@ -1,0 +1,51 @@
+---
+/*
+  YF.CLI — ONE compact CRT window living in the hero. Replaces the three
+  LED-scene windows (terminal / game / telemetry). Shell chrome only:
+  everything behavioral lives in src/scripts/cli-shell.ts.
+*/
+---
+<div class="cli-root" data-cli-root>
+  <button
+    class="cli-btn mono-tiny"
+    data-cli-btn
+    data-sfx
+    aria-expanded="false"
+    aria-controls="yf-cli"
+    type="button"
+  >OPEN TERMINAL &gt;_</button>
+
+  <section
+    class="cli-window"
+    id="yf-cli"
+    data-cli-window
+    role="dialog"
+    aria-label="YF.CLI terminal"
+    tabindex="-1"
+    hidden
+  >
+    <header class="cli-titlebar" data-cli-drag>
+      <span class="cli-status" data-cli-status aria-hidden="true"></span>
+      <span class="cli-title mono-tiny">YF.CLI — TERMINAL v1</span>
+      <span class="cli-kbd mono-tiny" data-cli-kbd hidden>KBD CAPTURED</span>
+      <span class="cli-spacer"></span>
+      <button class="cli-tbtn mono-tiny" data-cli-snd type="button" aria-label="Sound on/off" aria-pressed="false">
+        SND
+        <span class="cli-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      </button>
+      <button class="cli-tbtn mono-tiny" data-cli-fs type="button" aria-label="Toggle fullscreen" aria-pressed="false">⛶</button>
+      <button class="cli-tbtn mono-tiny" data-cli-close type="button" aria-label="Close terminal">✕</button>
+    </header>
+
+    <div class="cli-screen" data-cli-screen>
+      <!-- boot/idle pixel canvas (the game brings its own canvas in Lote 2) -->
+      <canvas class="cli-pix" data-cli-canvas aria-hidden="true"></canvas>
+      <div class="cli-crt" aria-hidden="true"></div>
+    </div>
+
+    <footer class="cli-foot mono-tiny" data-cli-foot>YF.CLI READY</footer>
+
+    <!-- resize handle, bottom-right chamfer -->
+    <span class="cli-resize" data-cli-resize aria-hidden="true"></span>
+  </section>
+</div>

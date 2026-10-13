@@ -38,6 +38,7 @@ import { TOTAL_VH, sceneStart, sceneLen } from '../scripts/scenes';
   import { sceneStart, sceneLen } from '../scripts/scenes';
   import { mountWindows, initWindowsScrub } from '../scripts/windows-shell';
   import { mountGameHost } from '../scripts/game-host';
+  import { mountCli } from '../scripts/cli-shell';
 
   const portrait = document.querySelector<HTMLCanvasElement>('[data-portrait]');
   if (portrait) mountPortrait(portrait, { imageUrl: '/images/portrait.jpg' });
@@ -90,6 +91,8 @@ import { TOTAL_VH, sceneStart, sceneLen } from '../scripts/scenes';
   }
 
   initFlipbook();
+  /* YF.CLI — the single terminal window in the hero */
+  mountCli();
   /* force one pass of every scroll-driven updater (film bands, wave
      ignition) so a mid-page load composes correctly without a nudge */
   dispatchEvent(new Event('scroll'));
