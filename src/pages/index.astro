@@ -4,7 +4,6 @@ export const prerender = true;
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import LedScene from '../components/LedScene.astro';
-import Windows from '../components/Windows.astro';
 import LimeScene from '../components/LimeScene.astro';
 import Snapshots from '../components/Snapshots.astro';
 import WorkedAt from '../components/WorkedAt.astro';
@@ -20,7 +19,6 @@ import { TOTAL_VH, sceneStart, sceneLen } from '../scripts/scenes';
       <div data-flip-frame="hero"><Hero /></div>
       <div data-flip-frame="led">
         <LedScene />
-        <Windows />
       </div>
       <div data-flip-frame="lime"><LimeScene /></div>
       <div data-flip-frame="snap"><Snapshots /></div>

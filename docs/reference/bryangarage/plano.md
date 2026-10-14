@@ -101,6 +101,30 @@ src/games/shaft-runner/*     ← MOTOR MANTIDO (data/layout/world/index) + corre
    -motion, remover 3 janelas + código morto + suites antigas, FPS/freeze check).
 
 ## Status (atualizado ao final)
-- [x] Lote 1 — ver abaixo
-- [x] Lote 2
-- [x] Lote 3
+- [x] **Lote 1** — YF.CLI na hero: botão OPEN TERMINAL >_ (chanfro lime, data-sfx),
+  open/close com wipe, boot BIOS próprio (6 linhas + barra de blocos, pulável,
+  1×/sessão), idle pixel (logo YF, PRESS ANY KEY, sparklines MS/SCR com dados reais),
+  arraste com clamp de viewport, fullscreen, resize handle, SND espelhando o toggle do
+  site (barras animam), CRT verde (scanline+vinheta+grade). Janela teleportada para o
+  body (frames do film escalam — position:fixed lá dentro quebrava).
+- [x] **Lote 2** — jogo na janela: game-host reescrito fino (captura só em foco, badge
+  KBD CAPTURED, loop 60 Hz destruído junto), dificuldade v30→v68 com curva suave
+  (fase 1 lenta), interstício STAGE CLEAR +1000 (72 ticks), **placar por linha
+  corrigido** (floor por tick zerava — bug pré-existente), SFX ligados ao SOUND do
+  site, Q volta ao idle, touch drag + faixa FIRE/BOMB/AUTO/PAUSE/CLI.
+- [x] **Lote 3** — 3 janelas antigas + windows-shell/windows.ts/CSS morto removidos
+  (~270 linhas de CSS); suites: `cli-verify.mjs` NOVO (16 itens), `shaft-verify.mjs`
+  reescrito para a via CLI, `windows-verify`/`layout-verify` aposentados (o lint de
+  HUD vive no cli-verify item 7). **Bugs de produção consertados de carona**: (a)
+  `releaseGame` drenava os cleanups de mount — o host perdia click/Q/resize no
+  primeiro release (split captureCleanups); (b) teclas soltas com jogo sem foco
+  rolavam a página e a hero fechava a janela — agora qualquer tecla do jogo
+  REFOCA (preventDefault); (c) mobile ≤700px renderizava em BRANCO desde sempre
+  (`.flip-track{display:none}` escondia o stage que mora dentro dele) — agora o
+  track fica com altura auto e a página empilha; (d) footer com nowrap (dica longa
+  quebrava linha e a janela estourava a viewport após o fit).
+- Suites finais: **cli-verify 16/16 · shaft 13/13 · rain 13/13 · scroll-fix 15/15**.
+  `lime-pixels` falha 8 checks TAMBÉM na produção pré-mudança (drift pré-existente da
+  suíte, fora do escopo — documentado).
+- Pulado: interpretador de comandos no CLI (idle direto — simplificação deliberada);
+  leaderboard server-side (mantemos top-5 local); mudanças na tabela de cenas.

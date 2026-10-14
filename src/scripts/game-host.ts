@@ -77,6 +77,10 @@ let focused = false;
 let lastW = 0;
 let lastH = 0;
 const cleanups: Array<() => void> = [];
+/* capture-only teardown: releasing focus must NOT unmount the host's
+   own listeners (click-to-refocus, Q, resize…). One array for both was
+   gutting the host on the FIRST release — the suite caught it. */
+const captureCleanups: Array<() => void> = [];
 
 const input: InputState = {
   left: false, right: false, up: false, down: false,
@@ -112,7 +116,7 @@ function installCapture() {
   window.addEventListener('keydown', onKeyDown, { capture: true });
   window.addEventListener('keyup', onKeyUp, { capture: true });
   window.addEventListener('blur', onBlur);
-  cleanups.push(() => {
+  captureCleanups.push(() => {
     window.removeEventListener('keydown', onKeyDown, { capture: true } as EventListenerOptions);
     window.removeEventListener('keyup', onKeyUp, { capture: true } as EventListenerOptions);
     window.removeEventListener('blur', onBlur);
@@ -133,9 +137,10 @@ function fitCanvas() {
   canvas.style.height = canvas.height / dpr + 'px';
   lastW = canvas.width;
   lastH = canvas.height;
-  /* if the window grew past the top edge, pull it back inside */
+  /* the game is the tallest mode: re-anchor the window so the WHOLE
+     chrome fits the viewport (dragged positions included) */
   const r = winEl.getBoundingClientRect();
-  if (r.top < 8) {
+  if (r.top < 8 || r.top + r.height > innerHeight - 8) {
     winEl.style.bottom = 'auto';
     winEl.style.top = Math.max(8, Math.min(innerHeight - r.height - 8, 48)) + 'px';
   }
@@ -182,13 +187,14 @@ function releaseGame(reason = 'user') {
   if (!focused) return;
   focused = false;
   clearInput();
-  for (const c of cleanups.splice(0)) c();
+  for (const c of captureCleanups.splice(0)) c();
   unlockScroll();
   document.documentElement.classList.remove('game-focused');
   winEl?.classList.remove('is-focused');
   setKbd(false);
   module?.setMode('attract');
-  setFoot(HINTS.attract + (reason === 'esc' ? '' : ''));
+  setFoot(HINTS.attract);
+  void reason;
 }
 
 /* ---------- mount into the CLI window ---------- */
@@ -245,6 +251,9 @@ function mountInScreen(sh: {
   const onClick = () => { if (!focused) focusGame(); };
   winEl.addEventListener('click', onClick);
   cleanups.push(() => winEl?.removeEventListener('click', onClick));
+  /* the shell refocuses the game on stray keys — expose the hook */
+  (window as unknown as { __cliFocusGame?: () => void }).__cliFocusGame = focusGame;
+  cleanups.push(() => { delete (window as unknown as { __cliFocusGame?: () => void }).__cliFocusGame; });
 
   /* ESC outside focus (module handles its own ESC while capturing) */
   const onEsc = (e: KeyboardEvent) => {

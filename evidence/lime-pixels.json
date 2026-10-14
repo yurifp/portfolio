@@ -1,190 +1,315 @@
 {
- "url": "http://localhost:4322/",
+ "url": "https://yurifp-portfolio.vercel.app/",
  "selftest": false,
  "results": {
   "fill": [
    {
     "card": 0,
     "ratios": [
-     0.805,
-     0.805,
-     0.805
+     0.981,
+     1.104,
+     1.047
     ],
-    "ok": true
+    "ok": false
    },
    {
     "card": 1,
     "ratios": [
-     0.805,
-     0.805,
-     0.809
+     3.93,
+     3.864,
+     3.93
     ],
-    "ok": true
+    "ok": false
    },
    {
     "card": 2,
     "ratios": [
-     0.806,
-     0.805,
-     0.805
+     2.816,
+     1.014,
+     1.014
     ],
-    "ok": true
+    "ok": false
    },
    {
     "card": 3,
     "ratios": [
-     0.808,
-     0.805,
-     0.805
+     1.688,
+     1.697,
+     2.702
     ],
-    "ok": true
+    "ok": false
    },
    {
     "card": 4,
     "ratios": [
-     0.808,
-     0.804,
-     0.805
+     0.768,
+     0.739,
+     0.787
     ],
     "ok": true
    },
    {
     "card": 5,
     "ratios": [
-     0.804,
-     0.805,
-     0.808
+     0.725,
+     0.791,
+     0.673
     ],
     "ok": true
    },
    {
     "card": 6,
     "ratios": [
-     0.805,
-     0.809,
-     0.809
+     6.515,
+     0.943,
+     0.995
     ],
-    "ok": true
+    "ok": false
    },
    {
     "card": 7,
     "ratios": [
-     0.805,
-     0.807,
-     0.804
+     1.64,
+     0.967,
+     1.645
     ],
-    "ok": true
+    "ok": false
+   },
+   {
+    "card": 8,
+    "ratios": [
+     5.158,
+     0.948,
+     6.467
+    ],
+    "ok": false
+   },
+   {
+    "card": 9,
+    "ratios": [
+     0.507,
+     0.516,
+     0.654
+    ],
+    "ok": false
+   },
+   {
+    "card": 10,
+    "ratios": [
+     1.18,
+     1.242,
+     1.256
+    ],
+    "ok": false
+   },
+   {
+    "card": 11,
+    "ratios": [
+     0.573,
+     1.654,
+     1.64
+    ],
+    "ok": false
+   },
+   {
+    "card": 12,
+    "ratios": [
+     0.995,
+     1.014,
+     1.574
+    ],
+    "ok": false
+   },
+   {
+    "card": 13,
+    "ratios": [
+     0.991,
+     1.1,
+     1.057
+    ],
+    "ok": false
    }
   ],
   "stroke": {
    "ratios": [
-    0.644,
-    0.645,
-    0.661,
-    0.761
+    3.911,
+    0.939,
+    0.725,
+    0.924
    ],
-   "fillRef": 0.805,
+   "fillRef": 1.044,
    "ok": true
   },
   "chamfer": {
-   "notchIsBg": true,
+   "notchIsBg": false,
    "midPainted": true,
    "cornerIsBg": true,
    "nearCornerPainted": true
   },
   "lines": [
    {
-    "x": 529,
-    "on": 0.879,
-    "off": 1,
+    "x": 389,
+    "on": 0.573,
+    "off": 0.587,
+    "ok": false
+   },
+   {
+    "x": 738,
+    "on": 1.659,
+    "off": 1.64,
+    "ok": false
+   },
+   {
+    "x": 1086,
+    "on": 1.64,
+    "off": 1.659,
+    "ok": false
+   },
+   {
+    "x": 1434,
+    "on": 1.64,
+    "off": 1.707,
+    "ok": false
+   },
+   {
+    "x": 1782,
+    "on": 0.948,
+    "off": 0.995,
     "ok": true
    },
    {
-    "x": 1016,
-    "on": 0.886,
-    "off": 1,
-    "ok": true
-   },
-   {
-    "x": 1504,
-    "on": 0.882,
-    "off": 1.001,
-    "ok": true
-   },
-   {
-    "x": 1991,
-    "on": 0.884,
-    "off": 1,
-    "ok": true
-   },
-   {
-    "x": 2479,
-    "on": 0.887,
-    "off": 0.997,
-    "ok": true
-   },
-   {
-    "x": 2479,
-    "on": 0.887,
-    "off": 0.997,
-    "ok": true
+    "x": 2131,
+    "on": 3.878,
+    "off": 3.916,
+    "ok": false
    }
   ],
   "text": [
    {
     "card": 0,
-    "dark": 1188,
-    "ok": true
+    "dark": 0,
+    "ok": false
    },
    {
     "card": 1,
-    "dark": 1306,
-    "ok": true
+    "dark": 0,
+    "ok": false
    },
    {
     "card": 2,
-    "dark": 999,
-    "ok": true
+    "dark": 0,
+    "ok": false
    },
    {
     "card": 3,
-    "dark": 1132,
-    "ok": true
+    "dark": 0,
+    "ok": false
    },
    {
     "card": 4,
-    "dark": 303,
-    "ok": true
+    "dark": 0,
+    "ok": false
    },
    {
     "card": 5,
-    "dark": 711,
-    "ok": true
+    "dark": 0,
+    "ok": false
    },
    {
     "card": 6,
-    "dark": 296,
-    "ok": true
+    "dark": 0,
+    "ok": false
    },
    {
     "card": 7,
-    "dark": 255,
-    "ok": true
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 8,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 9,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 10,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 11,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 12,
+    "dark": 0,
+    "ok": false
+   },
+   {
+    "card": 13,
+    "dark": 0,
+    "ok": false
    }
   ],
   "geometry": {
    "colSpread": 0,
-   "minGap": 59
+   "minGap": 6
   },
   "icons": {
    "slugs": [
     "nodedotjs",
     "typescript",
     "react",
-    "threedotjs"
+    "threedotjs",
+    "astro",
+    "gsap",
+    "nextdotjs",
+    "tailwindcss",
+    "postgresql",
+    "docker"
    ],
    "textDithers": 0
   }
  },
- "failures": []
+ "failures": [
+  "FILL card0: 0.981,1.104,1.047",
+  "FILL card1: 3.93,3.864,3.93",
+  "FILL card2: 2.816,1.014,1.014",
+  "FILL card3: 1.688,1.697,2.702",
+  "FILL card6: 6.515,0.943,0.995",
+  "FILL card7: 1.64,0.967,1.645",
+  "FILL card8: 5.158,0.948,6.467",
+  "FILL card9: 0.507,0.516,0.654",
+  "FILL card10: 1.18,1.242,1.256",
+  "FILL card11: 0.573,1.654,1.64",
+  "FILL card12: 0.995,1.014,1.574",
+  "FILL card13: 0.991,1.1,1.057",
+  "CHANFRO: {\"notchIsBg\":false,\"midPainted\":true,\"cornerIsBg\":true,\"nearCornerPainted\":true}",
+  "LINE x=389: on 0.57 off 0.59",
+  "LINE x=738: on 1.66 off 1.64",
+  "LINE x=1086: on 1.64 off 1.66",
+  "LINE x=1434: on 1.64 off 1.71",
+  "LINE x=2131: on 3.88 off 3.92",
+  "TEXT card0: only 0 dark px",
+  "TEXT card1: only 0 dark px",
+  "TEXT card2: only 0 dark px",
+  "TEXT card3: only 0 dark px",
+  "TEXT card4: only 0 dark px",
+  "TEXT card5: only 0 dark px",
+  "TEXT card6: only 0 dark px",
+  "TEXT card7: only 0 dark px",
+  "TEXT card8: only 0 dark px",
+  "TEXT card9: only 0 dark px",
+  "TEXT card10: only 0 dark px",
+  "TEXT card11: only 0 dark px",
+  "TEXT card12: only 0 dark px",
+  "TEXT card13: only 0 dark px",
+  "GAP card1: 6px",
+  "GAP card3: 6px"
+ ]
 }

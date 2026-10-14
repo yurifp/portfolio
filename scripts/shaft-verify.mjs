@@ -5,7 +5,6 @@ import fs from 'fs';
 const URL = process.argv[2] || 'http://127.0.0.1:4322/';
 const results = [];
 const note = (id, pass, detail) => { results.push(!!pass); console.log((pass ? 'PASS' : 'FAIL') + ' ' + id + (detail ? ' — ' + detail : '')); };
-const PLATEAU = `(document.documentElement.scrollHeight - innerHeight) * ${(132 / 1420 + 0.8 * 300 / 1420)}`;
 
 async function main() {
   const b = await chromium.launch({ headless: false });
@@ -15,9 +14,12 @@ async function main() {
   p.on('pageerror', (e) => errs.push(String(e).slice(0, 150)));
   p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text().slice(0, 150)); });
   await p.goto(URL, { waitUntil: 'networkidle' });
-  await p.waitForTimeout(2500);
-  await p.evaluate(`window.scrollTo(0, ${PLATEAU})`);
-  await p.waitForTimeout(600);
+  /* the game lives in the YF.CLI window now: open it, let the boot play
+     (or skip it with a key), ENTER mounts SHAFT RUNNER */
+  await p.waitForFunction(() => !document.querySelector('.preloader'), null, { timeout: 12000 });
+  await p.locator('[data-cli-btn]').click();
+  await p.waitForTimeout(2300);
+  await p.keyboard.press('Enter');
   await p.waitForFunction(() => !!window.__game, null, { timeout: 15000 });
 
   /* ---------- DETERMINISMO ---------- */
@@ -130,12 +132,14 @@ async function main() {
 
   /* ---------- FLUXO (REAL keyboard — the probe input() is read-only) ---------- */
   const w1box = await p.evaluate(() => {
-    const r = window.__host.windows().w1.rect;
-    return { x: r.left + r.width / 2, y: r.top + 40 };
+    const r = window.__cli.rect();
+    return { x: r.x + r.w / 2, y: r.y + r.h * 0.5 };
   });
+  const isFocused = () => p.evaluate(() => document.documentElement.classList.contains('game-focused'));
   const states = {};
   await p.mouse.click(w1box.x, w1box.y);
   await p.waitForTimeout(400);
+  states.focused1 = await isFocused();
   states.s1 = await p.evaluate(() => window.__game.state); /* menu */
   await p.keyboard.press('Space');
   await p.waitForTimeout(400);
@@ -143,18 +147,20 @@ async function main() {
   await p.keyboard.press('Escape');
   await p.waitForTimeout(350);
   states.s3 = await p.evaluate(() => window.__game.state); /* pause */
-  states.lbl3 = await p.evaluate(() => document.querySelector('[data-win-label]').textContent);
+  states.lbl3 = await p.evaluate(() => document.querySelector('[data-cli-foot]').textContent);
   await p.keyboard.press('Space');
   await p.waitForTimeout(350);
   states.s4 = await p.evaluate(() => window.__game.state); /* play */
+  /* ESC, ESC: play → pause → attract (the host releases focus) */
   await p.keyboard.press('Escape');
-  await p.waitForTimeout(300);
+  await p.waitForTimeout(350);
   await p.keyboard.press('Escape');
   await p.waitForTimeout(350);
   states.s5 = await p.evaluate(() => window.__game.state); /* attract (released) */
-  states.focused5 = await p.evaluate(() => window.__host.focused());
-  /* HISCORES: focus → menu → down → space */
-  await p.mouse.click(w1box.x, w1box.y);
+  states.focused5 = await isFocused();
+  /* refocus (attract → menu) — click the GAME CANVAS element itself
+     (coordinate clicks have hit the ✕ once too often) */
+  await p.locator('[data-cli-window] canvas[aria-label*="SHAFT"]').click({ timeout: 5000 });
   await p.waitForTimeout(400);
   await p.keyboard.press('ArrowDown');
   await p.waitForTimeout(250);
@@ -165,18 +171,25 @@ async function main() {
   await p.waitForTimeout(300);
   states.s7 = await p.evaluate(() => window.__game.state); /* menu */
   await p.keyboard.press('KeyQ');
-  await p.waitForTimeout(350);
-  states.focused8 = await p.evaluate(() => window.__host.focused()); /* released */
+  await p.waitForTimeout(400);
+  states.cliAfterQ = await p.evaluate(() => window.__cli.mode()); /* idle */
+  states.gameGone = await p.evaluate(() => !window.__game);
+  states.focused8 = await isFocused(); /* released */
   const flow = states;
-  const flowOk = flow.s1 === 'menu' && flow.s2 === 'play' && flow.s3 === 'pause' && flow.lbl3 === 'PAUSED' && flow.s4 === 'play' && flow.s5 === 'attract' && flow.focused5 === false && flow.s6 === 'hiscores' && flow.s7 === 'menu' && flow.focused8 === false;
+  const flowOk = flow.s1 === 'menu' && flow.s2 === 'play' && flow.s3 === 'pause' && /PAUSED/i.test(flow.lbl3 || '') && flow.s4 === 'play' && flow.s5 === 'attract' && flow.focused5 === false && flow.s6 === 'hiscores' && flow.s7 === 'menu' && flow.cliAfterQ === 'idle' && flow.gameGone && flow.focused8 === false;
   note('10. MÁQUINA DE ESTADOS por entradas', flowOk, JSON.stringify(flow));
+
+  /* remount for the remaining items (Q destroyed the module) */
+  await p.waitForTimeout(300);
+  await p.keyboard.press('Enter');
+  await p.waitForFunction(() => !!window.__game, null, { timeout: 8000 });
+  /* let the attract screen paint at least one frame before sampling */
+  await p.waitForTimeout(400);
 
   /* ---------- RENDER ---------- */
   const render = await p.evaluate(() => {
     const g = window.__game;
-    const pal = window.__host ? null : null;
-    /* sample the canvas pixels */
-    const cv = document.querySelector('[data-win="w1"] canvas');
+    const cv = document.querySelector('[data-cli-window] canvas[aria-label*="SHAFT"]');
     const x = cv.getContext('2d');
     const w = cv.width, h = cv.height;
     const d = x.getImageData(0, 0, w, h).data;
@@ -190,7 +203,7 @@ async function main() {
     const rampSet = new Set(ramp.map((hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255); }));
     let off = 0;
     for (const k of seen.keys()) if (!rampSet.has(k)) off++;
-    void g; void pal;
+    void g;
     return { distinct: seen.size, off, w, h };
   });
   note('12. PALETA fechada (≤8 no jogo, 0 fora da rampa)', render.off === 0, `cores=${render.distinct} fora=${render.off} canvas=${render.w}×${render.h}`);
@@ -221,19 +234,19 @@ async function main() {
   });
   note('16. Persistência try/catch (top5 + RUNS)', persist.saved !== undefined, JSON.stringify(persist));
 
-  /* ---------- INTEGRAÇÃO (real keys → events reach W2) ---------- */
-  const termBefore = await p.evaluate(() => document.querySelectorAll('[data-term] div').length);
+  /* ---------- INTEGRAÇÃO (keys drive the footer status line) ---------- */
+  const footBefore = await p.evaluate(() => document.querySelector('[data-cli-foot]').textContent);
   await p.mouse.click(w1box.x, w1box.y);
   await p.waitForTimeout(350);
   await p.keyboard.press('Space'); /* start */
   await p.waitForTimeout(800);
   await p.keyboard.press('Escape'); /* pause */
+  await p.waitForTimeout(350);
+  const footPause = await p.evaluate(() => document.querySelector('[data-cli-foot]').textContent);
+  await p.keyboard.press('Space'); /* resume */
   await p.waitForTimeout(300);
-  await p.keyboard.press('Escape'); /* release */
-  await p.waitForTimeout(400);
-  const termAfter = await p.evaluate(() => document.querySelectorAll('[data-term] div').length);
-  const termText = await p.evaluate(() => document.querySelector('[data-term]').textContent);
-  note('17. EVENTOS no terminal (start/pause/release…)', termAfter > termBefore && /start/.test(termText), `linhas ${termBefore}→${termAfter}, tem "start": ${/start/.test(termText)}`);
+  const footPlay = await p.evaluate(() => document.querySelector('[data-cli-foot]').textContent);
+  note('17. STATUS no rodapé (play/pause)', /PAUSED/i.test(footPause) && !/PAUSED/i.test(footPlay), `${JSON.stringify(footBefore)} → ${JSON.stringify(footPause)} → ${JSON.stringify(footPlay)}`);
 
   /* ---------- PERFORMANCE ---------- */
   const perf = await p.evaluate(() => new Promise((res) => {
@@ -250,37 +263,33 @@ async function main() {
 
   /* ---------- CONTACT SHEETS ---------- */
   fs.mkdirSync('evidence/sr-sheet', { recursive: true });
+  const clip = () => p.evaluate(() => {
+    const r = window.__cli.rect();
+    return { x: Math.max(0, r.x - 8), y: Math.max(0, r.y - 8), width: Math.min(innerWidth - r.x, r.w + 16), height: Math.min(innerHeight - r.y, r.h + 16) };
+  });
   /* menu */
-  await p.evaluate(async () => {
-    const w1 = document.querySelector('[data-win="w1"]');
-    w1.click();
-    await new Promise((r) => setTimeout(r, 400));
-  });
-  await p.screenshot({ path: 'evidence/sr-sheet/01-menu.png', clip: await w1Clip(p) });
-  /* play + situations */
-  await p.evaluate(async () => {
-    window.__host.input().fire = true;
-    await new Promise((r) => setTimeout(r, 200));
-    window.__host.input().fire = false;
-    await new Promise((r) => setTimeout(r, 800));
-  });
-  await p.screenshot({ path: 'evidence/sr-sheet/02-play-early.png', clip: await w1Clip(p) });
-  await p.waitForTimeout(4000);
-  await p.screenshot({ path: 'evidence/sr-sheet/03-play-mid.png', clip: await w1Clip(p) });
-  /* force scenes via probe: bomb */
-  await p.evaluate(() => { const g = window.__game; g.autopilot(true); });
-  await p.waitForTimeout(6000);
-  await p.screenshot({ path: 'evidence/sr-sheet/04-enemies.png', clip: await w1Clip(p) });
-  /* pause */
-  await p.evaluate(() => { window.__host.input().esc = true; });
+  await p.screenshot({ path: 'evidence/sr-sheet/01-menu.png', clip: await clip() });
+  /* play + situations (real focus + keys) */
+  await p.mouse.click(w1box.x, w1box.y);
   await p.waitForTimeout(300);
-  await p.screenshot({ path: 'evidence/sr-sheet/05-pause.png', clip: await w1Clip(p) });
-  await p.evaluate(() => { window.__host.input().fire = true; window.__host.input().fire = false; });
+  await p.keyboard.press('Space');
+  await p.waitForTimeout(1000);
+  await p.screenshot({ path: 'evidence/sr-sheet/02-play-early.png', clip: await clip() });
+  await p.waitForTimeout(4000);
+  await p.screenshot({ path: 'evidence/sr-sheet/03-play-mid.png', clip: await clip() });
+  /* autopilot: enemies populate the shaft */
+  await p.evaluate(() => { window.__game.autopilot(true); });
+  await p.waitForTimeout(6000);
+  await p.screenshot({ path: 'evidence/sr-sheet/04-enemies.png', clip: await clip() });
+  /* pause */
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(300);
+  await p.screenshot({ path: 'evidence/sr-sheet/05-pause.png', clip: await clip() });
+  await p.keyboard.press('Space');
   await p.waitForTimeout(250);
-  /* game over + hiscores via probe */
+  /* game over via probe fast-forward */
   await p.evaluate(() => {
     const g = window.__game;
-    /* fast-forward to gameover via script: crash repeatedly */
     const crash = [];
     for (let i = 0; i < 4000; i++) crash.push({ left: true });
     g.setInputs(crash);
@@ -288,17 +297,11 @@ async function main() {
     g.setInputs(null);
   });
   await p.waitForTimeout(400);
-  await p.screenshot({ path: 'evidence/sr-sheet/06-gameover.png', clip: await w1Clip(p) });
+  await p.screenshot({ path: 'evidence/sr-sheet/06-gameover.png', clip: await clip() });
 
   await ctx.close();
   await b.close();
   const fails = results.filter((x) => !x).length;
   console.log('\nRESUMO: ' + (results.length - fails) + '/' + results.length + (fails ? ' — FALHAS: ver acima' : ' — ALL PASS'));
-}
-async function w1Clip(p) {
-  return p.evaluate(() => {
-    const r = window.__host.windows().w1.rect;
-    return { x: Math.max(0, r.left - 8), y: Math.max(0, r.top - 8), width: Math.min(innerWidth - r.left, r.width + 16), height: Math.min(innerHeight - r.top, r.height + 16) };
-  });
 }
 main().catch((e) => { console.error(e); process.exit(1); });

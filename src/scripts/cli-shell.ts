@@ -37,6 +37,10 @@ const BOOT_STEP = 210;
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* keys that belong to the game — while it is mounted they must never
+   scroll the page, focused or not */
+const GAME_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyX', 'KeyP', 'KeyQ', 'Enter']);
+
 interface Shell {
   root: HTMLElement;
   btn: HTMLButtonElement;
@@ -416,8 +420,15 @@ export function mountCli() {
       if (e.key === 'Enter') { e.preventDefault(); toGame(); }
       return;
     }
-    /* game mode: the host owns keys; ESC outside focus still closes us */
-    if (e.key === 'Escape' && !document.documentElement.classList.contains('game-focused')) close();
+    /* game mode: the host owns keys; ESC outside focus still closes us.
+       Any OTHER key while unfocused REFOCUSES the game — otherwise the
+       page scrolls under the window and the hero auto-close eats it. */
+    if (document.documentElement.classList.contains('game-focused')) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (GAME_KEYS.has(e.code)) {
+      e.preventDefault();
+      (window as unknown as { __cliFocusGame?: () => void }).__cliFocusGame?.();
+    }
   };
   addEventListener('keydown', onKey);
 
@@ -427,7 +438,7 @@ export function mountCli() {
     'scroll',
     () => {
       if (shell!.mode === 'closed') return;
-      const fb = (window as unknown as { __flipbook?: { progress(): number } }).__flipbook;
+      const fb = (window as unknown as { __flipbook?: { progress: () => number } }).__flipbook;
       if (fb && fb.progress() > HERO_END) close(true);
     },
     { passive: true },
